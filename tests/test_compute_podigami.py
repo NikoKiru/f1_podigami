@@ -509,8 +509,8 @@ def test_apply_grid_penalties_place_drop_shifts_field():
 
 
 def test_apply_grid_penalties_penalised_behind_unpenalised_on_same_slot():
-    """FIA-style: quali P1 + 2 places targets slot 3, which the unpenalised P3
-    car contests after moving up — the penalised car lines up behind it."""
+    """FIA-style: quali P1 + 2 places pins the car to slot 3 exactly; the
+    unpenalised P2/P3 cars compress into the vacated slots ahead of it."""
     qpos = {"a": 1, "b": 2, "c": 3}
     out = cp._apply_grid_penalties(qpos, [{"driverId": "a", "penaltyPlaces": 2}])
     assert out == {"b": 1, "c": 2, "a": 3}
@@ -526,6 +526,51 @@ def test_apply_grid_penalties_back_of_grid_behind_big_place_penalty():
     """Back-of-grid outranks even a place penalty that overshoots the field."""
     qpos = {"a": 1, "b": 2, "c": 3, "d": 4}
     pens = [{"driverId": "a", "penaltyPlaces": 10}, {"driverId": "b", "backOfGrid": True}]
+    out = cp._apply_grid_penalties(qpos, pens)
+    assert out == {"c": 1, "d": 2, "a": 3, "b": 4}
+
+
+def test_apply_grid_penalties_pins_exact_slot_hungary_2026():
+    """A penalised driver starts exactly (position + penalty) even when the cars
+    promoted into the vacated slots would otherwise compress the field past him.
+
+    Real case (2026 Hungarian GP, round 11): Hamilton P2 and Antonelli P4 both
+    drop 3. The official grid pins Hamilton to slot 5 and Antonelli to slot 7;
+    Verstappen (quali P6) moves up to P4 — the old sort-and-renumber approach
+    wrongly compressed Hamilton up into P4.
+    """
+    qpos = {
+        "norris": 1,
+        "hamilton": 2,
+        "leclerc": 3,
+        "antonelli": 4,
+        "piastri": 5,
+        "max_verstappen": 6,
+        "russell": 7,
+        "hadjar": 8,
+    }
+    pens = [
+        {"driverId": "hamilton", "penaltyPlaces": 3},
+        {"driverId": "antonelli", "penaltyPlaces": 3},
+    ]
+    out = cp._apply_grid_penalties(qpos, pens)
+    assert out == {
+        "norris": 1,
+        "leclerc": 2,
+        "piastri": 3,
+        "max_verstappen": 4,
+        "hamilton": 5,
+        "russell": 6,
+        "antonelli": 7,
+        "hadjar": 8,
+    }
+
+
+def test_apply_grid_penalties_two_penalised_contesting_one_slot():
+    """Two penalised cars pinned to the same slot: the one that qualified ahead
+    keeps it, the other takes the next slot down."""
+    qpos = {"a": 1, "b": 2, "c": 3, "d": 4}
+    pens = [{"driverId": "a", "penaltyPlaces": 2}, {"driverId": "b", "penaltyPlaces": 1}]
     out = cp._apply_grid_penalties(qpos, pens)
     assert out == {"c": 1, "d": 2, "a": 3, "b": 4}
 
