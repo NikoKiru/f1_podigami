@@ -1,6 +1,22 @@
 [
   {
     "season": "2026",
+    "round": "11",
+    "penalties": [
+      {
+        "driverId": "hamilton",
+        "penaltyPlaces": 3,
+        "backOfGrid": null
+      },
+      {
+        "driverId": "antonelli",
+        "penaltyPlaces": 3,
+        "backOfGrid": null
+      }
+    ]
+  },
+  {
+    "season": "2026",
     "round": "10",
     "penalties": [
       {
