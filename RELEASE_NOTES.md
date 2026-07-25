@@ -6,6 +6,7 @@
 - Final grid penalties for the 2026 Hungarian GP (round 11): Hamilton and Antonelli each drop 3 places (impeding Piastri in Q3 / yellow-flag infringement) (#227)
 
 ### Fixes
+- Grid penalties now pin a driver to exactly (qualifying position + penalty), matching how the FIA builds the grid: unpenalised cars promoted into vacated slots compress around the pinned slot instead of dragging the penalised car up with them. The old sort-and-renumber logic put Hamilton P4 for the Hungarian GP where the official grid has him P5 (Verstappen P4) (#230)
 - Pinned ruff below 0.16 in CI: the just-released 0.16.0 changed formatter output (it now reformats code blocks inside Markdown docs), so the unpinned CI install silently failed every PR's required "Lint & format" check — including the automated Hungary post-qualifying data PR, which sat blocked instead of auto-merging. Future ruff upgrades must now arrive as a deliberate PR that reformats the repo in the same change (#227)
 
 ## 2026-07-23

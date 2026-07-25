@@ -175,11 +175,13 @@ def _title_from_id(driver_id: str) -> str:
 def _apply_grid_penalties(qpos: dict[str, int], penalties: list[dict]) -> dict[str, int]:
     """Reconstruct starting slots from the quali classification plus penalties.
 
-    ``penaltyPlaces: N`` drops a driver N slots below their qualifying position
-    (cars in between move up, and a penalised car lines up behind an unpenalised
-    one contesting the same slot — FIA-style); ``backOfGrid: true`` sends a
-    driver behind every other car, back-of-grid drivers keeping their quali
-    order among themselves. Directives for drivers not in ``qpos`` are ignored.
+    ``penaltyPlaces: N`` pins a driver to exactly N slots below his place in the
+    lineup — FIA-style, so unpenalised cars promoted into vacated slots compress
+    *around* the pinned slot, never past it (a pin past the field size means the
+    back; two cars pinned to the same slot keep their quali order). ``backOfGrid:
+    true`` sends a driver behind every other car, back-of-grid drivers keeping
+    their quali order among themselves. Directives for drivers not in ``qpos``
+    are ignored.
     """
     directive = {p["driverId"]: p for p in penalties if p["driverId"] in qpos}
     if not directive:
@@ -191,14 +193,27 @@ def _apply_grid_penalties(qpos: dict[str, int], penalties: list[dict]) -> dict[s
     front = sorted((d for d in qpos if d not in set(back)), key=qpos.get)
     eff = {d: i + 1 for i, d in enumerate(front)}
 
-    def slot_key(d: str) -> tuple[int, int, int]:
-        q = eff[d]
+    slot: dict[str, int] = {}
+    taken: set[int] = set()
+    for d in front:  # quali order, so the earlier qualifier wins a contested slot
         p = directive.get(d)
         if p is None:
-            return (q, 0, q)
-        return (q + p["penaltyPlaces"], 1, q)
+            continue
+        s = min(eff[d] + p["penaltyPlaces"], len(front))
+        while s in taken:
+            s += 1
+        slot[d] = s
+        taken.add(s)
+    nxt = 1
+    for d in front:
+        if d in slot:
+            continue
+        while nxt in taken:
+            nxt += 1
+        slot[d] = nxt
+        nxt += 1
 
-    order = sorted(front, key=slot_key) + back
+    order = sorted(front, key=slot.get) + back
     return {d: i + 1 for i, d in enumerate(order)}
 
 
