@@ -81,3 +81,19 @@ def test_driver_constructors_empty_when_no_round_has_results(monkeypatch):
     monkeypatch.setattr(fcs.time, "sleep", lambda *_: None)
 
     assert fcs.fetch_driver_constructors(2026, [1, 2, 3]) == {}
+
+
+def test_standings_requests_bypass_the_response_cache(monkeypatch):
+    """Standings are always the running season, so a cached body is always a
+    risk and never a saving."""
+    from fetch.api_cache import CACHE_BUSTER
+
+    calls = []
+
+    def fake_get(url, params):
+        calls.append(params)
+        return {"MRData": {"StandingsTable": {"StandingsLists": []}}}
+
+    monkeypatch.setattr(fcs, "get", fake_get)
+    fcs.fetch_standings(2026)
+    assert calls and all(CACHE_BUSTER in p for p in calls)

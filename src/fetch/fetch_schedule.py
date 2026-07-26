@@ -29,6 +29,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 from track_geo import VIEW_H, VIEW_W, geo_to_svg_path, nearest_circuit  # noqa: E402
 
 from datalib import save_schedule  # noqa: E402
+from fetch.api_cache import fresh  # noqa: E402
 
 API_ROOT = "https://api.jolpi.ca/ergast/f1"
 MAX_BACKOFF_RETRIES = 6
@@ -117,7 +118,7 @@ def main() -> int:
     features = json.loads(CIRCUITS_PATH.read_text(encoding="utf-8"))["features"]
 
     def fetch_races(year: int) -> list[dict]:
-        data = get(f"{API_ROOT}/{year}.json", {"limit": 100})
+        data = get(f"{API_ROOT}/{year}.json", fresh({"limit": 100}))
         return data["MRData"]["RaceTable"]["Races"]
 
     season, races = choose_season_races(

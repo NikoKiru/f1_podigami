@@ -107,3 +107,42 @@ def test_merge_entries_sorts_numerically_not_lexically():
     r2 = {"season": "2025", "round": "2", "results": []}
     r10 = {"season": "2025", "round": "10", "results": []}
     assert frr.merge_entries([r10], [r2]) == [r2, r10]
+
+
+# --- cache bypass -------------------------------------------------------------
+
+
+def _page(total, races=()):
+    return {"MRData": {"total": str(total), "RaceTable": {"Races": list(races)}}}
+
+
+def _capture_pages(monkeypatch):
+    calls = []
+
+    def fake_get(url, params):
+        calls.append(params)
+        return _page(1)
+
+    monkeypatch.setattr(frr, "get", fake_get)
+    monkeypatch.setattr(frr.time, "sleep", lambda *_: None)
+    return calls
+
+
+def test_mutable_season_pages_bypass_the_response_cache(monkeypatch):
+    """The running season's rows change race by race, and a cached body is how
+    race_results.json fell a round behind podiums.json."""
+    from fetch.api_cache import CACHE_BUSTER
+
+    calls = _capture_pages(monkeypatch)
+    frr.fetch_season_races(2026, fresh_data=True)
+    assert calls and all(CACHE_BUSTER in p for p in calls)
+
+
+def test_settled_season_pages_stay_cacheable(monkeypatch):
+    """1950-2025 is immutable; busting the cache there would make a --full
+    rebuild an origin miss on every page for no freshness gain."""
+    from fetch.api_cache import CACHE_BUSTER
+
+    calls = _capture_pages(monkeypatch)
+    frr.fetch_season_races(1950)
+    assert calls and not any(CACHE_BUSTER in p for p in calls)

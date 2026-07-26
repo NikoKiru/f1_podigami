@@ -24,6 +24,7 @@ import requests
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 from datalib import save_current_drivers  # noqa: E402
+from fetch.api_cache import fresh  # noqa: E402
 
 API_ROOT = "https://api.jolpi.ca/ergast/f1"
 SLEEP_BETWEEN = 1.0
@@ -77,7 +78,7 @@ def fetch_round_drivers(season: int, rnd: int) -> dict[str, dict]:
     straight from the API's Driver object; either may be absent for some
     drivers, in which case the key is omitted.
     """
-    data = get(f"{API_ROOT}/{season}/{rnd}/results.json", {"limit": 100})
+    data = get(f"{API_ROOT}/{season}/{rnd}/results.json", fresh({"limit": 100}))
     lists = data["MRData"]["RaceTable"]["Races"]
     if not lists:
         return {}
