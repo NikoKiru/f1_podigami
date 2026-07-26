@@ -2,6 +2,9 @@
 
 ## 2026-07-26
 
+### Improvements
+- The automated data refresh now watches the PR it opens, not just the run that opens it: an `auto/update-data` PR still unmerged 45 minutes after it was created raises the same deduplicated alert issue a failed run does, naming the cause (failing required check, merge conflict, auto-merge not armed). A fully green run whose PR sat blocked — what kept the Hungarian GP result off the site for ~2h — was the last stall that nothing alerted on (#229)
+
 ### Fixes
 - The 404 page's "DNF" message now uses the site's theme-aware muted token. It referenced `--text-muted`, which is defined nowhere, so it always painted the hardcoded `#888` fallback — ignoring the theme and failing WCAG AA in light mode (3.31:1). It now measures 6.39:1 in light and 7.62:1 in dark (#224)
 - The global font stack moved into a real `--font` token, so the `font-family: var(--font)` reset on tooltip bubbles resolves instead of being dropped as an undefined reference (#224)
