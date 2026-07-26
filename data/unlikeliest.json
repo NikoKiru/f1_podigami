@@ -4,8 +4,8 @@
   },
   "asOf": {
     "season": "2026",
-    "round": "10",
-    "raceName": "Belgian Grand Prix"
+    "round": "11",
+    "raceName": "Hungarian Grand Prix"
   },
   "trios": [
     {
@@ -271,8 +271,8 @@
         {
           "name": "Fernando Alonso",
           "podiums": 106,
-          "starts": 438,
-          "rate": 0.242
+          "starts": 439,
+          "rate": 0.2415
         },
         {
           "name": "Michael Schumacher",
@@ -443,7 +443,7 @@
         {
           "name": "Lance Stroll",
           "podiums": 3,
-          "starts": 201,
+          "starts": 202,
           "rate": 0.0149
         }
       ]
@@ -619,8 +619,8 @@
         "Carlos Sainz",
         "Lance Stroll"
       ],
-      "racesTogether": 185,
-      "score": 0.0106,
+      "racesTogether": 186,
+      "score": 0.0105,
       "count": 1,
       "happened": {
         "season": "2020",
@@ -631,19 +631,19 @@
         {
           "name": "Pierre Gasly",
           "podiums": 6,
-          "starts": 188,
-          "rate": 0.0319
+          "starts": 189,
+          "rate": 0.0317
         },
         {
           "name": "Carlos Sainz",
           "podiums": 29,
-          "starts": 242,
-          "rate": 0.1198
+          "starts": 243,
+          "rate": 0.1193
         },
         {
           "name": "Lance Stroll",
           "podiums": 3,
-          "starts": 201,
+          "starts": 202,
           "rate": 0.0149
         }
       ]
