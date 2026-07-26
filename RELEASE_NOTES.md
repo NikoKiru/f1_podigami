@@ -1,5 +1,12 @@
 # Release Notes
 
+## 2026-07-26
+
+### Fixes
+- The 404 page's "DNF" message now uses the site's theme-aware muted token. It referenced `--text-muted`, which is defined nowhere, so it always painted the hardcoded `#888` fallback — ignoring the theme and failing WCAG AA in light mode (3.31:1). It now measures 6.39:1 in light and 7.62:1 in dark (#224)
+- The global font stack moved into a real `--font` token, so the `font-family: var(--font)` reset on tooltip bubbles resolves instead of being dropped as an undefined reference (#224)
+- The closing methodology footnote on the Overdue, Unlikeliest and Soulmates pages is styled as fine print — 13px, muted, hairline rule above it. Its `.as-of` class had no rule in any stylesheet, so the caveat rendered at full body size and brightness, louder than the captions above it (#225)
+
 ## 2026-07-25
 
 ### Improvements

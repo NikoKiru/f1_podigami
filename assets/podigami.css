@@ -692,6 +692,16 @@ main {
     font-size: 13px;
 }
 
+/* closing methodology footnote (Overdue / Unlikeliest / Soulmates) */
+.as-of {
+    margin: 28px 0 0;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
 /* candidate list */
 .cand-list {
     list-style: none;
