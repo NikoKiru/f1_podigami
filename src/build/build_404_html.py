@@ -42,7 +42,7 @@ def render() -> str:
 }}
 .error-msg {{
     font-size: 1.25rem;
-    color: var(--text-muted, #888);
+    color: var(--muted);
 }}
 .error-home {{
     margin-top: 1.5rem;
