@@ -721,6 +721,27 @@ def json_ld_schemas(
     return schemas
 
 
+def live_post_quali(data: dict) -> dict | None:
+    """The postQuali block only while it still describes an *upcoming* race.
+
+    The block predicts the race after ``asOf``. If ``asOf`` has caught up to (or
+    passed) that round the race is already over, so the grid-aware chance is
+    history and the hero must fall back to the pre-quali numbers. Compared
+    numerically on (season, round) — rounds restart each season, and "9" > "10"
+    as strings. Anything unreadable is dropped: a pre-quali hero is always
+    defensible, a post-quali hero for a finished race never is.
+    """
+    post = data.get("postQuali")
+    if not post:
+        return None
+    try:
+        covers = (int(post["season"]), int(post["round"]))
+        as_of = (int(data["asOf"]["season"]), int(data["asOf"]["round"]))
+    except (KeyError, TypeError, ValueError):
+        return None
+    return post if covers > as_of else None
+
+
 def main() -> int:
     data = load_podigami().model_dump()
     season = data["currentSeason"]
@@ -728,7 +749,7 @@ def main() -> int:
     cands = data["candidates"]
     # Post-quali overrides the pre-quali headline once the grid is set; the
     # top-level `chance` stays the pre-quali number the delta line cites.
-    post = data.get("postQuali")
+    post = live_post_quali(data)
     active_chance = post["chanceNextRaceNew"] if post else chance
     active_cands = post["candidates"] if post else cands
     active_form = post["driverForm"] if post else data["driverForm"]

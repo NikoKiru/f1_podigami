@@ -50,3 +50,36 @@ def test_merge_entries_replaces_refetched_and_sorts_numerically():
 
     merged = fq.merge_entries([old, r10], [fresh, r2])
     assert merged == [fresh, r2, r10]
+
+
+# --- cache bypass -------------------------------------------------------------
+
+
+def _capture_quali_pages(monkeypatch):
+    calls = []
+
+    def fake_get(url, params):
+        calls.append(params)
+        return {"MRData": {"total": "1", "RaceTable": {"Races": []}}}
+
+    monkeypatch.setattr(fq, "get", fake_get)
+    monkeypatch.setattr(fq.time, "sleep", lambda *_: None)
+    return calls
+
+
+def test_mutable_season_qualifying_bypasses_the_response_cache(monkeypatch):
+    """Qualifying drives the post-quali hero, so a cached body holds the grid
+    back for an hour after the session."""
+    from fetch.api_cache import CACHE_BUSTER
+
+    calls = _capture_quali_pages(monkeypatch)
+    fq.fetch_season_races(2026, fresh_data=True)
+    assert calls and all(CACHE_BUSTER in p for p in calls)
+
+
+def test_settled_season_qualifying_stays_cacheable(monkeypatch):
+    from fetch.api_cache import CACHE_BUSTER
+
+    calls = _capture_quali_pages(monkeypatch)
+    fq.fetch_season_races(1994)
+    assert calls and not any(CACHE_BUSTER in p for p in calls)

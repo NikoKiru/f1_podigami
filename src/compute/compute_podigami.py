@@ -110,8 +110,16 @@ def _v2_next_race_model(
     grid_ids: list[str],
     driver_cid: dict[str, str],
     seen: set[tuple[str, str, str]],
+    as_of: tuple[int, int] | None = None,
 ) -> dict:
     """Filter the full history, then predict the next race for the current grid.
+
+    ``as_of`` is the latest race podiums.json knows has run. The upstream
+    aggregates publish out of step — the podium feeds can carry a race hours
+    before the full-classification feed does — so race_results alone is not a
+    reliable answer to "which race is next". Taking whichever source is further
+    ahead keeps the prediction pointed at a race that has not happened yet; the
+    filter state simply misses the newest race until results catch up.
 
     Returns {"mu_var", "p_fin", "temp", "circuit", "chance_new", "ranked_new",
     "params", "hf", "next_race", "next_season"}.
@@ -125,6 +133,8 @@ def _v2_next_race_model(
 
     last_season = int(ordered[-1]["season"])
     last_round = int(ordered[-1]["round"])
+    if as_of is not None and as_of > (last_season, last_round):
+        last_season, last_round = as_of
     next_race = _next_race(schedule, last_season, last_round)
     circuit = next_race.get("circuitId") if next_race else None
 
@@ -379,7 +389,10 @@ def compute(
     # Plackett-Luce strengths + live constructor overlay.
     v2 = None
     if race_results:
-        v2 = _v2_next_race_model(race_results, qualifying, schedule, grid_ids, driver_cid, seen)
+        as_of = (int(races[-1]["season"]), int(races[-1]["round"]))
+        v2 = _v2_next_race_model(
+            race_results, qualifying, schedule, grid_ids, driver_cid, seen, as_of=as_of
+        )
         lam = {d: math.exp(v2["mu_var"][d][0]) for d in grid_ids}
     else:
         lam = model.strengths(per_driver, grid_ids, n, current, model.DEFAULT_PARAMS)

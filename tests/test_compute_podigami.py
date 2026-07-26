@@ -498,6 +498,66 @@ def test_post_quali_deterministic(scenario_post_quali):
     assert cp.compute(podiums, combos, grid, **kw) == cp.compute(podiums, combos, grid, **kw)
 
 
+SCHED_R7 = {
+    "season": "2025",
+    "totalRounds": 7,
+    "races": [
+        {"round": "5", "circuitId": "testring", "raceName": "Test GP"},
+        {"round": "6", "circuitId": "monaco", "raceName": "Monaco GP"},
+        {"round": "7", "circuitId": "spa", "raceName": "Belgian GP"},
+    ],
+}
+
+
+@pytest.fixture
+def scenario_stale_results(scenario_post_quali):
+    """Podiums know round 6 has run; race_results still stop at round 5.
+
+    The upstream aggregates publish out of step, so this skew is a normal
+    transient state rather than a corrupt dataset.
+    """
+    podiums, combos, grid, con, rres, quali = scenario_post_quali
+    podiums = podiums + [race(2025, 6, "eli", "alf", "cas", name="Monaco GP")]
+    return podiums, combos_from(podiums), grid, con, rres, quali
+
+
+def test_post_quali_null_for_a_round_already_in_podiums(scenario_stale_results):
+    """A race that has already run must never get a grid-aware prediction.
+
+    ``asOf`` comes from podiums while the v2 filter reads race_results; when the
+    two disagree the next race must be taken from whichever is further ahead, or
+    the page shows a post-qualifying chance for a race that is already over.
+    """
+    podiums, combos, grid, con, rres, quali = scenario_stale_results
+    res = cp.compute(
+        podiums,
+        combos,
+        grid,
+        constructor_data=con,
+        race_results=rres,
+        qualifying=quali,
+        schedule=SCHED_R7,
+    )
+    assert res["asOf"]["round"] == "6"
+    assert res["postQuali"] is None
+
+
+def test_next_race_circuit_follows_podiums_when_results_lag(scenario_stale_results):
+    """The modelled circuit must be the race actually coming up (round 7),
+    not the finished round 6 the lagging race_results still points at."""
+    podiums, combos, grid, con, rres, quali = scenario_stale_results
+    res = cp.compute(
+        podiums,
+        combos,
+        grid,
+        constructor_data=con,
+        race_results=rres,
+        qualifying=quali,
+        schedule=SCHED_R7,
+    )
+    assert res["params"]["circuitId"] == "spa"
+
+
 # --- grid penalties ---------------------------------------------------------------
 
 

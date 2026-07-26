@@ -37,6 +37,7 @@ from pathlib import Path
 import requests
 
 from check_update_due import latest_finished_round
+from fetch.api_cache import fresh
 
 API_ROOT = "https://api.jolpi.ca/ergast/f1"
 DATA_DIR = Path(__file__).resolve().parents[1] / "data"
@@ -88,9 +89,14 @@ def wait_for_round(
 
 
 def _fetch_last_results(season: int) -> object | None:
-    """One request for the season's most recent classified race; None on failure."""
+    """One request for the season's most recent classified race; None on failure.
+
+    Cache-busted: the API caches this feed per request-variant with a long TTL,
+    so an un-nonced poll re-reads the same stale body every interval and waits
+    out the entire budget on a race that is already published.
+    """
     try:
-        resp = requests.get(f"{API_ROOT}/{season}/last/results.json", timeout=30)
+        resp = requests.get(f"{API_ROOT}/{season}/last/results.json", params=fresh(), timeout=30)
         resp.raise_for_status()
         return resp.json()
     except (requests.RequestException, ValueError) as exc:

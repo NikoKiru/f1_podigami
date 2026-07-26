@@ -22,6 +22,7 @@ import requests
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 from datalib import save_qualifying  # noqa: E402
+from fetch.api_cache import fresh  # noqa: E402
 
 API_ROOT = "https://api.jolpi.ca/ergast/f1"
 PAGE_SIZE = 100
@@ -86,13 +87,19 @@ def accumulate_page(merged: dict[tuple[str, str], dict], page: list[dict]) -> No
             merged[key] = copy
 
 
-def fetch_season_races(season: int) -> list[dict]:
-    """Page through /{season}/qualifying.json; empty seasons return no races."""
+def fetch_season_races(season: int, *, fresh_data: bool = False) -> list[dict]:
+    """Page through /{season}/qualifying.json; empty seasons return no races.
+
+    ``fresh_data`` bypasses the API's response cache (see fetch.api_cache) —
+    needed for the running season, where a stale body withholds the grid the
+    post-qualifying prediction is built from.
+    """
     merged: dict[tuple[str, str], dict] = {}
     offset = 0
     total = None
     while True:
-        data = get(f"{API_ROOT}/{season}/qualifying.json", {"limit": PAGE_SIZE, "offset": offset})
+        params = {"limit": PAGE_SIZE, "offset": offset}
+        data = get(f"{API_ROOT}/{season}/qualifying.json", fresh(params) if fresh_data else params)
         mr = data["MRData"]
         if total is None:
             total = int(mr["total"])
@@ -140,9 +147,11 @@ def main(argv: list[str] | None = None) -> int:
         seasons = [latest, latest + 1]
         print(f"Incremental fetch: latest season on disk is {latest}; fetching {seasons}")
 
+    current_year = date.today().year
     fetched: list[dict] = []
     for season in seasons:
-        entries = [quali_entry(r) for r in fetch_season_races(season)]
+        races = fetch_season_races(season, fresh_data=season >= current_year)
+        entries = [quali_entry(r) for r in races]
         fetched.extend(e for e in entries if e["results"])
         time.sleep(SLEEP_BETWEEN)
 

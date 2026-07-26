@@ -163,9 +163,14 @@ def test_landing_page_has_next_race_box(dist):
 def test_post_quali_hero_state_matches_data(dist, data):
     """The rendered hero must mirror the committed postQuali state exactly —
     conditional on the data so the update job's pytest run stays green whether
-    the block is live or null (the #178 stall-class guardrail)."""
+    the block is live or null (the #178 stall-class guardrail).
+
+    Keyed on ``live_post_quali``, not the raw key: a block whose race has already
+    run is deliberately not rendered."""
+    from build.build_podigami_html import live_post_quali
+
     html_text = (dist / "index.html").read_text(encoding="utf-8")
-    if data["podigami"].get("postQuali"):
+    if live_post_quali(data["podigami"]):
         assert "hc-updated" in html_text
         assert "cd-grid" in html_text
     else:
