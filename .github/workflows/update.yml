@@ -154,28 +154,70 @@ jobs:
       - name: Run tests
         run: pytest -q
 
-  # If the guard or the update itself fails, the site silently stalls one race
-  # behind (no PR merges; the guard just re-fires every tick). Make that loud:
-  # open — or refresh — a single deduplicated issue so a failure pings a human
-  # within one cron tick instead of hiding in a red run nobody watches.
+  # A green update run is not the same as the data shipping. At the 2026
+  # Hungarian GP every job passed — guard fired, pipeline ran, PR opened with
+  # auto-merge armed — and the site still stalled ~2h, because a required check
+  # *on the PR* failed for a reason of its own (an unpinned ruff resolved to
+  # 0.16.0, #227). notify-failure watches the run, so nothing pinged. Watch the
+  # PR too, on every tick, whether or not an update was due (#229).
+  #
+  # Deliberately NOT pinned to main like the jobs above: this reads no data, and
+  # the script must come from the same ref as this workflow file (the default
+  # branch, on a schedule) or it would break in the window between merging to
+  # develop and promoting to main.
+  watchdog:
+    runs-on: ubuntu-latest
+    outputs:
+      stalled: ${{ steps.stall.outputs.stalled }}
+      reason: ${{ steps.stall.outputs.reason }}
+      pr: ${{ steps.stall.outputs.pr }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: Look for a data PR that will not merge on its own
+        id: stall
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr list --repo "$GITHUB_REPOSITORY" --head auto/update-data --state open \
+            --json number,url,createdAt,mergeStateStatus,autoMergeRequest,statusCheckRollup \
+            | python src/check_stalled_data_pr.py
+
+  # Whether the run failed or the PR it opened is wedged, the outcome is the
+  # same — the site stalls one race behind, the guard re-fires every tick, and
+  # nobody is watching the Actions tab. Make it loud: open, or refresh, a single
+  # deduplicated issue so it pings a human within one cron tick.
   notify-failure:
-    needs: [check, update]
-    if: failure()
+    needs: [check, update, watchdog]
+    if: always() && (failure() || needs.watchdog.outputs.stalled == 'true')
     runs-on: ubuntu-latest
     steps:
       - name: Open or refresh the failure issue
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          STALL_REASON: ${{ needs.watchdog.outputs.reason }}
+          STALLED_PR: ${{ needs.watchdog.outputs.pr }}
         run: |
+          # Two ways in: the run went red, or the run was fine but the PR it
+          # left behind is wedged. Same consequence, same alert issue.
+          if [ -n "$STALL_REASON" ]; then
+            headline="The open data PR is not merging: $STALL_REASON"
+            where="Blocked PR: $STALLED_PR"
+          else
+            headline="The automated data update run failed"
+            where="Failed run: $RUN_URL"
+          fi
           gh label create auto-update-failure --repo "$GITHUB_REPOSITORY" \
             --color B60205 --description "update.yml data refresh is failing" 2>/dev/null || true
           existing="$(gh issue list --repo "$GITHUB_REPOSITORY" --state open \
             --label auto-update-failure --json number --jq '.[0].number // empty')"
-          body=$'The automated data update failed, so the site will stall one race behind until it is fixed (the guard keeps firing but no data PR merges).\n\nFailed run: '"$RUN_URL"$'\n\nDiagnose per CLAUDE.md (Deployment > "When a finished race does not appear"). Typical tell: check green with update red (Run tests failed), or an open auto/update-data PR whose checks are red. Close this issue once a data PR merges.'
+          body="$headline"$'.\n\nThe site will stall one race behind until it is fixed (the guard keeps firing but no data PR merges).\n\n'"$where"$'\n\nDiagnose per CLAUDE.md (Deployment > "When a finished race does not appear"). Typical tells: check green with update red (Run tests failed), or an open auto/update-data PR whose required checks are red. Close this issue once a data PR merges.'
           if [ -n "$existing" ]; then
             gh issue comment "$existing" --repo "$GITHUB_REPOSITORY" \
-              --body "Still failing as of $(date -u +%Y-%m-%dT%H:%MZ): $RUN_URL"
+              --body "Still failing as of $(date -u +%Y-%m-%dT%H:%MZ): $headline. $where"
           else
             gh issue create --repo "$GITHUB_REPOSITORY" \
               --title "⚠️ Automated data update is failing" \
