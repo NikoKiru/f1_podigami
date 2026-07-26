@@ -101,3 +101,32 @@ def test_a_newer_round_than_expected_also_satisfies_the_wait():
     assert wait_for_round(
         10, lambda: payload("11"), timeout_s=3600, interval_s=180, sleep=clock.sleep, now=clock
     )
+
+
+# --- cache bypass: the poll must see live data, not a cached body
+
+
+def test_the_poll_request_bypasses_the_response_cache(monkeypatch):
+    """Without a nonce the watcher re-reads one cached body every 3 minutes and
+    burns the whole budget on it — the 2026-07-26 hour of nothing."""
+    import wait_for_results as wfr
+    from fetch.api_cache import CACHE_BUSTER
+
+    seen = {}
+
+    class Resp:
+        def raise_for_status(self):
+            pass
+
+        def json(self):
+            return payload("11")
+
+    def fake_get(url, **kwargs):
+        seen["url"] = url
+        seen["params"] = kwargs.get("params") or {}
+        return Resp()
+
+    monkeypatch.setattr(wfr.requests, "get", fake_get)
+    assert wfr._fetch_last_results(2026) is not None
+    assert "2026/last/results.json" in seen["url"]
+    assert CACHE_BUSTER in seen["params"]

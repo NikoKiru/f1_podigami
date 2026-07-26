@@ -404,3 +404,51 @@ def test_faq_items_matches_rendered_faq():
     for q, _a in pairs:
         assert f'<summary class="faq-q">{q}</summary>' in html_out
     assert len(pairs) >= 5
+
+
+# --- stale postQuali guard --------------------------------------------------------
+
+
+def _pq_data(as_of_round, pq_round, pq_season="2026"):
+    return {
+        "asOf": {"season": "2026", "round": as_of_round, "raceName": "Hungarian Grand Prix"},
+        "postQuali": {"season": pq_season, "round": pq_round, "chanceNextRaceNew": 43.5},
+    }
+
+
+def test_live_post_quali_kept_when_it_leads_the_last_race():
+    data = _pq_data("10", "11")
+    assert bp.live_post_quali(data) == data["postQuali"]
+
+
+def test_live_post_quali_dropped_once_that_race_has_run():
+    """The grid-aware block is for the *upcoming* race; once asOf reaches that
+    round the race is over and its post-quali chance must not stay on the hero."""
+    assert bp.live_post_quali(_pq_data("11", "11")) is None
+
+
+def test_live_post_quali_dropped_when_older_than_the_last_race():
+    assert bp.live_post_quali(_pq_data("11", "9")) is None
+
+
+def test_live_post_quali_none_when_absent():
+    assert bp.live_post_quali({"asOf": {"season": "2026", "round": "11"}}) is None
+    assert (
+        bp.live_post_quali({"asOf": {"season": "2026", "round": "11"}, "postQuali": None}) is None
+    )
+
+
+def test_live_post_quali_kept_across_a_season_rollover():
+    """Round numbers restart each season, so the comparison must be numeric on
+    (season, round) — not on round alone, which would drop a valid R1 block."""
+    data = {
+        "asOf": {"season": "2026", "round": "22"},
+        "postQuali": {"season": "2027", "round": "1", "chanceNextRaceNew": 40.0},
+    }
+    assert bp.live_post_quali(data) == data["postQuali"]
+
+
+def test_live_post_quali_dropped_when_rounds_are_unreadable():
+    """Garbage beats a wrong hero: an unparseable block falls back to pre-quali."""
+    bad = {"asOf": {"season": "2026", "round": "11"}, "postQuali": {"season": "?", "round": "?"}}
+    assert bp.live_post_quali(bad) is None

@@ -27,6 +27,7 @@ import requests
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 from datalib import save_constructor_standings  # noqa: E402
+from fetch.api_cache import fresh  # noqa: E402
 
 API_ROOT = "https://api.jolpi.ca/ergast/f1"
 SLEEP_BETWEEN = 1.0
@@ -75,7 +76,7 @@ def season_and_rounds(today_year: int | None = None) -> tuple[int, list[int]]:
 
 
 def fetch_standings(season: int) -> list[dict]:
-    data = get(f"{API_ROOT}/{season}/constructorStandings.json", {"limit": 100})
+    data = get(f"{API_ROOT}/{season}/constructorStandings.json", fresh({"limit": 100}))
     lists = data["MRData"]["StandingsTable"].get("StandingsLists", [])
     if not lists:
         return []
@@ -95,7 +96,7 @@ def fetch_driver_constructors(season: int, rounds: list[int]) -> dict[str, str]:
     round gives the same mapping.
     """
     for rnd in reversed(rounds):
-        data = get(f"{API_ROOT}/{season}/{rnd}/results.json", {"limit": 100})
+        data = get(f"{API_ROOT}/{season}/{rnd}/results.json", fresh({"limit": 100}))
         races = data["MRData"]["RaceTable"]["Races"]
         if races:
             return {

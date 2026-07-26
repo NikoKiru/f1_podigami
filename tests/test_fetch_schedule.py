@@ -56,3 +56,21 @@ def test_schedule_race_schema_accepts_both_shapes():
     assert ScheduleRace.model_validate(legacy).qualifyingDate is None
     withq = dict(legacy, qualifyingDate="2026-03-07", qualifyingTime="07:00:00Z")
     assert ScheduleRace.model_validate(withq).qualifyingTime == "07:00:00Z"
+
+
+def test_schedule_request_bypasses_the_response_cache(monkeypatch):
+    """A cached calendar can miss a rescheduled round or a freshly published
+    qualifying time, which is what the post-quali trigger fires on."""
+    from fetch.api_cache import CACHE_BUSTER
+
+    calls = []
+
+    def fake_get(url, params):
+        calls.append(params)
+        return {"MRData": {"RaceTable": {"Races": []}}}
+
+    monkeypatch.setattr(fs, "get", fake_get)
+    monkeypatch.setattr(fs, "save_schedule", lambda *a, **k: None)
+    monkeypatch.setattr(fs, "nearest_circuit", lambda *a, **k: None)
+    fs.main()
+    assert calls and all(CACHE_BUSTER in p for p in calls)

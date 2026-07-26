@@ -25,6 +25,7 @@ import requests
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 from datalib import save_race_results  # noqa: E402
+from fetch.api_cache import fresh  # noqa: E402
 
 API_ROOT = "https://api.jolpi.ca/ergast/f1"
 PAGE_SIZE = 100
@@ -106,13 +107,19 @@ def accumulate_page(merged: dict[tuple[str, str], dict], page: list[dict]) -> No
             merged[key] = copy
 
 
-def fetch_season_races(season: int) -> list[dict]:
-    """Page through /{season}/results.json and return merged Ergast race dicts."""
+def fetch_season_races(season: int, *, fresh_data: bool = False) -> list[dict]:
+    """Page through /{season}/results.json and return merged Ergast race dicts.
+
+    ``fresh_data`` bypasses the API's response cache — required for a season
+    still in progress, whose cached body can be an hour behind the last race
+    (see fetch.api_cache).
+    """
     merged: dict[tuple[str, str], dict] = {}
     offset = 0
     total = None
     while True:
-        data = get(f"{API_ROOT}/{season}/results.json", {"limit": PAGE_SIZE, "offset": offset})
+        params = {"limit": PAGE_SIZE, "offset": offset}
+        data = get(f"{API_ROOT}/{season}/results.json", fresh(params) if fresh_data else params)
         mr = data["MRData"]
         if total is None:
             total = int(mr["total"])
@@ -160,9 +167,13 @@ def main(argv: list[str] | None = None) -> int:
         seasons = [latest, latest + 1]
         print(f"Incremental fetch: latest season on disk is {latest}; fetching {seasons}")
 
+    # Only the running season (and the next) can still gain rows, so that is the
+    # only place worth spending an uncached request.
+    current_year = date.today().year
     fetched: list[dict] = []
     for season in seasons:
-        fetched.extend(race_entry(r) for r in fetch_season_races(season))
+        races = fetch_season_races(season, fresh_data=season >= current_year)
+        fetched.extend(race_entry(r) for r in races)
         time.sleep(SLEEP_BETWEEN)
 
     combined = merge_entries(existing, fetched)

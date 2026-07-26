@@ -14,12 +14,14 @@ import argparse
 import json
 import sys
 import time
+from datetime import date
 from pathlib import Path
 
 import requests
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 from datalib import save_podiums  # noqa: E402
+from fetch.api_cache import fresh  # noqa: E402
 
 API_ROOT = "https://api.jolpi.ca/ergast/f1"
 PAGE_SIZE = 100
@@ -50,21 +52,28 @@ def get(url: str, params: dict) -> dict:
     raise RuntimeError(f"giving up on {url} after {MAX_BACKOFF_RETRIES} retries")
 
 
-def fetch_all_for_position(position: int, season: int | None = None) -> list[dict]:
+def fetch_all_for_position(
+    position: int, season: int | None = None, *, fresh_data: bool = False
+) -> list[dict]:
     """Page through every Race that has a finisher at the given position.
 
     Uses Ergast's path-style position filter: /results/{position}.json
     When ``season`` is given, scopes to /{season}/results/{position}.json so we
     fetch only that season instead of all of history.
+
+    ``fresh_data`` bypasses the API's response cache (see fetch.api_cache). This
+    file decides ``asOf``, so a cached body here costs a whole cron hour: the run
+    finds no new race and opens a PR that changes nothing.
     """
     races: list[dict] = []
     offset = 0
     total = None
     base = f"{API_ROOT}/{season}" if season is not None else API_ROOT
     while True:
+        params = {"limit": PAGE_SIZE, "offset": offset}
         data = get(
             f"{base}/results/{position}.json",
-            {"limit": PAGE_SIZE, "offset": offset},
+            fresh(params) if fresh_data else params,
         )
         mr = data["MRData"]
         if total is None:
@@ -124,9 +133,11 @@ def main(argv: list[str] | None = None) -> int:
         seasons_to_fetch = list(range(latest, latest + 2))
         print(f"Incremental fetch: latest season on disk is {latest}; fetching {seasons_to_fetch}")
 
+    # season is None only for the unscoped history rebuild, which is immutable.
     for season in seasons_to_fetch:
+        live = season is not None and season >= date.today().year
         for position in (1, 2, 3):
-            for race in fetch_all_for_position(position, season):
+            for race in fetch_all_for_position(position, season, fresh_data=live):
                 key = (race["season"], race["round"])
                 entry = by_race.setdefault(
                     key,

@@ -60,3 +60,46 @@ def test_trio_key_is_order_independent():
 def test_driver_record_extracts_id_and_full_name():
     obj = {"Driver": {"driverId": "max_verstappen", "givenName": "Max", "familyName": "Verstappen"}}
     assert fp.driver_record(obj) == {"driverId": "max_verstappen", "name": "Max Verstappen"}
+
+
+# --- podium fetcher: response-cache bypass -------------------------------------
+
+
+def test_mutable_season_podiums_bypass_the_response_cache(monkeypatch):
+    """podiums.json sets ``asOf``. A cached body means the run finds no new race
+    and the site waits another cron hour for a result that is already published."""
+    from fetch import fetch_podiums as fp
+    from fetch.api_cache import CACHE_BUSTER
+
+    calls = []
+
+    def fake_get(url, params):
+        calls.append(params)
+        return {"MRData": {"total": "1", "RaceTable": {"Races": []}}}
+
+    monkeypatch.setattr(fp, "get", fake_get)
+    monkeypatch.setattr(fp.time, "sleep", lambda *_: None)
+
+    fp.fetch_all_for_position(1, 2026, fresh_data=True)
+    assert calls and all(CACHE_BUSTER in p for p in calls)
+
+    calls.clear()
+    fp.fetch_all_for_position(1, None)  # unscoped history rebuild
+    assert calls and not any(CACHE_BUSTER in p for p in calls)
+
+
+def test_current_drivers_request_bypasses_the_response_cache(monkeypatch):
+    """The grid feeds the prediction hero; a cached round would silently drop a
+    mid-season seat change."""
+    from fetch import fetch_current_drivers as fcd
+    from fetch.api_cache import CACHE_BUSTER
+
+    calls = []
+
+    def fake_get(url, params):
+        calls.append(params)
+        return {"MRData": {"RaceTable": {"Races": []}}}
+
+    monkeypatch.setattr(fcd, "get", fake_get)
+    fcd.fetch_round_drivers(2026, 11)
+    assert calls and all(CACHE_BUSTER in p for p in calls)
