@@ -5,41 +5,41 @@
     {
       "constructorId": "mercedes",
       "name": "Mercedes",
-      "points": 358.0,
+      "points": 379.0,
       "position": 1,
       "wins": 8
     },
     {
       "constructorId": "ferrari",
       "name": "Ferrari",
-      "points": 285.0,
+      "points": 307.0,
       "position": 2,
       "wins": 2
     },
     {
       "constructorId": "mclaren",
       "name": "McLaren",
-      "points": 195.0,
+      "points": 220.0,
       "position": 3,
-      "wins": 0
+      "wins": 1
     },
     {
       "constructorId": "red_bull",
       "name": "Red Bull",
-      "points": 151.0,
+      "points": 177.0,
       "position": 4,
-      "wins": 0
-    },
-    {
-      "constructorId": "alpine",
-      "name": "Alpine F1 Team",
-      "points": 61.0,
-      "position": 5,
       "wins": 0
     },
     {
       "constructorId": "rb",
       "name": "RB F1 Team",
+      "points": 66.0,
+      "position": 5,
+      "wins": 0
+    },
+    {
+      "constructorId": "alpine",
+      "name": "Alpine F1 Team",
       "points": 61.0,
       "position": 6,
       "wins": 0
@@ -52,16 +52,16 @@
       "wins": 0
     },
     {
-      "constructorId": "williams",
-      "name": "Williams",
-      "points": 11.0,
+      "constructorId": "audi",
+      "name": "Audi",
+      "points": 12.0,
       "position": 8,
       "wins": 0
     },
     {
-      "constructorId": "audi",
-      "name": "Audi",
-      "points": 10.0,
+      "constructorId": "williams",
+      "name": "Williams",
+      "points": 11.0,
       "position": 9,
       "wins": 0
     },
@@ -81,27 +81,27 @@
     }
   ],
   "driverConstructor": {
+    "norris": "mclaren",
+    "max_verstappen": "red_bull",
     "antonelli": "mercedes",
     "leclerc": "ferrari",
-    "max_verstappen": "red_bull",
     "hamilton": "ferrari",
-    "piastri": "mclaren",
     "hadjar": "red_bull",
-    "norris": "mclaren",
-    "bortoleto": "audi",
-    "arvid_lindblad": "rb",
-    "colapinto": "alpine",
-    "gasly": "alpine",
+    "russell": "mercedes",
     "lawson": "rb",
     "hulkenberg": "audi",
-    "bearman": "haas",
+    "arvid_lindblad": "rb",
+    "bortoleto": "audi",
+    "gasly": "alpine",
+    "stroll": "aston_martin",
+    "alonso": "aston_martin",
+    "colapinto": "alpine",
+    "ocon": "haas",
     "albon": "williams",
     "sainz": "williams",
-    "ocon": "haas",
-    "bottas": "cadillac",
-    "alonso": "aston_martin",
-    "stroll": "aston_martin",
+    "bearman": "haas",
+    "piastri": "mclaren",
     "perez": "cadillac",
-    "russell": "mercedes"
+    "bottas": "cadillac"
   }
 }
