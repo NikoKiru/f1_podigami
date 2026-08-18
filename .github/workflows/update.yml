@@ -169,6 +169,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       stalled: ${{ steps.stall.outputs.stalled }}
+      open: ${{ steps.stall.outputs.open }}
       reason: ${{ steps.stall.outputs.reason }}
       pr: ${{ steps.stall.outputs.pr }}
     steps:
@@ -188,7 +189,10 @@ jobs:
   # Whether the run failed or the PR it opened is wedged, the outcome is the
   # same — the site stalls one race behind, the guard re-fires every tick, and
   # nobody is watching the Actions tab. Make it loud: open, or refresh, a single
-  # deduplicated issue so it pings a human within one cron tick.
+  # deduplicated issue so it pings a human within one cron tick. Loud means
+  # informative, not chatty: an unchanged failure gets NO new comment — the
+  # Aug 2026 stall buried itself under 400+ identical "still failing" comments
+  # on a month-old issue, which pings nobody (#245).
   notify-failure:
     needs: [check, update, watchdog]
     if: always() && (failure() || needs.watchdog.outputs.stalled == 'true')
@@ -214,12 +218,39 @@ jobs:
             --color B60205 --description "update.yml data refresh is failing" 2>/dev/null || true
           existing="$(gh issue list --repo "$GITHUB_REPOSITORY" --state open \
             --label auto-update-failure --json number --jq '.[0].number // empty')"
-          body="$headline"$'.\n\nThe site will stall one race behind until it is fixed (the guard keeps firing but no data PR merges).\n\n'"$where"$'\n\nDiagnose per CLAUDE.md (Deployment > "When a finished race does not appear"). Typical tells: check green with update red (Run tests failed), or an open auto/update-data PR whose required checks are red. Close this issue once a data PR merges.'
-          if [ -n "$existing" ]; then
-            gh issue comment "$existing" --repo "$GITHUB_REPOSITORY" \
-              --body "Still failing as of $(date -u +%Y-%m-%dT%H:%MZ): $headline. $where"
-          else
+          # The body's first line is exactly "$headline." — the marker the next
+          # tick compares against to detect a repeat vs a changed failure.
+          body="$headline"$'.\n\nThe site will stall one race behind until it is fixed (the guard keeps firing but no data PR merges).\n\n'"$where"$'\n\nDiagnose per CLAUDE.md (Deployment > "When a finished race does not appear"). Typical tells: check green with update red (Run tests failed), or an open auto/update-data PR whose required checks are red. This issue closes itself once no data PR is left open.\n\ncc @NikoKiru'
+          if [ -z "$existing" ]; then
             gh issue create --repo "$GITHUB_REPOSITORY" \
               --title "⚠️ Automated data update is failing" \
               --label auto-update-failure --body "$body"
+          elif [ "$(gh issue view "$existing" --repo "$GITHUB_REPOSITORY" --json body --jq .body | head -n 1)" = "${headline}." ]; then
+            echo "Unchanged failure already reported in #$existing; staying quiet."
+          else
+            gh issue edit "$existing" --repo "$GITHUB_REPOSITORY" --body "$body"
+            gh issue comment "$existing" --repo "$GITHUB_REPOSITORY" \
+              --body "Failure changed as of $(date -u +%Y-%m-%dT%H:%MZ): $headline. $where"
+          fi
+
+  # The flip side: the moment no auto/update-data PR is left open (merged, or
+  # closed by hand) the incident is over. Close the alert issue so the NEXT
+  # incident opens a FRESH issue — a new issue notifies a human, whereas a
+  # comment on a month-old open one does not (how #245 sat blocked for 15 days).
+  notify-recovery:
+    needs: [check, update, watchdog]
+    if: always() && !failure() && needs.watchdog.outputs.open == 'false'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close the failure issue once no data PR is left open
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          existing="$(gh issue list --repo "$GITHUB_REPOSITORY" --state open \
+            --label auto-update-failure --json number --jq '.[0].number // empty')"
+          if [ -n "$existing" ]; then
+            gh issue close "$existing" --repo "$GITHUB_REPOSITORY" \
+              --comment "Recovered: no auto/update-data PR is open any more. A new incident will open a fresh issue."
+          else
+            echo "No open failure issue; nothing to close."
           fi

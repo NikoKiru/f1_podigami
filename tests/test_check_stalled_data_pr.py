@@ -109,3 +109,37 @@ def test_an_unparseable_created_at_stays_quiet():
     pr = open_pr()
     pr[0]["createdAt"] = ""
     assert stall_reason(pr, NOW) is None
+
+
+# --- main(): the $GITHUB_OUTPUT contract update.yml consumes -------------------
+
+
+def run_main(prs: list[dict], monkeypatch, tmp_path) -> dict[str, str]:
+    """Run main() with ``prs`` on stdin and return the $GITHUB_OUTPUT key/values."""
+    import io
+    import json
+    import sys
+
+    import check_stalled_data_pr as mod
+
+    out = tmp_path / "github_output"
+    monkeypatch.setenv("GITHUB_OUTPUT", str(out))
+    monkeypatch.setattr(sys, "stdin", io.StringIO(json.dumps(prs)))
+    assert mod.main() == 0
+    return dict(line.split("=", 1) for line in out.read_text(encoding="utf-8").splitlines())
+
+
+def test_main_reports_no_open_pr(monkeypatch, tmp_path):
+    """open=false is the recovery signal: the alert issue can be auto-closed."""
+    outputs = run_main([], monkeypatch, tmp_path)
+    assert outputs["open"] == "false"
+    assert outputs["stalled"] == "false"
+
+
+def test_main_reports_open_but_healthy_pr(monkeypatch, tmp_path):
+    """A PR still inside its merge window is open (incident not over) yet not stalled."""
+    fresh = open_pr(checks=list(GREEN))
+    fresh[0]["createdAt"] = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+    outputs = run_main(fresh, monkeypatch, tmp_path)
+    assert outputs["open"] == "true"
+    assert outputs["stalled"] == "false"

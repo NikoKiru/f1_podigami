@@ -92,7 +92,7 @@ def stall_reason(prs: list[dict], now: datetime) -> str | None:
     )
 
 
-def main() -> int:  # pragma: no cover - thin CLI glue exercised in CI, not unit tests
+def main() -> int:
     prs = json.load(sys.stdin)
     reason = stall_reason(prs, datetime.now(UTC))
     url = prs[0].get("url", "") if prs else ""
@@ -110,6 +110,9 @@ def main() -> int:  # pragma: no cover - thin CLI glue exercised in CI, not unit
         flat_url = url.replace("\n", " ")
         with open(out, "a", encoding="utf-8") as fh:
             fh.write(f"stalled={'true' if reason else 'false'}\n")
+            # open=false means no data PR is in flight at all: the incident (if
+            # any) is over, so update.yml can auto-close the alert issue.
+            fh.write(f"open={'true' if prs else 'false'}\n")
             fh.write(f"reason={flat_reason}\n")
             fh.write(f"pr={flat_url}\n")
     return 0
