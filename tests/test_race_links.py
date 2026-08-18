@@ -128,6 +128,21 @@ def test_update_map_refresh_keeps_previously_mapped_rounds():
     }
 
 
+def test_update_map_drops_carried_round_that_no_longer_matches_its_race():
+    # A race inserted mid-season renumbers every later round (2026: "Bahrain
+    # Grand Prix in Malaysia" became R16, pushing Singapore 16 -> 17). The
+    # carried-over old "16": singapore row now points at the WRONG race, and a
+    # merge that can only add rows ships it anyway — the identity guardrail
+    # test then rejects the dataset and stalls the data PR (#245). A refreshed
+    # year must drop any kept row whose slug no longer matches that round's
+    # race name.
+    existing = {"2026": {"16": {"id": "1296", "slug": "singapore"}}}
+    html = '<a href="/en/results/2026/races/1296/singapore/race-result"></a>'
+    names = {2026: {"16": "Gotham City Grand Prix", "17": "Singapore Grand Prix"}}
+    out = frl.update_map(existing, [(2026, 2)], lambda y: html, names, sleep=0)
+    assert out["2026"] == {"17": {"id": "1296", "slug": "singapore"}}
+
+
 def test_season_counts_uses_schedule_for_current_and_podiums_for_history():
     schedule = {"season": "2026", "races": [{"round": "1"}, {"round": "2"}]}
     podiums = [{"season": "1950"}, {"season": "1950"}, {"season": "2026"}]

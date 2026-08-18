@@ -38,7 +38,7 @@ import requests
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 from datalib import DATA_DIR, load_podiums, load_schedule, save_race_links  # noqa: E402
-from fetch.race_identity import match_season  # noqa: E402
+from fetch.race_identity import match_season, slug_matches  # noqa: E402
 
 INDEX_URL = "https://www.formula1.com/en/results/{year}/races"
 RESULT_RE = re.compile(r"/en/results/(\d{4})/races/(\d+)/([a-z0-9-]+)/race-result")
@@ -131,7 +131,10 @@ def update_map(
     as-is. Rounds are assigned by slug identity, not ID/page order; identity
     matching is partial, so an unidentifiable slug (new race name, cancelled
     event) costs only its own round, and a refresh merges over what a year
-    already has rather than replacing it."""
+    already has rather than replacing it. A kept row must still identity-match
+    its round, though: a calendar change that renumbers rounds mid-season turns
+    carried-over rows into wrong links (2026 R16, #245), so any row whose slug
+    no longer matches that round's race name is dropped."""
     result = {k: dict(v) for k, v in existing.items()}
     for i, (year, expected) in enumerate(targets):
         try:
@@ -143,7 +146,12 @@ def update_map(
             print(f"  warn: {year} fetch failed ({exc}); keeping existing", file=sys.stderr)
             continue
         if season_map:
-            merged = {**result.get(str(year), {}), **season_map}
+            names = round_names.get(year, {})
+            merged = {
+                rnd: entry
+                for rnd, entry in {**result.get(str(year), {}), **season_map}.items()
+                if rnd not in names or slug_matches(entry["slug"], names[rnd])
+            }
             result[str(year)] = {str(r): merged[str(r)] for r in sorted(merged, key=int)}
             if len(season_map) < expected:
                 print(
