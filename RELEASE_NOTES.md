@@ -3,9 +3,9 @@
 ## 2026-08-18
 
 ### Fixes
-- The official-race-links refresh can now unlearn: a carried-over round whose slug no longer identity-matches that round's race name is dropped instead of shipped. When the 2026 calendar gained "Bahrain Grand Prix in Malaysia" as round 16 (Sepang) and renumbered every later round, the merge-only refresh kept the stale `R16 → singapore` row, the race-identity guardrail (rightly) failed, and the auto-update PR sat blocked for 15 days (#246)
-- The identity table knows the relocated race: F1's results index lists "Bahrain Grand Prix in Malaysia" under its `bahrain` slug (id 1308), so round 16 gets its official link instead of a Wikipedia fallback (#246)
-- Auto-update alerts now reach a human instead of burying themselves: an unchanged failure no longer adds a "still failing" comment every tick (the blocked-PR incident had piled up 400+ identical comments on a month-old issue, which notifies nobody), a changed failure updates the issue and comments once, and a new `notify-recovery` job closes the issue as soon as no data PR is left open — so the next incident opens a fresh issue and actually pings (#246)
+- The official-race-links refresh can now unlearn: a carried-over round whose slug no longer identity-matches that round's race name is dropped instead of shipped. When the 2026 calendar gained "Bahrain Grand Prix in Malaysia" as round 16 (Sepang) and renumbered every later round, the merge-only refresh kept the stale `R16 → singapore` row, the race-identity guardrail (rightly) failed, and the auto-update PR sat blocked for 15 days (#252)
+- The identity table knows the relocated race: F1's results index lists "Bahrain Grand Prix in Malaysia" under its `bahrain` slug (id 1308), so round 16 gets its official link instead of a Wikipedia fallback (#252)
+- Auto-update alerts now reach a human instead of burying themselves: an unchanged failure no longer adds a "still failing" comment every tick (the blocked-PR incident had piled up 400+ identical comments on a month-old issue, which notifies nobody), a changed failure updates the issue and comments once, and a new `notify-recovery` job closes the issue as soon as no data PR is left open — so the next incident opens a fresh issue and actually pings (#252)
 
 ## 2026-07-26
 
