@@ -34,6 +34,8 @@ ACCEPTABLE_SLUGS: dict[str, frozenset[str]] = {
     "Austrian Grand Prix": frozenset({"austria"}),
     "Azerbaijan Grand Prix": frozenset({"azerbaijan"}),
     "Bahrain Grand Prix": frozenset({"bahrain"}),
+    # 2026 R16: the Bahrain GP relocated to Sepang keeps F1's "bahrain" slug.
+    "Bahrain Grand Prix in Malaysia": frozenset({"bahrain"}),
     "Barcelona Grand Prix": frozenset({"barcelona-catalunya"}),
     "Belgian Grand Prix": frozenset({"belgium"}),
     "Brazilian Grand Prix": frozenset({"brazil"}),

@@ -33,6 +33,13 @@ def test_slug_matches_distinguishes_two_spanish_country_races():
     assert not ri.slug_matches("spain", "Barcelona Grand Prix")
 
 
+def test_slug_matches_relocated_bahrain_race_in_malaysia():
+    # 2026 R16 "Bahrain Grand Prix in Malaysia" (Sepang): F1's results index
+    # lists it under the slug "bahrain" (observed live, id 1308).
+    assert ri.slug_matches("bahrain", "Bahrain Grand Prix in Malaysia")
+    assert not ri.slug_matches("singapore", "Bahrain Grand Prix in Malaysia")
+
+
 def test_slug_matches_us_grand_prix_accepts_both_east_and_plain():
     # 1976-80 the US GP (East, Watkins Glen) used slug "usa-east"; otherwise
     # the single US GP uses "united-states".
