@@ -1,5 +1,11 @@
 # Release Notes
 
+## 2026-08-19
+
+### Fixes
+- A driver who misses a race keeps his car. `driverConstructor` names only the latest round's starters, so a driver who sits one out drops out of it entirely and was then predicted in an unknown — i.e. brand-new — car. The 2026 Dutch GP substitution (Hadjar out injured, Lawson up to Red Bull, Tsunoda into the Racing Bull) would have cut Hadjar's rating from 7,985 to 0.2 and shown him teamless on the grid for the whole fortnight to Monza. Seats now fall back to the last car each driver started this season, with the fresher of the two feeds winning either way round (#254)
+- The post-qualifying block reads car strength from the car each driver actually qualified in rather than from his season-long mapping, so a stand-in no longer carries his old team's strength — or 0.0, if he had not raced this season at all — beside the correct new team name (#254)
+
 ## 2026-08-18
 
 ### Fixes
