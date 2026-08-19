@@ -53,21 +53,46 @@ def trio_key(ids) -> tuple[str, str, str]:
     return model.trio_key(ids)
 
 
+def _latest_seats(race_results: list[dict] | None, season: int) -> dict[str, tuple[int, str]]:
+    """driverId → (round, constructorId) of the last race he started in ``season``.
+
+    The latest round wins, so a real mid-season team change overwrites the older
+    seat rather than lingering beside it.
+    """
+    seats: dict[str, tuple[int, str]] = {}
+    for rr in race_results or []:
+        if int(rr["season"]) != season:
+            continue
+        rnd = int(rr["round"])
+        for row in rr["results"]:
+            did = row["driverId"]
+            if did not in seats or rnd > seats[did][0]:
+                seats[did] = (rnd, row["constructorId"])
+    return seats
+
+
 def _build_constructor_strength(
     constructor_data: dict | None,
     current_season: int,
-) -> tuple[dict[str, float], dict[str, str]]:
-    """Return (driverId → normalized strength 0-1, driverId → constructorId).
+    race_results: list[dict] | None = None,
+) -> tuple[dict[str, float], dict[str, str], dict[str, float]]:
+    """Return (driverId → strength 0-1, driverId → constructorId, cid → strength).
+
+    ``driverConstructor`` names only the latest round's starters, so a driver who
+    misses a race drops out of it and would be predicted in an unknown — i.e.
+    brand-new — car. Seats are therefore layered: the season's race_results give
+    each driver his last seen car, and the fetched map overrides it wherever it is
+    at least as fresh (the two feeds publish out of step, either way round).
 
     Returns empty dicts when data is missing or not for the current season.
     """
     if not constructor_data:
-        return {}, {}
+        return {}, {}, {}
     if int(constructor_data.get("season", 0)) != current_season:
-        return {}, {}
+        return {}, {}, {}
     constructors = constructor_data.get("constructors", [])
     if not constructors:
-        return {}, {}
+        return {}, {}, {}
 
     points_by_cid: dict[str, float] = {}
     for c in constructors:
@@ -75,15 +100,19 @@ def _build_constructor_strength(
 
     max_pts = max(points_by_cid.values()) if points_by_cid else 0
     if max_pts <= 0:
-        return {}, {}
+        return {}, {}, {}
 
-    driver_cid: dict[str, str] = constructor_data.get("driverConstructor", {})
+    cid_strength = {cid: pts / max_pts for cid, pts in points_by_cid.items()}
 
-    strength: dict[str, float] = {}
-    for did, cid in driver_cid.items():
-        strength[did] = points_by_cid.get(cid, 0) / max_pts
+    fetched_round = int(constructor_data.get("round", 0) or 0)
+    driver_cid: dict[str, str] = dict(constructor_data.get("driverConstructor", {}))
+    for did, (rnd, cid) in _latest_seats(race_results, current_season).items():
+        if did not in driver_cid or rnd > fetched_round:
+            driver_cid[did] = cid
 
-    return strength, driver_cid
+    strength = {did: cid_strength.get(cid, 0.0) for did, cid in driver_cid.items()}
+
+    return strength, driver_cid, cid_strength
 
 
 def _next_race(schedule: dict | None, as_of_season: int, as_of_round: int) -> dict | None:
@@ -235,7 +264,7 @@ def _post_quali_block(
     season_pod: dict[str, int],
     recent_pod: dict[str, int],
     cid_name: dict[str, str],
-    con_strength: dict[str, float],
+    cid_strength: dict[str, float],
     using_constructors: bool,
     grid_penalties: list[dict] | None = None,
 ) -> dict | None:
@@ -322,7 +351,7 @@ def _post_quali_block(
         }
         if using_constructors:
             e["constructor"] = cid_name.get(qcid[d], "")
-            e["constructorStrength"] = round(con_strength.get(d, 0), 3)
+            e["constructorStrength"] = round(cid_strength.get(qcid[d], 0), 3)
         e["finishProb"] = round(p_fin[d], 3)
         e["uncertainty"] = round(math.sqrt(mu_var[d][1]), 3)
         e["gridPosition"] = gpos[d]
@@ -377,7 +406,9 @@ def compute(
     def nm(d: str) -> str:
         return name_by_id.get(d) or grid_name.get(d) or _title_from_id(d)
 
-    con_strength, driver_cid = _build_constructor_strength(constructor_data, current)
+    con_strength, driver_cid, cid_strength = _build_constructor_strength(
+        constructor_data, current, race_results
+    )
     using_constructors = bool(con_strength)
     constructor_name: dict[str, str] = {}
     cid_to_name: dict[str, str] = {}
@@ -462,7 +493,7 @@ def compute(
             season_pod,
             recent_pod,
             cid_to_name,
-            con_strength,
+            cid_strength,
             using_constructors,
             grid_penalties=grid_penalties,
         )

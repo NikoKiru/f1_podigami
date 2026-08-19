@@ -338,6 +338,43 @@ def test_v2_falls_back_to_v1_without_race_results(scenario_v2):
     assert v1["params"]["model"] == "plackett-luce"
 
 
+def _without(con, driver_id):
+    """``con`` with one driver dropped from driverConstructor (he missed the
+    latest round, which is the only round that map is built from)."""
+    return {
+        **con,
+        "driverConstructor": {k: v for k, v in con["driverConstructor"].items() if k != driver_id},
+    }
+
+
+def test_seat_survives_a_missed_race(scenario_v2):
+    """driverConstructor names only the latest round's starters, so a driver who
+    sits a race out falls out of it entirely. His seat must be recovered from the
+    season's race_results — the alternative is a teamless row on the grid."""
+    podiums, combos, grid, con, rres = scenario_v2
+    res = cp.compute(
+        podiums, combos, grid, constructor_data=_without(con, "dan"), race_results=rres
+    )
+    form = {d["driverId"]: d for d in res["driverForm"]}
+    assert form["dan"]["constructorId"] == "teamB"
+    assert form["dan"]["constructor"] == "Teamb"
+    assert form["dan"]["constructorStrength"] == pytest.approx(0.5)
+
+
+def test_missed_race_does_not_collapse_the_rating(scenario_v2):
+    """An empty constructorId sends the engine to its brand-new-team prior, which
+    wipes out the driver's worth. Recovering the seat must leave his rating exactly
+    where the intact mapping puts it."""
+    podiums, combos, grid, con, rres = scenario_v2
+    full = cp.compute(podiums, combos, grid, constructor_data=con, race_results=rres)
+    dropped = cp.compute(
+        podiums, combos, grid, constructor_data=_without(con, "dan"), race_results=rres
+    )
+    w_full = {d["driverId"]: d["weight"] for d in full["driverForm"]}
+    w_dropped = {d["driverId"]: d["weight"] for d in dropped["driverForm"]}
+    assert w_dropped["dan"] == pytest.approx(w_full["dan"])
+
+
 def test_v2_candidates_are_unseen_sorted_valid(scenario_v2):
     podiums, combos, grid, con, rres = scenario_v2
     res = cp.compute(podiums, combos, grid, constructor_data=con, race_results=rres)
@@ -718,6 +755,46 @@ def test_post_quali_substitute_driver_gets_title_cased_name(scenario_v2):
     form = {d["driverId"]: d for d in res["postQuali"]["driverForm"]}
     assert form["zed_zephyr"]["name"] == "Zed Zephyr"
     assert form["zed_zephyr"]["gridPosition"] == 4
+
+
+def test_post_quali_strength_follows_the_qualified_seat(scenario_v2):
+    """A driver standing in at another team qualifies in that car: the strength
+    shown must be the car's, not the one his season-long mapping still names."""
+    podiums, combos, grid, con, rres = scenario_v2
+    cid = dict(con["driverConstructor"], cas="teamA")  # cas (teamB) steps up
+    quali = [q_entry(2025, 6, ["alf", "bob", "cas", "eli"], cid)]
+    res = cp.compute(
+        podiums,
+        combos,
+        grid,
+        constructor_data=con,
+        race_results=rres,
+        qualifying=quali,
+        schedule=SCHED_R6,
+    )
+    form = {d["driverId"]: d for d in res["postQuali"]["driverForm"]}
+    assert form["cas"]["constructor"] == "Teama"
+    assert form["cas"]["constructorStrength"] == pytest.approx(1.0)
+
+
+def test_post_quali_substitute_gets_the_strength_of_the_car_he_is_in(scenario_v2):
+    """A substitute who has not raced this season is in no mapping at all; his
+    strength must still come from the car he qualified in, not default to zero."""
+    podiums, combos, grid, con, rres = scenario_v2
+    cid = dict(con["driverConstructor"], zed_zephyr="teamA")
+    quali = [q_entry(2025, 6, ["alf", "bob", "cas", "zed_zephyr"], cid)]
+    res = cp.compute(
+        podiums,
+        combos,
+        grid,
+        constructor_data=con,
+        race_results=rres,
+        qualifying=quali,
+        schedule=SCHED_R6,
+    )
+    form = {d["driverId"]: d for d in res["postQuali"]["driverForm"]}
+    assert form["zed_zephyr"]["constructor"] == "Teama"
+    assert form["zed_zephyr"]["constructorStrength"] == pytest.approx(1.0)
 
 
 def test_post_quali_needs_three_entrants(scenario_v2):
