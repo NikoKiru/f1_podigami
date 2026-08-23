@@ -192,13 +192,13 @@
     },
     {
       "name": "Lando Norris",
-      "total": 47,
+      "total": 48,
       "medianYear": 2024
     },
     {
       "name": "George Russell",
-      "total": 29,
-      "medianYear": 2024
+      "total": 30,
+      "medianYear": 2025
     }
   ],
   "matrix": [
@@ -1838,7 +1838,7 @@
       6,
       14,
       0,
-      8
+      9
     ],
     [
       0,
@@ -1879,7 +1879,7 @@
       3,
       4,
       7,
-      8,
+      9,
       0
     ]
   ],
