@@ -19718,5 +19718,22 @@
       "driverId": "antonelli",
       "name": "Andrea Kimi Antonelli"
     }
+  },
+  {
+    "season": "2026",
+    "round": "12",
+    "raceName": "Dutch Grand Prix",
+    "p1": {
+      "driverId": "norris",
+      "name": "Lando Norris"
+    },
+    "p2": {
+      "driverId": "antonelli",
+      "name": "Andrea Kimi Antonelli"
+    },
+    "p3": {
+      "driverId": "russell",
+      "name": "George Russell"
+    }
   }
 ]

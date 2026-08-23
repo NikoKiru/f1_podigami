@@ -34,116 +34,116 @@
   "ladder": [
     {
       "model": "recent-frequency",
-      "n": 163,
-      "top1": 0.1288,
-      "top3": 0.2699,
-      "top5": 0.362,
-      "logLoss": 4.3123,
+      "n": 164,
+      "top1": 0.128,
+      "top3": 0.2683,
+      "top5": 0.3659,
+      "logLoss": 4.3108,
       "brierSet": 0.9561,
-      "brierNew": 0.2365
+      "brierNew": 0.2374
     },
     {
       "model": "current (product)",
-      "n": 163,
-      "top1": 0.1288,
-      "top3": 0.2761,
-      "top5": 0.3865,
-      "logLoss": 4.2092,
+      "n": 164,
+      "top1": 0.128,
+      "top3": 0.2744,
+      "top5": 0.3902,
+      "logLoss": 4.2106,
       "brierSet": 0.9551,
-      "brierNew": 0.2435
+      "brierNew": 0.2443
     },
     {
       "model": "plackett-luce",
-      "n": 163,
-      "top1": 0.1288,
-      "top3": 0.2638,
-      "top5": 0.3865,
-      "logLoss": 4.1877,
-      "brierSet": 0.9507,
-      "brierNew": 0.2388
+      "n": 164,
+      "top1": 0.128,
+      "top3": 0.2622,
+      "top5": 0.3902,
+      "logLoss": 4.1878,
+      "brierSet": 0.9508,
+      "brierNew": 0.2394
     },
     {
       "model": "PL + tuned (chosen)",
-      "n": 163,
-      "top1": 0.1227,
-      "top3": 0.2883,
-      "top5": 0.4049,
-      "logLoss": 4.1056,
-      "brierSet": 0.9484,
-      "brierNew": 0.2413
+      "n": 164,
+      "top1": 0.122,
+      "top3": 0.2866,
+      "top5": 0.4024,
+      "logLoss": 4.112,
+      "brierSet": 0.9485,
+      "brierNew": 0.2422
     },
     {
       "model": "v2 pace",
-      "n": 163,
-      "top1": 0.1534,
-      "top3": 0.3067,
-      "top5": 0.3926,
-      "logLoss": 4.085,
-      "brierSet": 0.9485,
-      "brierNew": 0.2362
+      "n": 164,
+      "top1": 0.1524,
+      "top3": 0.311,
+      "top5": 0.3963,
+      "logLoss": 4.0768,
+      "brierSet": 0.9481,
+      "brierNew": 0.2363
     },
     {
       "model": "v2 +attrition",
-      "n": 163,
-      "top1": 0.1534,
-      "top3": 0.3067,
-      "top5": 0.3926,
-      "logLoss": 4.085,
-      "brierSet": 0.9485,
-      "brierNew": 0.2362
+      "n": 164,
+      "top1": 0.1524,
+      "top3": 0.311,
+      "top5": 0.3963,
+      "logLoss": 4.0768,
+      "brierSet": 0.9481,
+      "brierNew": 0.2363
     },
     {
       "model": "v2 +chaos",
-      "n": 163,
-      "top1": 0.1472,
-      "top3": 0.3067,
-      "top5": 0.3926,
-      "logLoss": 4.0789,
-      "brierSet": 0.9487,
-      "brierNew": 0.2313
+      "n": 164,
+      "top1": 0.1524,
+      "top3": 0.311,
+      "top5": 0.3963,
+      "logLoss": 4.0705,
+      "brierSet": 0.9483,
+      "brierNew": 0.2314
     },
     {
       "model": "v2 full",
-      "n": 163,
-      "top1": 0.1779,
-      "top3": 0.3497,
-      "top5": 0.4356,
-      "logLoss": 3.9126,
-      "brierSet": 0.9377,
-      "brierNew": 0.238
+      "n": 164,
+      "top1": 0.1768,
+      "top3": 0.3537,
+      "top5": 0.439,
+      "logLoss": 3.9058,
+      "brierSet": 0.9375,
+      "brierNew": 0.2384
     },
     {
       "model": "v2 post-quali (ratings)",
-      "n": 163,
-      "top1": 0.2086,
-      "top3": 0.362,
-      "top5": 0.4724,
-      "logLoss": 3.7503,
-      "brierSet": 0.9272,
-      "brierNew": 0.2352
+      "n": 164,
+      "top1": 0.2073,
+      "top3": 0.3659,
+      "top5": 0.4756,
+      "logLoss": 3.7434,
+      "brierSet": 0.9269,
+      "brierNew": 0.2355
     },
     {
       "model": "v2 post-quali +grid",
-      "n": 163,
-      "top1": 0.2515,
-      "top3": 0.3988,
-      "top5": 0.5092,
-      "logLoss": 3.4736,
-      "brierSet": 0.9038,
-      "brierNew": 0.2215
+      "n": 164,
+      "top1": 0.2561,
+      "top3": 0.4024,
+      "top5": 0.5122,
+      "logLoss": 3.4643,
+      "brierSet": 0.9029,
+      "brierNew": 0.2217
     }
   ],
   "chosen": {
-    "n": 163,
-    "top1": 0.1779,
-    "top3": 0.3497,
-    "top5": 0.4356,
-    "logLoss": 3.9126,
-    "brierSet": 0.9377,
-    "brierNew": 0.238,
-    "baseRateNew": 0.411,
-    "brierNewBaseRate": 0.2421,
-    "ece": 0.0717
+    "n": 164,
+    "top1": 0.1768,
+    "top3": 0.3537,
+    "top5": 0.439,
+    "logLoss": 3.9058,
+    "brierSet": 0.9375,
+    "brierNew": 0.2384,
+    "baseRateNew": 0.4146,
+    "brierNewBaseRate": 0.2427,
+    "ece": 0.068
   },
   "calibration": [
     {
@@ -177,9 +177,9 @@
     {
       "lo": 0.4,
       "hi": 0.5,
-      "n": 61,
-      "meanPred": 0.4465,
-      "obsRate": 0.3607
+      "n": 62,
+      "meanPred": 0.4466,
+      "obsRate": 0.371
     },
     {
       "lo": 0.5,
