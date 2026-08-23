@@ -8431,6 +8431,37 @@
     "drivers": [
       "Andrea Kimi Antonelli",
       "Lando Norris",
+      "George Russell"
+    ],
+    "driverIds": [
+      "antonelli",
+      "norris",
+      "russell"
+    ],
+    "count": 1,
+    "lastRace": {
+      "season": "2026",
+      "round": "12",
+      "raceName": "Dutch Grand Prix"
+    },
+    "firstRace": {
+      "season": "2026",
+      "round": "12",
+      "raceName": "Dutch Grand Prix"
+    },
+    "lastRaceKey": 2026012,
+    "races": [
+      {
+        "season": "2026",
+        "round": "12",
+        "raceName": "Dutch Grand Prix"
+      }
+    ]
+  },
+  {
+    "drivers": [
+      "Andrea Kimi Antonelli",
+      "Lando Norris",
       "Oscar Piastri"
     ],
     "driverIds": [

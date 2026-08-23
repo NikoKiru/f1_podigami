@@ -1,32 +1,32 @@
 {
   "season": "2026",
-  "round": "11",
+  "round": "12",
   "constructors": [
     {
       "constructorId": "mercedes",
       "name": "Mercedes",
-      "points": 392.0,
+      "points": 425.0,
       "position": 1,
       "wins": 8
     },
     {
       "constructorId": "ferrari",
       "name": "Ferrari",
-      "points": 316.0,
+      "points": 338.0,
       "position": 2,
       "wins": 2
     },
     {
       "constructorId": "mclaren",
       "name": "McLaren",
-      "points": 230.0,
+      "points": 263.0,
       "position": 3,
-      "wins": 1
+      "wins": 2
     },
     {
       "constructorId": "red_bull",
       "name": "Red Bull",
-      "points": 180.0,
+      "points": 186.0,
       "position": 4,
       "wins": 0
     },
@@ -40,7 +40,7 @@
     {
       "constructorId": "alpine",
       "name": "Alpine F1 Team",
-      "points": 62.0,
+      "points": 63.0,
       "position": 6,
       "wins": 0
     },
@@ -54,7 +54,7 @@
     {
       "constructorId": "audi",
       "name": "Audi",
-      "points": 12.0,
+      "points": 16.0,
       "position": 8,
       "wins": 0
     },
@@ -68,7 +68,7 @@
     {
       "constructorId": "aston_martin",
       "name": "Aston Martin",
-      "points": 1.0,
+      "points": 3.0,
       "position": 10,
       "wins": 0
     },
@@ -82,26 +82,26 @@
   ],
   "driverConstructor": {
     "norris": "mclaren",
-    "max_verstappen": "red_bull",
     "antonelli": "mercedes",
-    "leclerc": "ferrari",
-    "hamilton": "ferrari",
-    "hadjar": "red_bull",
     "russell": "mercedes",
-    "lawson": "rb",
+    "hamilton": "ferrari",
+    "leclerc": "ferrari",
+    "piastri": "mclaren",
+    "lawson": "red_bull",
     "hulkenberg": "audi",
+    "alonso": "aston_martin",
+    "gasly": "alpine",
+    "tsunoda": "rb",
     "arvid_lindblad": "rb",
     "bortoleto": "audi",
-    "gasly": "alpine",
-    "stroll": "aston_martin",
-    "alonso": "aston_martin",
     "colapinto": "alpine",
-    "ocon": "haas",
-    "albon": "williams",
-    "sainz": "williams",
-    "bearman": "haas",
-    "piastri": "mclaren",
     "perez": "cadillac",
-    "bottas": "cadillac"
+    "sainz": "williams",
+    "albon": "williams",
+    "bottas": "cadillac",
+    "ocon": "haas",
+    "stroll": "aston_martin",
+    "bearman": "haas",
+    "max_verstappen": "red_bull"
   }
 }
