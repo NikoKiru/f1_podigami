@@ -46,7 +46,7 @@
         "Oscar Piastri",
         "George Russell"
       ],
-      "prob": 3.816,
+      "prob": 3.815,
       "perDriver": [
         {
           "driverId": "antonelli",
@@ -100,7 +100,7 @@
         "Lando Norris",
         "George Russell"
       ],
-      "prob": 2.99,
+      "prob": 2.989,
       "perDriver": [
         {
           "driverId": "leclerc",
