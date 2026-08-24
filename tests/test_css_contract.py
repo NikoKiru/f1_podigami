@@ -119,3 +119,60 @@ def test_methodology_footnote_is_styled_as_fine_print():
     size = re.search(r"font-size:\s*(\d+)px", body)
     assert size, "the footnote should declare a font-size"
     assert int(size.group(1)) < 16, "the footnote must be smaller than 16px body text"
+
+
+def _info_tip_ancestor_classes(html: str) -> list[list[str]]:
+    """Every ``.info-tip``'s ancestor class lists, in document order."""
+    from html.parser import HTMLParser
+
+    VOID = {"br", "hr", "img", "input", "link", "meta", "source", "wbr"}
+
+    class Walker(HTMLParser):
+        def __init__(self) -> None:
+            super().__init__()
+            self.stack: list[list[str]] = []
+            self.found: list[list[str]] = []
+
+        def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+            classes = dict(attrs).get("class", "") or ""
+            names = classes.split()
+            if "info-tip" in names:
+                self.found.append([c for frame in self.stack for c in frame])
+            if tag not in VOID:
+                self.stack.append(names)
+
+        def handle_startendtag(self, tag, attrs):  # <span ... /> never nests
+            self.handle_starttag(tag, attrs)
+            self.stack.pop()
+
+        def handle_endtag(self, tag: str) -> None:
+            if tag not in VOID and self.stack:
+                self.stack.pop()
+
+    walker = Walker()
+    walker.feed(html)
+    return walker.found
+
+
+def test_info_tooltips_are_not_clipped_by_an_ancestor(dist):
+    """``.info-bubble`` hangs *outside* its icon, so any ancestor with
+    ``overflow: hidden`` cuts the tooltip in half.
+
+    ``.hero`` did exactly that: the 45% card's bubble opened downwards and lost
+    its last line at the hero's bottom edge. Ancestors of a tooltip must clip
+    nothing — round a decorative child instead of clipping the parent.
+    """
+    stylesheets = "\n".join(p.read_text(encoding="utf-8") for p in sorted(ASSETS.glob("*.css")))
+    offenders: set[str] = set()
+    for page in sorted(dist.glob("*.html")):
+        for ancestors in _info_tip_ancestor_classes(page.read_text(encoding="utf-8")):
+            for name in ancestors:
+                for rule in re.finditer(
+                    r"(?<![\w.-])\." + re.escape(name) + r"\s*\{([^}]*)\}", stylesheets
+                ):
+                    if re.search(r"overflow(-[xy])?:\s*hidden", rule.group(1)):
+                        offenders.add(f"{page.name}: .{name}")
+
+    assert not offenders, "these ancestors of an .info-tip clip its tooltip: " + ", ".join(
+        sorted(offenders)
+    )
