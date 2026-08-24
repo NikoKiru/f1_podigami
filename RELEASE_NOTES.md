@@ -3,7 +3,7 @@
 ## 2026-08-24
 
 ### Fixes
-- The "chance the next race delivers a brand-new trio" tooltip is no longer cut in half. The hero used `overflow: hidden` to round its accent bar, which also clipped the info bubble hanging below the 45% card; the bar now rounds its own corners and the hero clips nothing. A CSS-contract test walks every generated page and fails if any ancestor of an `.info-tip` clips (#255)
+- The "chance the next race delivers a brand-new trio" tooltip is no longer cut in half. The hero used `overflow: hidden` to round its accent bar, which also clipped the info bubble hanging below the 45% card; the bar now rounds its own corners and the hero clips nothing. A CSS-contract test walks every generated page and fails if any ancestor of an `.info-tip` clips (#261)
 
 ## 2026-08-19
 
