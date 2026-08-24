@@ -287,9 +287,10 @@ main {
     border-radius: var(--radius);
     padding: 26px;
     position: relative;
-    overflow: hidden;
 }
 
+/* The accent bar rounds itself rather than the hero clipping it: overflow:hidden
+   here cut off the tooltip that hangs below the 45% card's info icon. */
 .hero::before {
     content: "";
     position: absolute;
@@ -297,6 +298,7 @@ main {
     top: 0;
     bottom: 0;
     width: 4px;
+    border-radius: var(--radius) 0 0 var(--radius);
     background: linear-gradient(180deg, var(--accent-bright), var(--accent-dim));
 }
 
