@@ -347,34 +347,107 @@ main {
     color: var(--accent);
 }
 
-/* ── Shared ranked list (Overdue + Unlikeliest): hero card + leaderboard rows ─
-   The #1 hero keeps its card treatment; every other rank is a compact native
-   <details> row — the <summary> is the row face, the body holds the stat
-   cells. No JS: native disclosure, free keyboard support. */
+/* ── Shared ranked table (Overdue + Unlikeliest + Soulmates) ─────────────────
+   Deliberately mirrors the Combinations table on index.css: one bordered
+   container, an uppercase column-label strip, hairline row dividers and zebra
+   striping — no floating per-row cards. Every rank is a native <details> row
+   (the <summary> is the row face, the body holds the stat cells), so there is
+   no JS and keyboard support is free. Rank #1 carries .rankrow-hero: open by
+   default, accented and a size up, keeping the entry readers care about most
+   the richest one without breaking the grid.
+
+   The label strip and the row faces share their column geometry through
+   --rank-num-w / --rank-race-w, set per page as an inline custom property. */
+.rank-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+.rank-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 18px;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    user-select: none;
+}
+
+.rh-rank {
+    flex: 0 0 auto;
+    min-width: 30px;
+}
+
+.rh-drivers {
+    flex: 1;
+    min-width: 0;
+}
+
+.rh-race {
+    flex: 0 0 auto;
+    width: var(--rank-race-w, 0);
+    text-align: right;
+}
+
+.rh-num {
+    flex: 0 0 auto;
+    width: var(--rank-num-w, 120px);
+    text-align: right;
+}
+
+.rh-chev {
+    flex: 0 0 auto;
+    width: 11px;
+}
+
 .rank-list {
     list-style: none;
     margin: 0;
     padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
 }
 
 .rankrow > details {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
+    background: transparent;
+    transition: background 0.12s;
 }
 
+.rankrow + .rankrow > details {
+    border-top: 1px solid var(--border);
+}
+
+.rankrow:nth-of-type(2n) > details {
+    background: var(--stripe);
+}
+
+.rankrow > details:hover,
 .rankrow > details[open] {
-    border-color: var(--border-strong);
+    background: var(--surface-2);
+}
+
+/* #1: accent rule down the left edge drawn as an inset shadow, so the row's
+   content stays on the same grid as every other row (a border would shift it). */
+.rankrow-hero > details {
+    background: linear-gradient(135deg, var(--surface) 0%, var(--bg-2) 100%);
+    box-shadow: inset 3px 0 0 var(--accent-bright);
+}
+
+.rankrow-hero > details:hover {
+    background: linear-gradient(135deg, var(--surface-2) 0%, var(--bg-2) 100%);
 }
 
 .rr-face {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 10px 14px;
+    padding: 14px 18px;
     cursor: pointer;
     list-style: none;
 }
@@ -390,11 +463,6 @@ main {
     font-weight: 800;
     color: var(--muted);
     font-variant-numeric: tabular-nums;
-}
-
-.rr-rank::before {
-    content: "#";
-    color: var(--accent);
 }
 
 .rr-drivers {
@@ -417,22 +485,29 @@ main {
 }
 
 .rr-race {
-    flex: 0 1 auto;
-    font-size: 12px;
+    flex: 0 0 auto;
+    width: var(--rank-race-w, auto);
+    font-size: 13px;
     text-align: right;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .rr-num {
     flex: 0 0 auto;
+    width: var(--rank-num-w, 120px);
     font-size: 15px;
     font-weight: 800;
     color: var(--accent-bright);
     font-variant-numeric: tabular-nums;
+    text-align: right;
     white-space: nowrap;
 }
 
 .rr-chev {
     flex: 0 0 auto;
+    width: 11px;
     color: var(--muted);
     font-size: 11px;
     transition: transform 0.18s ease;
@@ -443,134 +518,39 @@ main {
     color: var(--accent-bright);
 }
 
+/* #1 sits a size up — enough to read as the headline entry, not enough to
+   break the column rhythm. */
+.rankrow-hero .rr-rank {
+    font-size: 15px;
+}
+
+.rankrow-hero .rr-drivers {
+    font-size: 19px;
+}
+
+.rankrow-hero .rr-num {
+    font-size: 24px;
+    letter-spacing: -0.5px;
+}
+
+/* Expanded panel: the labelled stat cells every page shares. */
 .rr-stats {
     display: flex;
     flex-wrap: wrap;
     gap: 10px 28px;
-    margin: 0 14px;
-    padding: 10px 0 12px;
+    margin: 0 18px;
+    padding: 10px 0 14px;
     border-top: 1px solid var(--border);
 }
 
-/* The race stat cell serves phones only; desktop shows the race on the row
-   face. Two-class selector so it beats the later same-specificity
-   .un-stat { display: flex } regardless of source order. */
-.rr-stats .rr-stat-race {
-    display: none;
-}
-
-.uncard {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 18px 18px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.uncard-hero {
-    background: linear-gradient(135deg, var(--surface) 0%, var(--bg-2) 100%);
-    border-color: var(--border-strong);
-    border-left: 4px solid var(--accent-bright);
-    padding: 24px;
-}
-
-.un-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-}
-
-.un-rank {
-    font-size: 14px;
-    font-weight: 800;
-    color: var(--muted);
-    font-variant-numeric: tabular-nums;
-}
-
-.un-rank::before {
-    content: "#";
-    color: var(--accent);
-}
-
-.uncard-hero .un-rank {
-    font-size: 18px;
-}
-
-.un-race {
-    font-size: 13px;
-    text-align: right;
-}
-
-.un-drivers {
-    font-size: 17px;
-    font-weight: 700;
-    color: var(--text);
-    line-height: 1.35;
-}
-
-.uncard-hero .un-drivers {
-    font-size: 24px;
-}
-
-.un-drivers .sep {
-    color: var(--muted-dim);
-    margin: 0 7px;
-    font-weight: 400;
-}
-
-.un-drivers .dn-abbr {
-    display: none;
-}
-
-/* Headline odds — the number the hero card leads with. */
-.un-odds {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.un-odds-num {
-    font-size: 30px;
-    font-weight: 800;
-    line-height: 1;
-    color: var(--accent-bright);
-    letter-spacing: -0.5px;
-    font-variant-numeric: tabular-nums;
-}
-
-.uncard-hero .un-odds-num {
-    font-size: 46px;
-}
-
-.un-odds-label {
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--muted);
-}
-
-/* Three labelled stat cells, always in the same order/place. */
-.un-stats {
-    display: grid;
-    /* rates cell gets extra width so "0% · 29% · 36%" stays on one line */
-    grid-template-columns: 1.5fr 1fr 1fr;
-    gap: 10px;
-    border-top: 1px solid var(--border);
-    padding-top: 12px;
-    margin-top: auto;
-}
-
-.un-stat {
+.rr-stat {
     display: flex;
     flex-direction: column;
     gap: 3px;
     min-width: 0;
 }
 
-.un-stat-label {
+.rr-stat-label {
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -578,12 +558,18 @@ main {
     line-height: 1.2;
 }
 
-.un-stat-val {
+.rr-stat-val {
     font-size: 14px;
     font-weight: 600;
     color: var(--text-dim);
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
+}
+
+/* The race stat cell serves phones only; desktop shows the race on the row
+   face. */
+.rr-stats .rr-stat-race {
+    display: none;
 }
 
 /* Inline race-report links: match the site's tagline/footer link convention
@@ -803,240 +789,9 @@ main {
     text-align: right;
 }
 
-/* ── Overdue page: hero card ─────────────────────────────────────────────────
-   Mirrors the Unlikeliest hero. Ranks below it use the shared .rankrow styles. */
-.odcard {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 18px 18px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.odcard-hero {
-    background: linear-gradient(135deg, var(--surface) 0%, var(--bg-2) 100%);
-    border-color: var(--border-strong);
-    border-left: 4px solid var(--accent-bright);
-    padding: 24px;
-}
-
-.od-top {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.od-rank {
-    font-size: 14px;
-    font-weight: 800;
-    color: var(--muted);
-    font-variant-numeric: tabular-nums;
-}
-
-.od-rank::before {
-    content: "#";
-    color: var(--accent);
-}
-
-.odcard-hero .od-rank {
-    font-size: 18px;
-}
-
-.od-drivers {
-    font-size: 17px;
-    font-weight: 700;
-    color: var(--text);
-    line-height: 1.35;
-}
-
-.odcard-hero .od-drivers {
-    font-size: 24px;
-}
-
-.od-drivers .sep {
-    color: var(--muted-dim);
-    margin: 0 7px;
-    font-weight: 400;
-}
-
-.od-drivers .dn-abbr {
-    display: none;
-}
-
-/* Headline score — the expected number of shared podiums. */
-.od-score {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.od-score-num {
-    font-size: 30px;
-    font-weight: 800;
-    line-height: 1;
-    color: var(--accent-bright);
-    letter-spacing: -0.5px;
-    font-variant-numeric: tabular-nums;
-}
-
-.odcard-hero .od-score-num {
-    font-size: 46px;
-}
-
-.od-score-label {
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--muted);
-}
-
-/* Three labelled stat cells, always in the same order/place. */
-.od-stats {
-    display: grid;
-    grid-template-columns: 1.5fr 1fr 1fr;
-    gap: 10px;
-    border-top: 1px solid var(--border);
-    padding-top: 12px;
-    margin-top: auto;
-}
-
-.od-stat {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    min-width: 0;
-}
-
-.od-stat-label {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--muted);
-    line-height: 1.2;
-}
-
-.od-stat-val {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text-dim);
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-}
-
-/* ── Soulmates: hero card + fun-fact grid ────────────────────────────────────
-   Mirrors the Overdue hero; every rank below the #1 duo reuses the shared
-   .rankrow leaderboard styles. The fun-fact cards sit in their own responsive
-   grid inside a second panel. */
-.smcard {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 18px 18px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.smcard-hero {
-    background: linear-gradient(135deg, var(--surface) 0%, var(--bg-2) 100%);
-    border-color: var(--border-strong);
-    border-left: 4px solid var(--accent-bright);
-    padding: 24px;
-}
-
-.sm-top {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.sm-rank {
-    font-size: 18px;
-    font-weight: 800;
-    color: var(--muted);
-    font-variant-numeric: tabular-nums;
-}
-
-.sm-rank::before {
-    content: "#";
-    color: var(--accent);
-}
-
-.sm-drivers {
-    font-size: 24px;
-    font-weight: 700;
-    color: var(--text);
-    line-height: 1.35;
-}
-
-.sm-drivers .sep {
-    color: var(--muted-dim);
-    margin: 0 7px;
-    font-weight: 400;
-}
-
-.sm-drivers .dn-abbr {
-    display: none;
-}
-
-/* Headline count — the number the hero card leads with. */
-.sm-count {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.sm-count-num {
-    font-size: 46px;
-    font-weight: 800;
-    line-height: 1;
-    color: var(--accent-bright);
-    letter-spacing: -0.5px;
-    font-variant-numeric: tabular-nums;
-}
-
-.sm-count-label {
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--muted);
-}
-
-/* Three labelled stat cells, always in the same order/place. */
-.sm-stats {
-    display: grid;
-    grid-template-columns: 1.4fr 1fr 1fr;
-    gap: 10px;
-    border-top: 1px solid var(--border);
-    padding-top: 12px;
-    margin-top: auto;
-}
-
-.sm-stat {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    min-width: 0;
-}
-
-.sm-stat-label {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--muted);
-    line-height: 1.2;
-}
-
-.sm-stat-val {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text-dim);
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-}
-
+/* ── Soulmates fun-fact grid ─────────────────────────────────────────────────
+   The partnership leaderboard uses the shared ranked table above; the
+   fun-fact cards sit in their own responsive grid inside a second panel. */
 /* fun-fact cards (second panel) */
 .sm-facts {
     display: grid;
@@ -1615,70 +1370,58 @@ a.tl-where:hover {
 }
 
 @media (max-width: 600px) {
-    /* Unlikeliest + Overdue cards: abbreviate driver names (E. Ocon) and dial
-       hero numbers down so the #1 card still fits a phone column. */
-    .un-drivers .dn-full,
-    .od-drivers .dn-full,
-    .sm-drivers .dn-full,
-    .rr-drivers .dn-full {
+    /* Ranked table: the column-label strip has no room on a phone, so rows
+       stand alone (matching how the combinations table drops its <thead>). */
+    .rank-head {
         display: none;
-    }
-
-    .un-drivers .dn-abbr,
-    .od-drivers .dn-abbr,
-    .sm-drivers .dn-abbr,
-    .rr-drivers .dn-abbr {
-        display: inline;
-    }
-
-    .uncard-hero {
-        padding: 18px;
-    }
-
-    .uncard-hero .un-drivers {
-        font-size: 20px;
-    }
-
-    .uncard-hero .un-odds-num {
-        font-size: 38px;
-    }
-
-    .odcard-hero {
-        padding: 18px;
-    }
-
-    .odcard-hero .od-drivers {
-        font-size: 20px;
-    }
-
-    .odcard-hero .od-score-num {
-        font-size: 38px;
-    }
-
-    .smcard-hero {
-        padding: 18px;
-    }
-
-    .smcard-hero .sm-drivers {
-        font-size: 20px;
-    }
-
-    .smcard-hero .sm-count-num {
-        font-size: 38px;
     }
 
     .sm-facts {
         grid-template-columns: 1fr;
     }
 
-    /* Leaderboard rows: tighter type; the race name leaves the row face and
-       shows as a stat cell inside the expanded panel instead. */
+    /* Leaderboard rows: abbreviate driver names (E. Ocon), tighten type, and
+       move the race name off the row face into the expanded panel. */
+    .rr-drivers .dn-full {
+        display: none;
+    }
+
+    .rr-drivers .dn-abbr {
+        display: inline;
+    }
+
+    .rr-face {
+        padding: 12px 14px;
+        gap: 10px;
+    }
+
+    /* No column strip on phones, so the rank carries its own "#" (matching
+       the combinations table's stacked rows). */
+    .rr-rank::before {
+        content: "#";
+        color: var(--accent);
+        opacity: 0.55;
+    }
+
     .rr-drivers {
         font-size: 13px;
     }
 
     .rr-num {
+        width: auto;
         font-size: 14px;
+    }
+
+    .rr-stats {
+        margin: 0 14px;
+    }
+
+    .rankrow-hero .rr-drivers {
+        font-size: 16px;
+    }
+
+    .rankrow-hero .rr-num {
+        font-size: 19px;
     }
 
     .rr-race {

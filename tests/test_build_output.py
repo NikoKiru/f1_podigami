@@ -287,30 +287,46 @@ def test_stylesheet_defines_light_theme(dist):
     assert ".theme-toggle" in css, "style.css must style the theme toggle"
 
 
-def test_overdue_has_two_ranked_lists(dist):
+def test_overdue_has_two_ranked_tables(dist):
     html = (dist / "overdue.html").read_text(encoding="utf-8")
     assert 'class="nav"' in html
-    assert html.count('class="rank-list"') == 2  # all-time + current grid
+    assert html.count('class="rank-wrap"') == 2  # all-time + current grid
+    assert html.count('<span class="rh-num">Expected co-podiums</span>') == 2
     assert "All-time near-misses" in html
-    assert 'class="od-drivers"' in html
+    assert 'class="oddriver"' in html
 
 
-def test_unlikeliest_has_ranked_list(dist):
+def test_unlikeliest_has_ranked_table(dist):
     html = (dist / "unlikeliest.html").read_text(encoding="utf-8")
-    assert html.count('class="rank-list"') == 1
-    assert html.count("uncard-hero") == 1  # only the #1 trio is a card
+    assert html.count('class="rank-wrap"') == 1
+    assert html.count("rankrow-hero") == 1  # only the #1 trio is the open hero
+    assert html.count("<details open>") == 1
     assert 'class="rankrow"' in html
-    assert 'class="un-stat rr-stat-race"' in html  # race repeats in the row panel
+    assert 'class="rr-stat rr-stat-race"' in html  # race repeats in the row panel
+
+
+def test_ranked_pages_share_one_table_component(dist):
+    """The three ranked pages must render through the same component as each
+    other (and read like the combinations table) — no per-page hero cards."""
+    for name in ("overdue.html", "unlikeliest.html", "soulmates.html"):
+        html = (dist / name).read_text(encoding="utf-8")
+        assert 'class="rank-wrap"' in html, name
+        assert 'class="rank-head"' in html, name
+        assert 'class="rank-list"' in html, name
+        # the retired bespoke hero cards must not come back
+        for dead in ("odcard", "uncard", "smcard", "od-stat", "un-stat", "sm-stat"):
+            assert dead not in html, f"{name} still emits .{dead}"
 
 
 def test_soulmates_uses_shared_ranked_layout(dist):
-    """Soulmates must share the site's panel + hero + leaderboard-row chrome
-    rather than its old bespoke bar-chart list."""
+    """Soulmates must share the site's panel + ranked-table chrome rather than
+    its old bespoke bar-chart list."""
     html = (dist / "soulmates.html").read_text(encoding="utf-8")
     assert 'class="nav"' in html
     assert 'class="panel"' in html  # site-standard panels
-    assert html.count('class="rank-list"') == 1
-    assert html.count("smcard-hero") == 1  # only the #1 duo is a hero card
+    assert html.count('class="rank-wrap"') == 1
+    assert '<span class="rh-num">Shared podiums</span>' in html
+    assert html.count("rankrow-hero") == 1  # only the #1 duo is the open hero
     assert 'class="rankrow"' in html  # the rest are shared leaderboard rows
     assert 'class="fact-card"' in html  # did-you-know cards retained
     # the old bespoke layout is gone

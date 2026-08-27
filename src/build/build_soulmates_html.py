@@ -1,9 +1,10 @@
 """Render soulmates.html — the driver-partnership leaderboard.
 
-Shares the site's ranked-list chrome (Overdue / Unlikeliest): the #1 duo is a
-full hero card and every rank below it is a compact native ``<details>`` row
-(``_rows.render_row``) that expands to show the partnership's stats. A second
-panel surfaces the fun-fact stat cards computed from the full 40×40 matrix.
+Shares the site's ranked table (Overdue / Unlikeliest, via ``_rows``): one
+bordered container with a column-label strip and a native ``<details>`` row per
+rank that expands to show the partnership's stats, the #1 duo open and accented.
+A second panel surfaces the fun-fact stat cards computed from the full 40×40
+matrix.
 """
 
 from __future__ import annotations
@@ -24,7 +25,7 @@ from _layout import (  # noqa: E402  (needs the sys.path entry above)
     nav,
     organization_schema,
 )
-from _rows import render_row  # noqa: E402
+from _rows import render_row, render_stat, render_table  # noqa: E402
 
 from datalib import SoulmatePair, Soulmates, load_soulmates  # noqa: E402
 
@@ -53,49 +54,24 @@ def render_pair(p: SoulmatePair) -> str:
     return sep.join(driver.format(full=esc(n), abbr=esc(abbr_name(n))) for n in (p.a, p.b))
 
 
-def _stat(label: str, value: str) -> str:
-    return (
-        f'<div class="sm-stat">'
-        f'<span class="sm-stat-label">{label}</span>'
-        f'<span class="sm-stat-val">{value}</span>'
-        f"</div>"
-    )
-
-
 def _pair_stats(p: SoulmatePair) -> str:
     seasons = _seasons(p)
     rate = p.count / seasons
     return (
-        _stat("Years", f"{p.firstYear}&ndash;{p.lastYear}")
-        + _stat("Seasons active", str(seasons))
-        + _stat("Per season", f"{rate:.1f}")
-    )
-
-
-def render_hero(p: SoulmatePair) -> str:
-    """The #1 pairing as the larger, accented hero card (mirrors Overdue)."""
-    return (
-        '<li class="smcard smcard-hero">'
-        '<div class="sm-top"><span class="sm-rank">1</span></div>'
-        f'<div class="sm-drivers">{render_pair(p)}</div>'
-        f'<div class="sm-count">'
-        f'<span class="sm-count-num">{p.count}</span>'
-        f'<span class="sm-count-label">shared podiums</span>'
-        f"</div>"
-        f'<div class="sm-stats">{_pair_stats(p)}</div>'
-        "</li>"
+        render_stat("Years", f"{p.firstYear}&ndash;{p.lastYear}")
+        + render_stat("Seasons active", str(seasons))
+        + render_stat("Per season", f"{rate:.1f}")
     )
 
 
 def render_pairs(pairs: list[SoulmatePair]) -> str:
     if not pairs:
         return '<p class="panel-sub">No partnerships yet.</p>'
-    hero = render_hero(pairs[0])
     rows = "".join(
-        render_row(i, render_pair(p), str(p.count), _pair_stats(p))
-        for i, p in enumerate(pairs[1:], 2)
+        render_row(i, render_pair(p), str(p.count), _pair_stats(p), hero=(i == 1))
+        for i, p in enumerate(pairs, 1)
     )
-    return f'<ol class="rank-list">{hero}{rows}</ol>'
+    return render_table(rows, value_label="Shared podiums", value_width=140, group_label="Duo")
 
 
 def _compute_facts(soulmates: Soulmates) -> list[dict]:

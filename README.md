@@ -155,7 +155,7 @@ src/
 assets/         source CSS + JS (copied into dist/ at build time)
 data/           committed JSON datasets the site builds from
 dist/           generated, deployable site (git-ignored)
-tests/          pytest suite (635 tests, run in CI)
+tests/          pytest suite (641 tests, run in CI)
 ```
 
 </details>
@@ -196,7 +196,7 @@ python src/build_site.py
 ```bash
 pip install -r requirements-dev.txt   # tooling: ruff, pytest-cov, pip-audit
 ruff check . && ruff format --check .  # lint + format
-pytest --cov                          # 635 tests + coverage gate (≥70%)
+pytest --cov                          # 641 tests + coverage gate (≥70%)
 ```
 
 The suite covers **pure helpers**, **cross-dataset integrity** (combos derive from podiums, podigami
@@ -274,6 +274,7 @@ flowchart LR
 | `src/build/build_soulmates_html.py` | Render `dist/soulmates.html` |
 | `src/build/build_404_html.py` | Render `dist/404.html` |
 | `src/build/_layout.py` | Shared page chrome: `head()`, `nav()`, footer |
+| `src/build/_rows.py` | Shared ranked table (Overdue / Unlikeliest / Soulmates): container, column labels, expandable rows |
 | `src/build/flags.py` | Country flag SVGs |
 | `src/build/team_colors.py` | Constructor colour lookup + contrast-safe text colour |
 | **Data layer** | |
