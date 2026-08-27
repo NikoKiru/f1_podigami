@@ -769,7 +769,7 @@ Replace the `name_by_id` / `seen` loop at lines 395-401:
         seen.update(podium_trios(r))
 ```
 
-This also removes a latent bug in the old code, where `seen.add(trio_key(r[s]...))` reused the loop variable `s` leaking from the line above it.
+The old line computed the correct primary trio (a generator expression scopes its own loop variable, so the `s` inside it never aliased the one above); what it lacked was co-driver credit, which is what this adds.
 
 - [ ] **Step 4: Credit co-drivers in the other three scripts**
 
