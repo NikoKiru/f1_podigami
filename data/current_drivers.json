@@ -132,6 +132,12 @@
       "name": "Lance Stroll",
       "code": "STR",
       "number": "18"
+    },
+    {
+      "driverId": "tsunoda",
+      "name": "Yuki Tsunoda",
+      "code": "TSU",
+      "number": "22"
     }
   ]
 }

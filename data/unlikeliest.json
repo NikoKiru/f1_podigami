@@ -4,8 +4,8 @@
   },
   "asOf": {
     "season": "2026",
-    "round": "10",
-    "raceName": "Belgian Grand Prix"
+    "round": "12",
+    "raceName": "Dutch Grand Prix"
   },
   "trios": [
     {
@@ -271,8 +271,8 @@
         {
           "name": "Fernando Alonso",
           "podiums": 106,
-          "starts": 438,
-          "rate": 0.242
+          "starts": 440,
+          "rate": 0.2409
         },
         {
           "name": "Michael Schumacher",
@@ -419,8 +419,8 @@
         "Sergio Pérez",
         "Lance Stroll"
       ],
-      "racesTogether": 154,
-      "score": 0.0064,
+      "racesTogether": 156,
+      "score": 0.0063,
       "count": 1,
       "happened": {
         "season": "2020",
@@ -431,20 +431,20 @@
         {
           "name": "Esteban Ocon",
           "podiums": 4,
-          "starts": 190,
-          "rate": 0.0211
+          "starts": 192,
+          "rate": 0.0208
         },
         {
           "name": "Sergio Pérez",
           "podiums": 39,
-          "starts": 293,
-          "rate": 0.1331
+          "starts": 295,
+          "rate": 0.1322
         },
         {
           "name": "Lance Stroll",
           "podiums": 3,
-          "starts": 201,
-          "rate": 0.0149
+          "starts": 203,
+          "rate": 0.0148
         }
       ]
     },
@@ -619,8 +619,8 @@
         "Carlos Sainz",
         "Lance Stroll"
       ],
-      "racesTogether": 185,
-      "score": 0.0106,
+      "racesTogether": 187,
+      "score": 0.0104,
       "count": 1,
       "happened": {
         "season": "2020",
@@ -631,20 +631,20 @@
         {
           "name": "Pierre Gasly",
           "podiums": 6,
-          "starts": 188,
-          "rate": 0.0319
+          "starts": 190,
+          "rate": 0.0316
         },
         {
           "name": "Carlos Sainz",
           "podiums": 29,
-          "starts": 242,
-          "rate": 0.1198
+          "starts": 244,
+          "rate": 0.1189
         },
         {
           "name": "Lance Stroll",
           "podiums": 3,
-          "starts": 201,
-          "rate": 0.0149
+          "starts": 203,
+          "rate": 0.0148
         }
       ]
     },
