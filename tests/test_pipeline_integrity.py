@@ -26,15 +26,24 @@ def test_podiums_three_distinct_drivers_per_race():
 # --- combos derive from podiums ------------------------------------------------
 
 
-def test_every_podium_maps_to_one_combo():
+def test_every_podium_maps_to_its_combos():
+    """Each race contributes one combo — or several, when a shared car put more
+    than three drivers on the podium (18 pre-1961 races)."""
+    from compute.shared_drives import has_shared_drive, podium_trios
+
     podiums = load_data("podiums.json")
     combos = load_data("combos.json")
     by_key = {trio(c["driverIds"]): c for c in combos}
     assert len(by_key) == len(combos), "combo keys must be unique"
-    assert sum(c["count"] for c in combos) == len(podiums)
+
+    expected_instances = sum(len(podium_trios(p)) for p in podiums)
+    assert sum(c["count"] for c in combos) == expected_instances
+    assert expected_instances > len(podiums), "shared drives must add trio instances"
+    assert sum(1 for p in podiums if has_shared_drive(p)) == 18
+
     for p in podiums:
-        k = trio(p[s]["driverId"] for s in ("p1", "p2", "p3"))
-        assert k in by_key, f"podium trio {k} missing from combos"
+        for k in podium_trios(p):
+            assert k in by_key, f"podium trio {k} missing from combos"
 
 
 def test_combo_first_last_race_consistent():

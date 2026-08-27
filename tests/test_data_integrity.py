@@ -56,8 +56,9 @@ def test_combo_drivers_aligned_with_driver_ids():
     """drivers[i] must be the display name for driverIds[i] — parallel arrays must align."""
     name_by_id: dict[str, str] = {}
     for p in load_podiums():
-        for slot in (p.p1, p.p2, p.p3):
-            name_by_id[slot.driverId] = slot.name
+        for slot in ("p1", "p2", "p3"):
+            for d in [getattr(p, slot), *((p.coDrivers or {}).get(slot) or [])]:
+                name_by_id[d.driverId] = d.name
 
     for c in load_combos():
         assert len(c.drivers) == len(c.driverIds)
