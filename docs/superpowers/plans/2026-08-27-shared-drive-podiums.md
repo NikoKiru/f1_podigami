@@ -36,7 +36,7 @@
 - `src/compute/compute_overdue.py:87-91`, `src/compute/compute_unlikeliest.py:50-55` — count co-drivers.
 - `src/build/build_combos_html.py` — shared-car badge on combo rows, co-driver `title` on race pills.
 - `src/build/build_podigami_html.py:249-265` — stacked-step markup in the last-race card.
-- `assets/combos.css`, `assets/podigami.css` — styling for both.
+- `assets/index.css` (the stylesheet `combos.html` actually loads — there is no `combos.css`), `assets/podigami.css` — styling for both.
 - `tests/test_pipeline_integrity.py:29-37`, `tests/test_data_integrity.py:54-70` — updated invariants.
 - `data/podiums.json`, `data/combos.json`, `data/soulmates.json`, `data/overdue.json`, `data/unlikeliest.json`, `data/podigami.json` — regenerated.
 - `README.md`, `RELEASE_NOTES.md`.
@@ -842,7 +842,7 @@ git commit -m "feat(compute): credit shared-drive co-drivers across every stage"
 
 **Files:**
 - Modify: `src/build/build_combos_html.py:62-135` and `main`
-- Modify: `assets/combos.css`
+- Modify: `assets/index.css`
 - Test: `tests/test_build_combos.py`
 
 **Interfaces:**
@@ -1004,7 +1004,7 @@ Expected: PASS, including the pre-existing tests.
 
 - [ ] **Step 7: Style the marker**
 
-Append to `assets/combos.css`:
+Append to `assets/index.css` (the stylesheet `combos.html` loads; there is no `combos.css`), beside the existing `.race-pill` rules:
 
 ```css
 /* Shared-drive podiums: pre-1961 races where two drivers shared one car, so a
@@ -1039,7 +1039,7 @@ Expected exactly **40** badges and **42** shared pills (40 combos touch a shared
 ```bash
 python -m ruff check . && python -m ruff format .
 PYTHONPATH=src python -m pytest -q
-git add src/build/build_combos_html.py assets/combos.css tests/test_build_combos.py
+git add src/build/build_combos_html.py assets/index.css tests/test_build_combos.py
 git commit -m "feat(combos): mark podiums won by a shared car"
 ```
 
