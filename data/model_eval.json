@@ -116,13 +116,13 @@
     },
     {
       "model": "v2 +adaptive car",
-      "n": 162,
-      "top1": 0.1728,
-      "top3": 0.3457,
-      "top5": 0.4259,
-      "logLoss": 3.9146,
-      "brierSet": 0.9401,
-      "brierNew": 0.2438
+      "n": 164,
+      "top1": 0.1707,
+      "top3": 0.3476,
+      "top5": 0.4268,
+      "logLoss": 3.9094,
+      "brierSet": 0.9403,
+      "brierNew": 0.2436
     },
     {
       "model": "v2 post-quali (ratings)",
