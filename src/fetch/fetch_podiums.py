@@ -31,6 +31,7 @@ USER_AGENT = "f1podigami/0.1 (https://github.com/local/f1podigami)"
 
 DATA_DIR = Path(__file__).resolve().parents[2] / "data"
 OUT_PATH = DATA_DIR / "podiums.json"
+RESULTS_PATH = DATA_DIR / "race_results.json"
 
 
 def get(url: str, params: dict) -> dict:
@@ -107,6 +108,68 @@ def load_existing() -> dict[tuple[str, str], dict]:
     return {(r["season"], r["round"]): r for r in existing}
 
 
+def resolve_driver_name(driver_id: str) -> str:
+    """Look up one driver's display name from the API.
+
+    Only reached for a driver who appears nowhere else in podiums.json — three
+    of them in all of history (Portago, Ayulo, Bettenhausen), because a shared
+    drive was their only podium.
+    """
+    data = get(f"{API_ROOT}/drivers/{driver_id}.json", {})
+    drivers = data["MRData"]["DriverTable"]["Drivers"]
+    if not drivers:
+        raise RuntimeError(f"API knows no driver {driver_id!r}")
+    d = drivers[0]
+    return f"{d['givenName']} {d['familyName']}"
+
+
+def backfill_shared() -> int:
+    """Fill coDrivers on the committed podiums.json from race_results.json.
+
+    Shared drives are a closed set of pre-1961 races, and race_results.json
+    already records every driver at the shared car's position — so this needs no
+    historical re-fetch, just the local join.
+    """
+    podiums = json.loads(OUT_PATH.read_text(encoding="utf-8"))
+    results = json.loads(RESULTS_PATH.read_text(encoding="utf-8"))
+
+    name_by_id = {r[s]["driverId"]: r[s]["name"] for r in podiums for s in ("p1", "p2", "p3")}
+
+    shared: dict[tuple[str, str], dict[str, list[str]]] = {}
+    for race in results:
+        by_pos: dict[int, list[str]] = {}
+        for row in race["results"]:
+            if row["position"] in (1, 2, 3):
+                by_pos.setdefault(row["position"], []).append(row["driverId"])
+        extra = {f"p{p}": ids[1:] for p, ids in by_pos.items() if len(ids) > 1}
+        if extra:
+            shared[(race["season"], race["round"])] = extra
+
+    unknown = sorted(
+        {d for slots in shared.values() for ids in slots.values() for d in ids} - set(name_by_id)
+    )
+    for driver_id in unknown:
+        name_by_id[driver_id] = resolve_driver_name(driver_id)
+        print(f"  resolved {driver_id} -> {name_by_id[driver_id]}")
+        time.sleep(SLEEP_BETWEEN)
+
+    filled = 0
+    for race in podiums:
+        race.pop("coDrivers", None)
+        slots = shared.get((race["season"], race["round"]))
+        if not slots:
+            continue
+        race["coDrivers"] = {
+            slot: [{"driverId": d, "name": name_by_id[d]} for d in ids]
+            for slot, ids in sorted(slots.items())
+        }
+        filled += 1
+
+    save_podiums(podiums)
+    print(f"Backfilled shared drives into {OUT_PATH}: {filled} races")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -114,7 +177,15 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="rebuild the entire history from 1950 instead of fetching incrementally",
     )
+    parser.add_argument(
+        "--backfill-shared",
+        action="store_true",
+        help="fill coDrivers from the committed race_results.json (no full re-fetch)",
+    )
     args = parser.parse_args(argv)
+
+    if args.backfill_shared:
+        return backfill_shared()
 
     DATA_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -154,6 +225,9 @@ def main(argv: list[str] | None = None) -> int:
                 if not results:
                     continue
                 entry[f"p{position}"] = driver_record(results[0])
+                extras = [driver_record(r) for r in results[1:]]
+                if extras:
+                    entry.setdefault("coDrivers", {})[f"p{position}"] = extras
             time.sleep(SLEEP_BETWEEN)
 
     races_sorted = sorted(by_race.values(), key=lambda r: (int(r["season"]), int(r["round"])))
@@ -165,6 +239,10 @@ def main(argv: list[str] | None = None) -> int:
             complete.append(r)
         else:
             incomplete.append(r)
+
+    for r in complete:
+        if not r.get("coDrivers"):
+            r.pop("coDrivers", None)
 
     save_podiums(complete)
 

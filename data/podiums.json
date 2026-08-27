@@ -116,6 +116,14 @@
     "p3": {
       "driverId": "fagioli",
       "name": "Luigi Fagioli"
+    },
+    "coDrivers": {
+      "p2": [
+        {
+          "driverId": "ascari",
+          "name": "Alberto Ascari"
+        }
+      ]
     }
   },
   {
@@ -150,6 +158,14 @@
     "p3": {
       "driverId": "mcgrath",
       "name": "Jack McGrath"
+    },
+    "coDrivers": {
+      "p3": [
+        {
+          "driverId": "ayulo",
+          "name": "Manny Ayulo"
+        }
+      ]
     }
   },
   {
@@ -184,6 +200,20 @@
     "p3": {
       "driverId": "villoresi",
       "name": "Luigi Villoresi"
+    },
+    "coDrivers": {
+      "p1": [
+        {
+          "driverId": "fagioli",
+          "name": "Luigi Fagioli"
+        }
+      ],
+      "p2": [
+        {
+          "driverId": "ascari",
+          "name": "Alberto Ascari"
+        }
+      ]
     }
   },
   {
@@ -235,6 +265,14 @@
     "p3": {
       "driverId": "bonetto",
       "name": "Felice Bonetto"
+    },
+    "coDrivers": {
+      "p3": [
+        {
+          "driverId": "farina",
+          "name": "Nino Farina"
+        }
+      ]
     }
   },
   {
@@ -422,6 +460,14 @@
     "p3": {
       "driverId": "darter",
       "name": "Duane Carter"
+    },
+    "coDrivers": {
+      "p3": [
+        {
+          "driverId": "hanks",
+          "name": "Sam Hanks"
+        }
+      ]
     }
   },
   {
@@ -439,6 +485,14 @@
     "p3": {
       "driverId": "gonzalez",
       "name": "José Froilán González"
+    },
+    "coDrivers": {
+      "p3": [
+        {
+          "driverId": "bonetto",
+          "name": "Felice Bonetto"
+        }
+      ]
     }
   },
   {
@@ -643,6 +697,14 @@
     "p3": {
       "driverId": "trintignant",
       "name": "Maurice Trintignant"
+    },
+    "coDrivers": {
+      "p2": [
+        {
+          "driverId": "gonzalez",
+          "name": "José Froilán González"
+        }
+      ]
     }
   },
   {
@@ -677,6 +739,14 @@
     "p3": {
       "driverId": "gonzalez",
       "name": "José Froilán González"
+    },
+    "coDrivers": {
+      "p3": [
+        {
+          "driverId": "maglioli",
+          "name": "Umberto Maglioli"
+        }
+      ]
     }
   },
   {
@@ -711,6 +781,28 @@
     "p3": {
       "driverId": "maglioli",
       "name": "Umberto Maglioli"
+    },
+    "coDrivers": {
+      "p2": [
+        {
+          "driverId": "gonzalez",
+          "name": "José Froilán González"
+        },
+        {
+          "driverId": "trintignant",
+          "name": "Maurice Trintignant"
+        }
+      ],
+      "p3": [
+        {
+          "driverId": "farina",
+          "name": "Nino Farina"
+        },
+        {
+          "driverId": "trintignant",
+          "name": "Maurice Trintignant"
+        }
+      ]
     }
   },
   {
@@ -728,6 +820,14 @@
     "p3": {
       "driverId": "perdisa",
       "name": "Cesare Perdisa"
+    },
+    "coDrivers": {
+      "p3": [
+        {
+          "driverId": "behra",
+          "name": "Jean Behra"
+        }
+      ]
     }
   },
   {
@@ -745,6 +845,14 @@
     "p3": {
       "driverId": "davies",
       "name": "Jimmy Davies"
+    },
+    "coDrivers": {
+      "p2": [
+        {
+          "driverId": "bettenhausen",
+          "name": "Tony Bettenhausen"
+        }
+      ]
     }
   },
   {
@@ -830,6 +938,14 @@
     "p3": {
       "driverId": "hawthorn",
       "name": "Mike Hawthorn"
+    },
+    "coDrivers": {
+      "p1": [
+        {
+          "driverId": "musso",
+          "name": "Luigi Musso"
+        }
+      ]
     }
   },
   {
@@ -847,6 +963,14 @@
     "p3": {
       "driverId": "behra",
       "name": "Jean Behra"
+    },
+    "coDrivers": {
+      "p2": [
+        {
+          "driverId": "collins",
+          "name": "Peter Collins"
+        }
+      ]
     }
   },
   {
@@ -881,6 +1005,14 @@
     "p3": {
       "driverId": "perdisa",
       "name": "Cesare Perdisa"
+    },
+    "coDrivers": {
+      "p3": [
+        {
+          "driverId": "moss",
+          "name": "Stirling Moss"
+        }
+      ]
     }
   },
   {
@@ -915,6 +1047,14 @@
     "p3": {
       "driverId": "behra",
       "name": "Jean Behra"
+    },
+    "coDrivers": {
+      "p2": [
+        {
+          "driverId": "portago",
+          "name": "Alfonso de Portago"
+        }
+      ]
     }
   },
   {
@@ -949,6 +1089,14 @@
     "p3": {
       "driverId": "flockhart",
       "name": "Ron Flockhart"
+    },
+    "coDrivers": {
+      "p2": [
+        {
+          "driverId": "collins",
+          "name": "Peter Collins"
+        }
+      ]
     }
   },
   {
@@ -1034,6 +1182,14 @@
     "p3": {
       "driverId": "hawthorn",
       "name": "Mike Hawthorn"
+    },
+    "coDrivers": {
+      "p1": [
+        {
+          "driverId": "moss",
+          "name": "Stirling Moss"
+        }
+      ]
     }
   },
   {
@@ -1442,6 +1598,14 @@
     "p3": {
       "driverId": "moss",
       "name": "Stirling Moss"
+    },
+    "coDrivers": {
+      "p3": [
+        {
+          "driverId": "trintignant",
+          "name": "Maurice Trintignant"
+        }
+      ]
     }
   },
   {
