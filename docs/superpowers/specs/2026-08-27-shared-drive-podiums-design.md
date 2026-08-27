@@ -111,8 +111,13 @@ round-trips.
 cartesian product of its three slots (each slot = primary + co-drivers),
 discarding any product that names a driver twice and deduplicating the rest.
 This is what makes 1955 Argentina work: the 3 × 3 product yields only the legal
-trios. Each resulting trio records that race in its `races` list, tagged
-`shared: true`.
+trios. Each resulting trio records that race in its `races` list.
+
+Nothing is added to `combos.json`. `Combo.races` is a `list[RaceRef]`, and
+`RaceRef` is reused for `firstRace`/`lastRace`, so an optional flag there would
+serialise `"shared": null` onto thousands of entries in a 490 KB file. The
+builder already loads `podiums.json`, so it derives the marker at render time
+from the one source of truth.
 
 Results:
 
@@ -125,8 +130,11 @@ iterate co-drivers alongside the primary slots the same way, so Portago, Ayulo
 and Bettenhausen enter the dataset with one podium each.
 
 **Accepted consequence:** combo counts now sum to **1185 across 1161 races**.
-`build_combos_html.py:152` prints that sum as "across N races", which becomes
-wrong and must be reworded to use the race count, not the trio-instance count.
+The page copy is already safe — `build_combos_html.py:141` uses `len(podiums)`,
+not the sum. What breaks is `tests/test_pipeline_integrity.py:34`, which asserts
+`sum(count) == len(podiums)`; it must assert against the expanded trio count
+instead. `count_combos.py`'s closing summary prints the same false expectation
+and needs the matching reword.
 
 ### 3. Render
 
