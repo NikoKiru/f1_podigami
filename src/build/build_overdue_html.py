@@ -1,8 +1,9 @@
 """Render data/overdue.json into dist/overdue.html.
 
-Two ranked sections — all-time near-misses and current-grid candidates. In
-each, the #1 trio is a full hero card and every other rank is a compact
-leaderboard row (shared ``_rows.render_row``) that expands to show its stats.
+Two ranked sections — all-time near-misses and current-grid candidates. Each
+renders through the shared ranked table (``_rows``): one bordered container
+with a column-label strip and a row per rank that expands to show its stats.
+Rank #1 is the same row, open by default and accented.
 Every entry leads with the expected number of shared podiums (racesTogether ×
 rates) shown as "X.Y×", which makes the overdue-ness concrete: a score of 8
 means statistics expected this to happen roughly eight times already. A
@@ -29,7 +30,7 @@ from _layout import (  # noqa: E402
     nav,
     organization_schema,
 )
-from _rows import render_row  # noqa: E402
+from _rows import render_row, render_stat, render_table  # noqa: E402
 
 from datalib import OverdueTrio, load_overdue  # noqa: E402
 
@@ -70,55 +71,24 @@ def _rates_cells(e: OverdueTrio) -> str:
     return " &middot; ".join(f"{p.rate * 100:.0f}%" for p in e.perDriver)
 
 
-def _stat(label: str, value: str) -> str:
+def _stats(e: OverdueTrio) -> str:
     return (
-        f'<div class="od-stat">'
-        f'<span class="od-stat-label">{label}</span>'
-        f'<span class="od-stat-val">{value}</span>'
-        f"</div>"
+        render_stat("Podium rates", _rates_cells(e))
+        + render_stat("Raced together", f"{e.racesTogether}&times;")
+        + render_stat("Chance by now", format_probability(e.score))
     )
 
 
-def render_card(rank: int, e: OverdueTrio, hero: bool = False) -> str:
-    """One full card. ``hero`` makes it the larger, accented #1 variant."""
-    cls = "odcard odcard-hero" if hero else "odcard"
-    drivers = f'<div class="od-drivers">{render_trio(e.names)}</div>'
-    stats = (
-        _stat("Podium rates", _rates_cells(e))
-        + _stat("Raced together", f"{e.racesTogether}&times;")
-        + _stat("Chance by now", format_probability(e.score))
-    )
-    return (
-        f'<li class="{cls}">'
-        f'<div class="od-top">'
-        f'<span class="od-rank">{rank}</span>'
-        f"</div>"
-        f"{drivers}"
-        f'<div class="od-score">'
-        f'<span class="od-score-num">{format_score(e.score)}</span>'
-        f'<span class="od-score-label">expected co-podiums</span>'
-        f"</div>"
-        f'<div class="od-stats">{stats}</div>'
-        f"</li>"
-    )
-
-
-def render_row_entry(rank: int, e: OverdueTrio) -> str:
-    """One compact leaderboard row for ranks below the hero."""
-    stats = (
-        _stat("Podium rates", _rates_cells(e))
-        + _stat("Raced together", f"{e.racesTogether}&times;")
-        + _stat("Chance by now", format_probability(e.score))
-    )
-    return render_row(rank, render_trio(e.names), format_score(e.score), stats)
+def render_row_entry(rank: int, e: OverdueTrio, hero: bool = False) -> str:
+    """One leaderboard row. ``hero`` marks rank #1: open and accented."""
+    return render_row(rank, render_trio(e.names), format_score(e.score), _stats(e), hero=hero)
 
 
 def render_cards(entries: list[OverdueTrio]) -> str:
     if not entries:
         return '<p class="panel-sub">No candidates.</p>'
-    hero = render_card(1, entries[0], hero=True)
-    rows = "".join(render_row_entry(i, e) for i, e in enumerate(entries[1:], 2))
-    return f'<ol class="rank-list">{hero}{rows}</ol>'
+    rows = "".join(render_row_entry(i, e, hero=(i == 1)) for i, e in enumerate(entries, 1))
+    return render_table(rows, value_label="Expected co-podiums", value_width=168)
 
 
 def panel(title: str, sub: str, entries: list[OverdueTrio]) -> str:

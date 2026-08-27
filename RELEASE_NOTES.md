@@ -1,5 +1,12 @@
 # Release Notes
 
+## 2026-08-27
+
+### Improvements
+- Overdue, Unlikeliest and Soulmates now read as one family with the Combinations table instead of three variations on floating cards. All three render through a shared ranked table (`src/build/_rows.py`): a single bordered container with an uppercase column-label strip, hairline row dividers and zebra striping, matching `combos.html` value for value. Rank #1 stays the richest entry — it is the same table row, open by default and accented, so its stats show without a click
+- The three bespoke hero cards (`.odcard-hero`, `.uncard-hero`, `.smcard-hero`) and their triplicated stat-cell CSS are gone, taking ~250 lines of near-duplicate CSS and three per-page `render_card` helpers with them; the stat cell now has one definition all three pages share
+- Ranks read as plain `1, 2, 3` under a `#` column header rather than repeating `#1` in every row (the `#` prefix returns on phones, where the label strip is hidden — matching how the combinations table handles its stacked rows)
+
 ## 2026-08-24
 
 ### Fixes

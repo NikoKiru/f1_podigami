@@ -64,38 +64,6 @@ def test_render_trio_escapes_and_separates():
     assert 'class="sep"' in out
 
 
-# ── render_card ───────────────────────────────────────────────────────────────
-
-
-def test_render_card_fields_present():
-    e = entry(
-        ["Lewis Hamilton", "Nico Rosberg", "Sebastian Vettel"],
-        ["ham", "ros", "vet"],
-        100,
-        8.24,
-        [0.6, 0.5, 0.4],
-    )
-    html = bo.render_card(1, e)
-    assert 'class="od-rank"' in html
-    assert "8.2×" in html
-    assert 'class="dn-full"' in html
-    assert "60%" in html
-    assert "100" in html  # racesTogether
-
-
-def test_render_card_hero_variant():
-    e = entry(["A Driver", "B Driver", "C Driver"], ["a", "b", "c"], 10, 2.0, [0.3, 0.2, 0.1])
-    assert "odcard-hero" in bo.render_card(1, e, hero=True)
-    assert "odcard-hero" not in bo.render_card(2, e, hero=False)
-
-
-def test_render_card_probability_stat_present():
-    e = entry(["A Driver", "B Driver", "C Driver"], ["a", "b", "c"], 10, 2.0, [0.3, 0.2, 0.1])
-    html = bo.render_card(1, e)
-    # 1 - e^(-2) ≈ 86%
-    assert "86%" in html
-
-
 # ── render_row_entry ─────────────────────────────────────────────────────────
 
 
@@ -109,20 +77,31 @@ def test_render_row_entry_carries_score_and_stats():
     assert 'class="dn-abbr"' in html  # responsive names still emitted
 
 
+def test_render_row_entry_hero_is_open():
+    e = entry(["A Driver", "B Driver", "C Driver"], ["a", "b", "c"], 10, 2.0, [0.3, 0.2, 0.1])
+    assert "rankrow-hero" in bo.render_row_entry(1, e, hero=True)
+    assert "rankrow-hero" not in bo.render_row_entry(2, e)
+
+
 # ── render_cards ─────────────────────────────────────────────────────────────
 
 
-def test_render_cards_hero_then_rows():
+def test_render_cards_table_with_hero_first_row():
     entries = [
         entry(["A Driver", "B Driver", "C Driver"], ["a", "b", "c"], 50, 8.0, [0.5, 0.4, 0.3]),
         entry(["A Driver", "B Driver", "D Driver"], ["a", "b", "d"], 30, 4.0, [0.5, 0.4, 0.2]),
         entry(["A Driver", "C Driver", "D Driver"], ["a", "c", "d"], 20, 3.0, [0.5, 0.3, 0.2]),
     ]
     html = bo.render_cards(entries)
+    # one combos-style container with a column-label strip
+    assert 'class="rank-wrap"' in html
+    assert '<span class="rh-num">Expected co-podiums</span>' in html
     assert 'class="rank-list"' in html
-    assert html.count("odcard-hero") == 1  # only the first entry is a card
-    assert html.count('class="rankrow"') == 2  # the rest are rows
-    assert '<span class="rr-rank">2</span>' in html
+    # every rank is a row; only #1 is the open hero
+    assert html.count('class="rankrow') == 3
+    assert html.count("rankrow-hero") == 1
+    assert html.count("<details open>") == 1
+    assert '<span class="rr-rank">1</span>' in html
     assert '<span class="rr-rank">3</span>' in html
 
 
