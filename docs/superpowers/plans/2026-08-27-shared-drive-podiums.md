@@ -824,7 +824,9 @@ print({k: c[k] for k in ('portago','ayulo','bettenhausen','moss','trintignant')}
 "
 ```
 
-Expected: `{'portago': 1, 'ayulo': 1, 'bettenhausen': 1, 'moss': 24, 'trintignant': 10}`. The three new drivers legitimately stay out of the top-40 soulmates chart.
+Expected: `{'portago': 1, 'ayulo': 1, 'bettenhausen': 1, 'moss': 24, 'trintignant': 9}`.
+Trintignant is 9, not 10: he held both P2 and P3 in the 1955 Argentine Grand Prix,
+and `podium_drivers` dedupes by driver within a race, so that is one podium. The three new drivers legitimately stay out of the top-40 soulmates chart.
 
 - [ ] **Step 7: Lint and commit**
 
