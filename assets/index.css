@@ -428,6 +428,20 @@ a.race-pill:hover {
     font-size: 12px;
 }
 
+/* Shared-drive podiums: pre-1961 races where two drivers shared one car, so a
+   single podium step belongs to both of them. */
+.shared-badge,
+.shared-mark {
+    margin-left: 0.35em;
+    font-size: 0.85em;
+    color: var(--muted);
+    cursor: help;
+}
+
+.race-pill-shared {
+    border-style: dashed;
+}
+
 .empty-state {
     text-align: center;
     padding: 60px 20px;

@@ -153,3 +153,23 @@ def test_main_writes_full_page(tmp_path, monkeypatch):
     assert 'class="detail"' in html
     assert "<table" in html
     assert 'id="visible-count"' in html
+
+
+def test_shared_drive_race_pill_names_the_co_driver():
+    from build.build_combos_html import render_race_pills
+    from datalib import RaceRef
+
+    races = [RaceRef(season="1956", round="4", raceName="Belgian Grand Prix")]
+    out = render_race_pills(races, None, {("1956", "4"): "Stirling Moss"})
+    assert "race-pill-shared" in out
+    assert "shared car with Stirling Moss" in out
+
+
+def test_normal_race_pill_has_no_shared_marker():
+    from build.build_combos_html import render_race_pills
+    from datalib import RaceRef
+
+    races = [RaceRef(season="2021", round="21", raceName="Saudi Arabian Grand Prix")]
+    out = render_race_pills(races, None, {})
+    assert "race-pill-shared" not in out
+    assert "shared car" not in out
