@@ -459,8 +459,11 @@ def test_a_driver_never_appears_twice_in_one_trio():
         assert len(set(t)) == 3, f"{t} names a driver twice"
     assert trios == sorted(set(trios)), "trios must be sorted and deduplicated"
     # fangio + (farina|gonzalez|trintignant) + (maglioli|farina|trintignant),
-    # minus the products that repeat farina or trintignant
+    # minus the two products that name farina or trintignant twice. Six survive
+    # — including fangio/farina/gonzalez, which is real: gonzalez drove a share
+    # of the second-placed car and farina a share of the third.
     assert trios == [
+        ("fangio", "farina", "gonzalez"),
         ("fangio", "farina", "maglioli"),
         ("fangio", "farina", "trintignant"),
         ("fangio", "gonzalez", "maglioli"),
