@@ -30,6 +30,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 import model  # noqa: E402
 import model_v2  # noqa: E402
 
+from compute.shared_drives import podium_drivers, podium_trios  # noqa: E402
 from datalib import save_podigami  # noqa: E402
 
 DATA_DIR = Path(__file__).resolve().parents[2] / "data"
@@ -396,9 +397,11 @@ def compute(
     name_by_id: dict[str, str] = {}
     seen: set[tuple[str, str, str]] = set()
     for r in races:
-        for s in ("p1", "p2", "p3"):
-            name_by_id[r[s]["driverId"]] = r[s]["name"]
-        seen.add(trio_key(r[s]["driverId"] for s in ("p1", "p2", "p3")))
+        for d in podium_drivers(r):
+            name_by_id[d["driverId"]] = d["name"]
+        # A shared car makes one race the origin of several trios; all of them
+        # have happened, so none may be reported as new.
+        seen.update(podium_trios(r))
 
     grid_name = {d["driverId"]: d["name"] for d in grid}
     grid_ids = sorted(grid_name)
