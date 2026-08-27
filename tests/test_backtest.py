@@ -251,9 +251,14 @@ def test_score_window_v2_rank_pass_ranks_dominant_trio_first():
 
 def test_rungs_v2_ablation_ladder_shape():
     names = [name for name, _ in backtest.RUNGS_V2]
-    assert names == ["v2 pace", "v2 +attrition", "v2 +chaos", "v2 full"]
+    assert names == ["v2 pace", "v2 +attrition", "v2 +chaos", "v2 full", "v2 +adaptive car"]
     by = dict(backtest.RUNGS_V2)
     assert by["v2 full"] == {}
+    # The adaptive rung carries the validation-tuned knobs; the shipped default
+    # keeps them dormant because the test-window gate rejected them.
+    assert by["v2 +adaptive car"] == backtest.ADAPTIVE_CAR
+    assert backtest.ADAPTIVE_CAR["con_adapt_gain"] > 0.0
+    assert backtest.model_v2.DEFAULT_PARAMS_V2["con_adapt_gain"] == 0.0
     # the pace rung must disable attrition, quali, chaos and wild-race mixing
     pace = by["v2 pace"]
     assert pace["w_attr"] == 0.0 and pace["w_qual"] == 0.0

@@ -29,7 +29,9 @@
     "p_wild": 0.0,
     "t_wild": 2.5,
     "w_grid": 0.4,
-    "grid_circuit_beta": 1.0
+    "grid_circuit_beta": 1.0,
+    "con_adapt_gain": 0.0,
+    "con_adapt_hl": 1.0
   },
   "ladder": [
     {
@@ -111,6 +113,16 @@
       "logLoss": 3.9115,
       "brierSet": 0.9373,
       "brierNew": 0.2384
+    },
+    {
+      "model": "v2 +adaptive car",
+      "n": 162,
+      "top1": 0.1728,
+      "top3": 0.3457,
+      "top5": 0.4259,
+      "logLoss": 3.9146,
+      "brierSet": 0.9401,
+      "brierNew": 0.2438
     },
     {
       "model": "v2 post-quali (ratings)",
