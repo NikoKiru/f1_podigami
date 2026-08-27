@@ -162,6 +162,9 @@ surface today, and the visible work is on `combos.html`:
 pre-1961 ties arbitrarily. Real, but negligible in effect, and changing it would
 perturb the frozen backtest window for no measurable gain.
 
-No re-fetch of historical seasons: `race_results.json` is the source of truth
-for the correction, and `fetch_podiums.py` only needs `--full` re-run once to
-regenerate `podiums.json` with the new field.
+No re-fetch of historical seasons. A `--full` podiums fetch is hundreds of API
+calls for data that is already committed, so the 18 races are backfilled
+**locally from `race_results.json`** (a one-off script, or a `--backfill-shared`
+flag on `fetch_podiums.py`) that fills `coDrivers` by matching duplicate
+positions. `fetch_podiums.py` is still taught to populate the field from live
+API responses so future races — and any `--full` rebuild — stay correct.
