@@ -474,3 +474,35 @@ def test_podigami_post_quali_block_and_null():
     # committed file must expose the key (null or block) after this task's regen
     pj = json.loads((DATA_DIR / "podigami.json").read_text(encoding="utf-8"))
     assert "postQuali" in pj
+
+
+def test_podium_without_codrivers_roundtrips_without_the_key():
+    """The 1143 normal races must serialise exactly as they do today: a podium
+    that omits coDrivers must not gain a null key on the way back out."""
+    payload = {
+        "season": "1950",
+        "round": "1",
+        "raceName": "British Grand Prix",
+        "p1": {"driverId": "farina", "name": "Nino Farina"},
+        "p2": {"driverId": "fagioli", "name": "Luigi Fagioli"},
+        "p3": {"driverId": "reg_parnell", "name": "Reg Parnell"},
+    }
+    dumped = Podium.model_validate(payload).model_dump(mode="json")
+    assert dumped == payload
+    assert "coDrivers" not in dumped
+
+
+def test_podium_carries_shared_drive_codrivers():
+    """1956 Belgium: Perdisa and Moss shared the third-placed Maserati."""
+    payload = {
+        "season": "1956",
+        "round": "4",
+        "raceName": "Belgian Grand Prix",
+        "p1": {"driverId": "collins", "name": "Peter Collins"},
+        "p2": {"driverId": "frere", "name": "Paul Frère"},
+        "p3": {"driverId": "perdisa", "name": "Cesare Perdisa"},
+        "coDrivers": {"p3": [{"driverId": "moss", "name": "Stirling Moss"}]},
+    }
+    pod = Podium.model_validate(payload)
+    assert pod.coDrivers["p3"][0].driverId == "moss"
+    assert pod.model_dump(mode="json") == payload
