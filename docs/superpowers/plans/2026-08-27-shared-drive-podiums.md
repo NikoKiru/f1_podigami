@@ -716,32 +716,33 @@ git commit -m "feat(compute): expand shared-drive podiums into every real trio"
 
 **Why this matters:** `compute_podigami` decides which trios have already happened. If its `seen` set still holds only the primary trios, the site keeps treating `collins / frere / moss` as never-having-happened even after Task 4 records it as history.
 
-- [ ] **Step 1: Write the regression guard**
+- [ ] **Step 1: Write the failing test**
 
-Append to `tests/test_compute_podigami.py`:
+Append to `tests/test_compute_podigami.py`. It reuses that file's existing
+`race` and `combos_from` helpers and mirrors `test_single_seen_trio_is_impossible`:
 
 ```python
-def test_shared_drive_trios_count_as_already_seen():
-    """A trio that only ever happened via a shared car is still history, and
-    must never be offered as a never-before-seen combination."""
-    import json
-
-    from compute.shared_drives import podium_trios
-    from datalib import DATA_DIR
-
-    podiums = json.loads((DATA_DIR / "podiums.json").read_text(encoding="utf-8"))
-    belgium = next(p for p in podiums if p["season"] == "1956" and p["round"] == "4")
-    assert belgium["coDrivers"]["p3"][0]["driverId"] == "moss"
-    assert ("collins", "frere", "moss") in podium_trios(belgium)
+def test_shared_drive_trio_counts_as_already_seen():
+    """One car, two drivers: Cas handed his car to Dan mid-race, so alf+bob+dan
+    stood on that podium too and must never be offered as a brand-new trio."""
+    podiums = [race(2025, 1, "alf", "bob", "cas")]
+    podiums[0]["coDrivers"] = {"p3": [{"driverId": "dan", "name": "Dan"}]}
+    grid = [{"driverId": d, "name": d.title()} for d in ("alf", "bob", "dan")]
+    res = cp.compute(podiums, combos_from(podiums), grid)
+    assert res["chanceNextRaceNew"] == pytest.approx(0.0)
+    assert res["candidates"] == []
 ```
 
-This asserts the property at the level that can actually regress: the expansion the `seen` set is built from. A grid-level assertion would pass vacuously, because no 1950s driver is on the current grid.
+The three-driver grid admits exactly one trio, `alf/bob/dan`, and the shared
+drive is the only thing that makes it history — so this fails while the `seen`
+set is built from the primary slots alone, and passes once it is not.
 
-- [ ] **Step 2: Run it**
+- [ ] **Step 2: Run it to verify it fails**
 
 Run: `PYTHONPATH=src python -m pytest tests/test_compute_podigami.py -k shared_drive -v`
 
-Expected: PASS (Tasks 2 and 3 already satisfy it). If it fails, the backfill or the helper is wrong — fix that before continuing.
+Expected: FAIL — `assert 100.0 == 0.0 ± 1.0e-06`, because `compute` still treats
+`alf/bob/dan` as never-having-happened and reports it as a certain new combo.
 
 - [ ] **Step 3: Expand the `seen` set in `compute_podigami.py`**
 
