@@ -113,6 +113,14 @@ def test_combos_has_nav_and_combo_rows(dist):
     assert 'class="combo"' in html
 
 
+def test_combos_shared_drive_marker_counts(dist):
+    """Locks the shared-drive badge/pill counts so a regression in the shared
+    map or trio expansion is caught in CI rather than a manual grep."""
+    html = (dist / "combos.html").read_text(encoding="utf-8")
+    assert html.count("shared-badge") == 40
+    assert html.count("race-pill-shared") == 42
+
+
 def test_index_is_podigami_predictor(dist):
     html = (dist / "index.html").read_text(encoding="utf-8")
     assert 'class="nav"' in html

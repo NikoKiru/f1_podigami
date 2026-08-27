@@ -85,10 +85,11 @@ def render_race_pills(
             if co:
                 title = f"{title} (shared car with {co})"
             mark = '<span class="shared-mark" aria-hidden="true">&#8644;</span>' if co else ""
+            aria_label = f' aria-label="{html.escape(title, quote=True)}"' if co else ""
             pill_parts.append(
                 f'<a class="{cls}" href="{html.escape(race_url(links, r.season, r.round, r.raceName), quote=True)}"'
                 f' target="_blank" rel="noopener"'
-                f' title="{html.escape(title, quote=True)}">'
+                f' title="{html.escape(title, quote=True)}"{aria_label}>'
                 f'<span class="round">R{html.escape(r.round)}</span>'
                 f"{html.escape(short_race_name(r.raceName))}"
                 f"{mark}"
@@ -138,8 +139,11 @@ def render_combo(
     n = combo.count
 
     is_shared = any((r.season, r.round) in shared for r in combo.races)
+    shared_desc = "One podium step was a car shared by two drivers"
     badge = (
-        '<span class="shared-badge" title="One podium step was a car shared by two drivers">'
+        f'<span class="shared-badge" role="img"'
+        f' aria-label="{html.escape(shared_desc, quote=True)}"'
+        f' title="{html.escape(shared_desc, quote=True)}">'
         "&#8644;</span>"
         if is_shared
         else ""
@@ -179,7 +183,9 @@ def main() -> int:
     # field would write "shared": null onto every race entry in combos.json.
     shared = {
         (p.season, p.round): ", ".join(
-            d.name for slot in ("p1", "p2", "p3") for d in ((p.coDrivers or {}).get(slot) or [])
+            dict.fromkeys(
+                d.name for slot in ("p1", "p2", "p3") for d in ((p.coDrivers or {}).get(slot) or [])
+            )
         )
         for p in podiums
         if p.coDrivers

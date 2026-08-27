@@ -173,3 +173,55 @@ def test_normal_race_pill_has_no_shared_marker():
     out = render_race_pills(races, None, {})
     assert "race-pill-shared" not in out
     assert "shared car" not in out
+
+
+def test_shared_race_pill_anchor_has_aria_label():
+    races = [race_ref("1956", "4", "Belgian Grand Prix")]
+    out = bc.render_race_pills(races, None, {("1956", "4"): "Stirling Moss"})
+    assert (
+        'aria-label="1956 Belgian Grand Prix — race report (shared car with Stirling Moss)"' in out
+    )
+
+
+def test_normal_race_pill_anchor_has_no_aria_label():
+    races = [race_ref("2021", "21", "Saudi Arabian Grand Prix")]
+    out = bc.render_race_pills(races, None, {})
+    assert "aria-label" not in out
+
+
+# ── render_combo: shared-drive badge ────────────────────────────────────────
+
+
+def _shared_combo():
+    """A combo whose races include a pre-1961 shared-drive race."""
+    shared_race = race_ref("1955", "1", "Argentine Grand Prix")
+    other_race = race_ref("1956", "2", "Monaco Grand Prix")
+    return combo(
+        ["Juan Manuel Fangio", "Giuseppe Farina", "Roberto Mieres"],
+        ["fangio", "farina", "mieres"],
+        2,
+        other_race,
+        shared_race,
+        1956002,
+        [shared_race, other_race],
+    )
+
+
+def test_render_combo_emits_shared_badge_for_combo_touching_shared_race():
+    c = _shared_combo()
+    shared = {("1955", "1"): "Froilan Gonzalez"}
+    out = bc.render_combo(1, c, None, shared)
+    assert "shared-badge" in out
+
+
+def test_render_combo_omits_shared_badge_when_no_race_is_shared():
+    out = bc.render_combo(1, _sample_combo(), None, {})
+    assert "shared-badge" not in out
+
+
+def test_render_combo_shared_badge_has_aria_label():
+    c = _shared_combo()
+    shared = {("1955", "1"): "Froilan Gonzalez"}
+    out = bc.render_combo(1, c, None, shared)
+    assert 'role="img"' in out
+    assert 'aria-label="One podium step was a car shared by two drivers"' in out
