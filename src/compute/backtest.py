@@ -198,6 +198,12 @@ def tune(races, active, val) -> dict:
 
 # --- v2: dynamic Bayesian rating engine over full classifications -------------
 
+# Adaptive constructor diffusion, tuned on the 2010-2018 validation window.
+# DEFAULT_PARAMS_V2 ships it dormant (gain 0) because the acceptance gate below
+# rejected it on the frozen test window; the rung keeps the comparison visible
+# in the published ladder rather than deleting the negative result.
+ADAPTIVE_CAR = {"con_adapt_gain": 3.0, "con_adapt_hl": 1.0}
+
 # Ablation ladder: each rung switches one v2 channel on (overrides on top of
 # the tuned DEFAULT_PARAMS_V2; reliability is core and stays on in all rungs).
 RUNGS_V2 = [
@@ -208,6 +214,7 @@ RUNGS_V2 = [
     ("v2 +attrition", {"w_qual": 0.0, "chaos_gamma": 0.0, "chaos_eta": 0.0, "p_wild": 0.0}),
     ("v2 +chaos", {"w_qual": 0.0}),
     ("v2 full", {}),
+    ("v2 +adaptive car", ADAPTIVE_CAR),
 ]
 
 # Per-knob grids for --tune-v2 coordinate descent (2 sweeps, validation window).
@@ -230,6 +237,8 @@ V2_TUNE_GRID: dict[str, list] = {
     "chaos_eta": [0.0, 0.35, 0.7],
     "p_wild": [0.0, 0.05, 0.1],
     "t_wild": [1.5, 2.5],
+    "con_adapt_gain": [0.0, 0.25, 0.5, 1.0, 2.0],
+    "con_adapt_hl": [2.0, 4.0, 8.0],
 }
 
 # Post-quali protocol rungs: quali observed BEFORE the snapshot (legitimate
@@ -444,21 +453,35 @@ def evaluate(races, active, test, v2_data=None) -> dict:
         for k in ("halfLife", "offSeason", "seasonBoost", "posWeights", "temperature")
     }
     post_quali_info = None
+    v2_info = None
     if v2_data is not None:
         rresults, quali_map = v2_data
         keys = trio_keys_from(races)
-        v2_full_recs = None
+        recs_by_name: dict[str, list] = {}
+        rows_by_name: dict[str, dict] = {}
         for name, overrides in RUNGS_V2:
             params = dict(model_v2.DEFAULT_PARAMS_V2, **overrides)
             recs = score_window_v2(rresults, quali_map, keys, test, params, with_rank=True)
             ladder.append((name, summarize(recs)))
-            if name == "v2 full":
-                v2_full_recs = recs
-        v1, v2 = dict(ladder[3][1]), dict(ladder[-1][1])
+            recs_by_name[name] = recs
+            rows_by_name[name] = dict(ladder[-1][1])
+
+        # Adaptive-diffusion acceptance gate: the adaptive rung ships only if it
+        # beats the flat-tau baseline ("v2 full", the shipped dormant model) on
+        # BOTH headline scores. It does not, so the live model stays flat.
+        flat, adaptive = rows_by_name["v2 full"], rows_by_name["v2 +adaptive car"]
+        adaptive_accepted = bool(
+            adaptive["logLoss"] < flat["logLoss"] and adaptive["brierNew"] < flat["brierNew"]
+        )
+        v2_name = "v2 +adaptive car" if adaptive_accepted else "v2 full"
+        v2_params = dict(model_v2.DEFAULT_PARAMS_V2, **(ADAPTIVE_CAR if adaptive_accepted else {}))
+        v2_info = {"adaptiveAccepted": adaptive_accepted, "v2Champion": v2_name}
+
+        v1, v2 = dict(ladder[3][1]), rows_by_name[v2_name]
         # Acceptance gate: v2 ships only if it wins BOTH headline scores.
         if v2["logLoss"] <= v1["logLoss"] and v2["brierNew"] <= v1["brierNew"]:
-            chosen_recs, chosen_name = v2_full_recs, "v2 full"
-            chosen_model_params = dict(model_v2.DEFAULT_PARAMS_V2)
+            chosen_recs, chosen_name = recs_by_name[v2_name], v2_name
+            chosen_model_params = v2_params
 
         post_rows: dict[str, dict] = {}
         for name, overrides in RUNGS_V2_POSTQUALI:
@@ -503,6 +526,7 @@ def evaluate(races, active, test, v2_data=None) -> dict:
         "brierNewBase": brier_new_base,
         "ece": ece,
         "postQuali": post_quali_info,
+        "v2Gate": v2_info,
     }
 
 
@@ -587,6 +611,14 @@ def main(argv: list[str] | None = None) -> int:
         print(
             f"{name:22} {m['top1']:>6.3f} {m['top3']:>6.3f} {m['top5']:>6.3f} "
             f"{m['logLoss']:>8.3f} {m['brierNew']:>9.3f}"
+        )
+    if res.get("v2Gate") is not None:
+        by = dict(ladder)
+        flat, adaptive = by["v2 full"], by["v2 +adaptive car"]
+        print(
+            f"\nadaptive-car gate: adaptiveAccepted={res['v2Gate']['adaptiveAccepted']}"
+            f" | logLoss {adaptive['logLoss']:.4f} vs flat {flat['logLoss']:.4f}"
+            f" | brierNew {adaptive['brierNew']:.4f} vs flat {flat['brierNew']:.4f}"
         )
     if res.get("postQuali") is not None:
         by = dict(ladder)

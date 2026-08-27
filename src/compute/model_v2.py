@@ -33,6 +33,7 @@ __all__ = [
     "REG_RESET_SEASONS",
     "CONSTRUCTOR_LINEAGE",
     "CircuitStats",
+    "ADAPT_CEIL",
     "Gauss",
     "HistoryFilter",
     "RatingEngine",
@@ -73,7 +74,24 @@ DEFAULT_PARAMS_V2: dict = {
     # logLoss, J 4.201 -> 4.056. Both knobs pin to the grid ceiling.
     "w_grid": 0.4,  # weight of the causal grid-position term
     "grid_circuit_beta": 1.0,  # circuit modulation: disp_ratio ** (-beta)
+    # Adaptive constructor diffusion: a car that keeps moving the SAME way race
+    # after race has genuinely changed, so let its belief loosen and catch up.
+    # Noise pushes the mean both ways and cancels in the signed EWMA, so this
+    # costs nothing on a car that is merely inconsistent. gain 0 == flat tau_con.
+    # Tuned to gain 3.0 / hl 1.0 on the 2010-2018 validation window (J 4.4013 ->
+    # 4.3853) but REJECTED by the acceptance gate on the frozen 2019+ test window
+    # (logLoss 3.9146 vs 3.9115, brierNew 0.2438 vs 0.2384 -- worse on both).
+    # Shipped dormant at gain 0, exactly as the attrition channel is (w_attr 0.0):
+    # the mechanism and its ablation rung stay in the ladder so a future re-tune
+    # can revisit it, but it contributes nothing to the live prediction.
+    "con_adapt_gain": 0.0,  # weight of the squared standardised drift
+    "con_adapt_hl": 1.0,  # half-life (races) of the signed drift EWMA
 }
+
+# Ceiling on the adaptive variance step, as a multiple of the flat tau_con**2.
+# Without it a violent drift runs the filter into the degenerate regime observed
+# at tau_con 0.30 (log-worths inflating without bound).
+ADAPT_CEIL = 8.0
 
 # Seasons whose technical regulations changed enough to scramble the car order.
 REG_RESET_SEASONS = {1961, 1966, 1989, 2009, 2014, 2022, 2026}
@@ -218,6 +236,8 @@ class RatingEngine:
         self.params = params
         self._drivers: dict[str, Gauss] = {}
         self._constructors: dict[str, Gauss] = {}
+        self._con_drift: dict[str, float] = {}  # signed EWMA of mean movement
+        self._con_delta: dict[str, float] = {}  # movement accrued since last advance
 
     def driver(self, did: str) -> Gauss:
         st = self._drivers.get(did)
@@ -241,15 +261,40 @@ class RatingEngine:
         d, c = self.driver(did), self.constructor(cid)
         return d.mu + c.mu, d.var + c.var
 
+    def _fold_drift(self) -> None:
+        """Fold the movement accrued since the last advance into the EWMA.
+
+        Called once per race (not per channel), so ``con_adapt_hl`` is a
+        half-life in races however many channels the race happened to observe.
+        """
+        decay = 0.5 ** (1.0 / max(self.params["con_adapt_hl"], 1e-9))
+        for root in set(self._con_drift) | set(self._con_delta):
+            prev = self._con_drift.get(root, 0.0)
+            self._con_drift[root] = prev * decay + self._con_delta.get(root, 0.0) * (1.0 - decay)
+        self._con_delta.clear()
+
+    def _con_var_step(self, root: str, tc2: float) -> float:
+        """Variance added to one constructor this race, inflated by its drift."""
+        gain = self.params["con_adapt_gain"]
+        if gain <= 0.0:
+            return tc2
+        tau = self.params["tau_con"]
+        if tau <= 0.0:
+            return tc2
+        z = self._con_drift.get(root, 0.0) / tau
+        return tc2 * min(1.0 + gain * z * z, ADAPT_CEIL)
+
     def advance_race(self) -> None:
+        self._fold_drift()
         td2 = self.params["tau_drv"] ** 2
         tc2 = self.params["tau_con"] ** 2
         for st in self._drivers.values():
             st.var = _clamp_var(st.var + td2)
-        for st in self._constructors.values():
-            st.var = _clamp_var(st.var + tc2)
+        for root, st in self._constructors.items():
+            st.var = _clamp_var(st.var + self._con_var_step(root, tc2))
 
     def advance_season(self, new_season: int) -> None:
+        self._fold_drift()
         p = self.params
         extra = p["reg_var_con"] if new_season in REG_RESET_SEASONS else 0.0
         for st in self._drivers.values():
@@ -308,14 +353,21 @@ class RatingEngine:
             acc[0] += g
             acc[1] += h
         for root, (g, h) in con_acc.items():
-            self._nudge(self._constructors[root], g, h, weight)
+            moved = self._nudge(self._constructors[root], g, h, weight)
+            self._con_delta[root] = self._con_delta.get(root, 0.0) + moved
 
     @staticmethod
-    def _nudge(st: Gauss, g: float, h: float, weight: float) -> None:
-        """Scalar Kalman-style step: precision grows by κ·h, mean moves along κ·g."""
+    def _nudge(st: Gauss, g: float, h: float, weight: float) -> float:
+        """Scalar Kalman-style step: precision grows by κ·h, mean moves along κ·g.
+
+        Returns the signed mean movement, which the adaptive-diffusion EWMA
+        accumulates for constructors.
+        """
         denom = 1.0 + st.var * weight * h
-        st.mu += st.var * weight * g / denom
+        delta = st.var * weight * g / denom
+        st.mu += delta
         st.var = _clamp_var(st.var / denom)
+        return delta
 
 
 # Era fallbacks for the very first race, before any hazard data exists.

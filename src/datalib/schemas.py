@@ -247,6 +247,11 @@ class PodigamiParamsV2(_Base):
     t_wild: float
     w_grid: float
     grid_circuit_beta: float
+    # Adaptive constructor diffusion (added 2026-08-27). Optional with defaults so
+    # a podigami.json computed under the previous params still validates - the
+    # develop->main promotion merge keeps main's newer data, which predates them.
+    con_adapt_gain: float = 0.0
+    con_adapt_hl: float = 4.0
     usingQualifying: bool
     circuitId: str | None = None
     nDraws: int
@@ -344,7 +349,7 @@ class ModelParams(_Base):
 
 
 class ModelParamsV2(_Base):
-    """The 20 locked knobs of the v2 rating engine (see model_v2.DEFAULT_PARAMS_V2)."""
+    """The locked knobs of the v2 rating engine (see model_v2.DEFAULT_PARAMS_V2)."""
 
     sigma0_drv: float
     sigma0_con: float
@@ -366,6 +371,10 @@ class ModelParamsV2(_Base):
     t_wild: float
     w_grid: float
     grid_circuit_beta: float
+    # Adaptive constructor diffusion (added 2026-08-27); optional so a
+    # model_eval.json written under the previous params still validates.
+    con_adapt_gain: float = 0.0
+    con_adapt_hl: float = 4.0
 
 
 class LadderRow(_Base):

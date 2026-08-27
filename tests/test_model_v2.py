@@ -48,6 +48,8 @@ def test_default_params_have_exactly_the_locked_knobs():
         "t_wild",
         "w_grid",
         "grid_circuit_beta",
+        "con_adapt_gain",
+        "con_adapt_hl",
     }
 
 
@@ -186,6 +188,83 @@ def test_advance_race_adds_tau_squared():
     eng.advance_race()
     assert d.var == pytest.approx(vd + DEFAULT_PARAMS_V2["tau_drv"] ** 2)
     assert c.var == pytest.approx(vc + DEFAULT_PARAMS_V2["tau_con"] ** 2)
+
+
+# --- adaptive constructor variance ---------------------------------------------
+
+
+def _push(eng, order, n=1):
+    """Observe ``order`` (winner first) n times; each entry is its own team."""
+    entries = [(d, "car_" + d) for d in order]
+    for _ in range(n):
+        eng.observe_order(entries, depth=1, weight=1.0)
+
+
+def test_zero_gain_reproduces_the_flat_tau_step():
+    """gain=0 must be arithmetically identical to the pre-adaptive engine."""
+    eng = engine(con_adapt_gain=0.0)
+    _push(eng, ["a", "b"], n=4)  # a consistent drift the adaptive term would see
+    c = eng.constructor("car_a")
+    before = c.var
+    eng.advance_race()
+    assert c.var == pytest.approx(before + DEFAULT_PARAMS_V2["tau_con"] ** 2)
+
+
+def test_alternating_results_cancel_and_leave_the_step_flat():
+    """Noise pushes the mean both ways; the signed EWMA nets out near zero."""
+    eng = engine(con_adapt_gain=1.0, con_adapt_hl=4.0)
+    for _ in range(6):
+        _push(eng, ["a", "b"])
+        _push(eng, ["b", "a"])
+    c = eng.constructor("car_a")
+    before = c.var
+    eng.advance_race()
+    step = c.var - before
+    flat = DEFAULT_PARAMS_V2["tau_con"] ** 2
+    assert step == pytest.approx(flat, rel=0.25)
+
+
+def test_consistent_drift_inflates_the_step():
+    """A car climbing the order every race must diffuse faster than a flat one."""
+    drifting = engine(con_adapt_gain=1.0, con_adapt_hl=4.0)
+    _push(drifting, ["a", "b"], n=5)
+    steady = engine(con_adapt_gain=1.0, con_adapt_hl=4.0)
+    steady.constructor("car_a")
+
+    def step_of(eng):
+        c = eng.constructor("car_a")
+        before = c.var
+        eng.advance_race()
+        return c.var - before
+
+    assert step_of(drifting) > step_of(steady) * 1.5
+
+
+def test_adaptive_step_is_clamped_at_the_ceiling():
+    """Even a violent drift cannot exceed ADAPT_CEIL x the flat step."""
+    eng = engine(con_adapt_gain=50.0, con_adapt_hl=8.0)
+    _push(eng, ["a", "b"], n=20)
+    c = eng.constructor("car_a")
+    c.var = 0.01  # keep the clamp, not _VAR_MAX, the binding constraint
+    before = c.var
+    eng.advance_race()
+    step = c.var - before
+    flat = DEFAULT_PARAMS_V2["tau_con"] ** 2
+    assert step <= flat * model_v2.ADAPT_CEIL + 1e-12
+    assert step > flat  # the ceiling is genuinely engaged, not a no-op
+
+
+def test_drift_is_tracked_per_constructor_lineage():
+    """Two teams in the same race get their own drift, not a shared one."""
+    eng = engine(con_adapt_gain=1.0, con_adapt_hl=4.0)
+    _push(eng, ["a", "b"], n=5)
+    up, down = eng.constructor("car_a"), eng.constructor("car_b")
+    up.var = down.var = 0.05
+    eng.advance_race()
+    # Both drifted (in opposite directions) so both inflate; the point is that
+    # they are tracked separately rather than collapsing to one number.
+    assert eng._con_drift["car_a"] > 0.0
+    assert eng._con_drift["car_b"] < 0.0
 
 
 def test_advance_season_inflates_more_on_regulation_reset():
