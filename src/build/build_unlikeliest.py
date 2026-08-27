@@ -33,7 +33,7 @@ from _layout import (  # noqa: E402
     organization_schema,
     race_url,
 )
-from _rows import render_row  # noqa: E402
+from _rows import render_row, render_stat, render_table  # noqa: E402
 
 from datalib import UnlikeliestTrio, load_race_links, load_unlikeliest  # noqa: E402
 
@@ -93,65 +93,43 @@ def _race_link(e: UnlikeliestTrio, links: dict | None = None) -> str:
     )
 
 
-def _stat(label: str, value: str) -> str:
+def _stats(e: UnlikeliestTrio, race: str) -> str:
+    """Stat cells for the expanded panel. The race repeats here because CSS
+    moves it off the row face and into the panel on phones."""
     return (
-        f'<div class="un-stat">'
-        f'<span class="un-stat-label">{label}</span>'
-        f'<span class="un-stat-val">{value}</span>'
-        f"</div>"
+        render_stat("Podium rates", _rates_cells(e))
+        + render_stat("Raced together", f"{e.racesTogether}&times;")
+        + render_stat("Times it happened", str(e.count))
+        + render_stat("Race", race, extra_class="rr-stat-race")
     )
 
 
-def render_card(
-    rank: int, e: UnlikeliestTrio, hero: bool = False, links: dict | None = None
+def render_row_entry(
+    rank: int, e: UnlikeliestTrio, links: dict | None = None, hero: bool = False
 ) -> str:
-    """One uniform card. ``hero`` makes it the larger, accented #1 variant."""
-    cls = "uncard uncard-hero" if hero else "uncard"
-    drivers = f'<div class="un-drivers">{render_trio(e.names)}</div>'
-    stats = (
-        _stat("Podium rates", _rates_cells(e))
-        + _stat("Raced together", f"{e.racesTogether}&times;")
-        + _stat("Times it happened", str(e.count))
-    )
-    return (
-        f'<li class="{cls}">'
-        f'<div class="un-top">'
-        f'<span class="un-rank">{rank}</span>'
-        f'<span class="un-race">{_race_link(e, links)}</span>'
-        f"</div>"
-        f"{drivers}"
-        f'<div class="un-odds">'
-        f'<span class="un-odds-num">{format_odds(e.score)}</span>'
-        f'<span class="un-odds-label">chance it ever happened</span>'
-        f"</div>"
-        f'<div class="un-stats">{stats}</div>'
-        f"</li>"
-    )
-
-
-def render_row_entry(rank: int, e: UnlikeliestTrio, links: dict | None = None) -> str:
-    """One compact leaderboard row for ranks below the hero. The race link sits
-    on the row face on desktop and repeats in the stats panel, where CSS shows
-    it on phones instead."""
+    """One leaderboard row. ``hero`` marks rank #1: open and accented."""
     race = _race_link(e, links)
-    stats = (
-        _stat("Podium rates", _rates_cells(e))
-        + _stat("Raced together", f"{e.racesTogether}&times;")
-        + _stat("Times it happened", str(e.count))
-        + f'<div class="un-stat rr-stat-race">'
-        f'<span class="un-stat-label">Race</span>'
-        f'<span class="un-stat-val">{race}</span>'
-        f"</div>"
+    return render_row(
+        rank,
+        render_trio(e.names),
+        format_odds(e.score),
+        _stats(e, race),
+        race_html=race,
+        hero=hero,
     )
-    return render_row(rank, render_trio(e.names), format_odds(e.score), stats, race_html=race)
 
 
 def render_cards(entries: list[UnlikeliestTrio], links: dict | None = None) -> str:
     if not entries:
         return '<p class="panel-sub">No trios.</p>'
-    hero = render_card(1, entries[0], hero=True, links=links)
-    rows = "".join(render_row_entry(i, e, links) for i, e in enumerate(entries[1:], 2))
-    return f'<ol class="rank-list">{hero}{rows}</ol>'
+    rows = "".join(render_row_entry(i, e, links, hero=(i == 1)) for i, e in enumerate(entries, 1))
+    return render_table(
+        rows,
+        value_label="Chance it ever happened",
+        value_width=190,
+        race_label="Race",
+        race_width=210,
+    )
 
 
 def main() -> int:

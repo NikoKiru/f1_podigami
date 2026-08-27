@@ -59,10 +59,10 @@ def test_render_trio_escapes_names():
     assert "A &amp; B" in out
 
 
-# --- card -------------------------------------------------------------------
+# --- rows -------------------------------------------------------------------
 
 
-def test_render_card_has_every_field_in_place():
+def test_render_row_entry_has_every_field_in_place():
     e = trio(
         ["Esteban Ocon", "Sergio Pérez", "Lance Stroll"],
         ["o", "p", "s"],
@@ -71,9 +71,9 @@ def test_render_card_has_every_field_in_place():
         1,
         [0.02, 0.13, 0.02],
     )
-    html = bu.render_card(1, e)
-    assert 'class="uncard' in html
-    assert "1" in html  # rank
+    html = bu.render_row_entry(1, e)
+    assert 'class="rankrow' in html
+    assert '<span class="rr-rank">1</span>' in html
     assert "1 in 150" in html  # odds headline
     assert "2%" in html and "13%" in html  # per-driver rates
     assert "152" in html  # raced together
@@ -82,19 +82,19 @@ def test_render_card_has_every_field_in_place():
     assert "Esteban Ocon" in html and "E. Ocon" in html
 
 
-def test_render_card_uses_official_f1_url_when_links_present():
+def test_render_row_entry_uses_official_f1_url_when_links_present():
     from datalib import RaceLink
 
     e = trio(["A B", "C D", "E F"], ["a", "b", "c"], 10, 0.01, 1, [0.1, 0.1, 0.1])
     links = {"2020": {"1": RaceLink(id="1045", slug="austria")}}
-    html = bu.render_card(1, e, links=links)
+    html = bu.render_row_entry(1, e, links=links)
     assert "https://www.formula1.com/en/results/2020/races/1045/austria/race-result" in html
 
 
-def test_render_card_hero_variant_is_flagged():
+def test_render_row_entry_hero_is_open():
     e = trio(["A B", "C D", "E F"], ["a", "b", "c"], 10, 0.01, 1, [0.1, 0.1, 0.1])
-    assert "uncard-hero" in bu.render_card(1, e, hero=True)
-    assert "uncard-hero" not in bu.render_card(2, e, hero=False)
+    assert "rankrow-hero" in bu.render_row_entry(1, e, hero=True)
+    assert "rankrow-hero" not in bu.render_row_entry(2, e)
 
 
 def test_render_row_entry_shows_repeat_count():
@@ -112,21 +112,27 @@ def test_render_row_entry_race_on_face_and_in_stats():
     # race link appears twice: on the desktop row face and in the stats panel
     assert html.count("https://en.wikipedia.org/wiki/2020_Sakhir_Grand_Prix") == 2
     assert 'class="rr-race"' in html
-    assert 'class="un-stat rr-stat-race"' in html
+    assert 'class="rr-stat rr-stat-race"' in html
     assert "152&times;" in html  # raced together stat
 
 
-def test_render_cards_hero_then_rows():
+def test_render_cards_table_with_hero_first_row():
     entries = [
         trio(["A B", "C D", "E F"], ["a", "b", "c"], 10, 0.01, 1, [0.1, 0.1, 0.1]),
         trio(["G H", "I J", "K L"], ["g", "h", "i"], 20, 0.05, 1, [0.2, 0.2, 0.2]),
         trio(["M N", "O P", "Q R"], ["m", "n", "o"], 30, 0.08, 1, [0.2, 0.2, 0.2]),
     ]
     html = bu.render_cards(entries)
-    assert html.count("uncard-hero") == 1  # only the first entry is a card
-    assert html.count('class="rankrow"') == 2  # the rest are rows
+    # one combos-style container with a column-label strip, race column included
+    assert 'class="rank-wrap"' in html
+    assert '<span class="rh-num">Chance it ever happened</span>' in html
+    assert '<span class="rh-race">Race</span>' in html
     assert 'class="rank-list"' in html
-    assert '<span class="rr-rank">2</span>' in html
+    # every rank is a row; only #1 is the open hero
+    assert html.count('class="rankrow') == 3
+    assert html.count("rankrow-hero") == 1
+    assert html.count("<details open>") == 1
+    assert '<span class="rr-rank">1</span>' in html
     assert '<span class="rr-rank">3</span>' in html
 
 
