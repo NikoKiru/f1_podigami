@@ -7231,6 +7231,200 @@
         }
       }
     ],
+    "1951": [
+      {
+        "driverIds": [
+          "fangio",
+          "farina",
+          "taruffi"
+        ],
+        "names": [
+          "Juan Fangio",
+          "Nino Farina",
+          "Piero Taruffi"
+        ],
+        "firstRace": {
+          "round": "1",
+          "raceName": "Swiss Grand Prix"
+        }
+      },
+      {
+        "driverIds": [
+          "mcgrath",
+          "nazaruk",
+          "wallard"
+        ],
+        "names": [
+          "Jack McGrath",
+          "Mike Nazaruk",
+          "Lee Wallard"
+        ],
+        "firstRace": {
+          "round": "2",
+          "raceName": "Indianapolis 500"
+        }
+      },
+      {
+        "driverIds": [
+          "ayulo",
+          "nazaruk",
+          "wallard"
+        ],
+        "names": [
+          "Manny Ayulo",
+          "Mike Nazaruk",
+          "Lee Wallard"
+        ],
+        "firstRace": {
+          "round": "2",
+          "raceName": "Indianapolis 500"
+        }
+      },
+      {
+        "driverIds": [
+          "ascari",
+          "farina",
+          "villoresi"
+        ],
+        "names": [
+          "Alberto Ascari",
+          "Nino Farina",
+          "Luigi Villoresi"
+        ],
+        "firstRace": {
+          "round": "3",
+          "raceName": "Belgian Grand Prix"
+        }
+      },
+      {
+        "driverIds": [
+          "fangio",
+          "gonzalez",
+          "villoresi"
+        ],
+        "names": [
+          "Juan Fangio",
+          "José Froilán González",
+          "Luigi Villoresi"
+        ],
+        "firstRace": {
+          "round": "4",
+          "raceName": "French Grand Prix"
+        }
+      },
+      {
+        "driverIds": [
+          "ascari",
+          "fangio",
+          "villoresi"
+        ],
+        "names": [
+          "Alberto Ascari",
+          "Juan Fangio",
+          "Luigi Villoresi"
+        ],
+        "firstRace": {
+          "round": "4",
+          "raceName": "French Grand Prix"
+        }
+      },
+      {
+        "driverIds": [
+          "ascari",
+          "fagioli",
+          "villoresi"
+        ],
+        "names": [
+          "Alberto Ascari",
+          "Luigi Fagioli",
+          "Luigi Villoresi"
+        ],
+        "firstRace": {
+          "round": "4",
+          "raceName": "French Grand Prix"
+        }
+      },
+      {
+        "driverIds": [
+          "fagioli",
+          "gonzalez",
+          "villoresi"
+        ],
+        "names": [
+          "Luigi Fagioli",
+          "José Froilán González",
+          "Luigi Villoresi"
+        ],
+        "firstRace": {
+          "round": "4",
+          "raceName": "French Grand Prix"
+        }
+      },
+      {
+        "driverIds": [
+          "ascari",
+          "fangio",
+          "gonzalez"
+        ],
+        "names": [
+          "Alberto Ascari",
+          "Juan Fangio",
+          "José Froilán González"
+        ],
+        "firstRace": {
+          "round": "6",
+          "raceName": "German Grand Prix"
+        }
+      },
+      {
+        "driverIds": [
+          "ascari",
+          "farina",
+          "gonzalez"
+        ],
+        "names": [
+          "Alberto Ascari",
+          "Nino Farina",
+          "José Froilán González"
+        ],
+        "firstRace": {
+          "round": "7",
+          "raceName": "Italian Grand Prix"
+        }
+      },
+      {
+        "driverIds": [
+          "ascari",
+          "bonetto",
+          "gonzalez"
+        ],
+        "names": [
+          "Alberto Ascari",
+          "Felice Bonetto",
+          "José Froilán González"
+        ],
+        "firstRace": {
+          "round": "7",
+          "raceName": "Italian Grand Prix"
+        }
+      },
+      {
+        "driverIds": [
+          "fangio",
+          "farina",
+          "gonzalez"
+        ],
+        "names": [
+          "Juan Fangio",
+          "Nino Farina",
+          "José Froilán González"
+        ],
+        "firstRace": {
+          "round": "8",
+          "raceName": "Spanish Grand Prix"
+        }
+      }
+    ],
     "1992": [
       {
         "driverIds": [
@@ -7472,120 +7666,6 @@
         "firstRace": {
           "round": "8",
           "raceName": "Italian Grand Prix"
-        }
-      }
-    ],
-    "1951": [
-      {
-        "driverIds": [
-          "fangio",
-          "farina",
-          "taruffi"
-        ],
-        "names": [
-          "Juan Fangio",
-          "Nino Farina",
-          "Piero Taruffi"
-        ],
-        "firstRace": {
-          "round": "1",
-          "raceName": "Swiss Grand Prix"
-        }
-      },
-      {
-        "driverIds": [
-          "mcgrath",
-          "nazaruk",
-          "wallard"
-        ],
-        "names": [
-          "Jack McGrath",
-          "Mike Nazaruk",
-          "Lee Wallard"
-        ],
-        "firstRace": {
-          "round": "2",
-          "raceName": "Indianapolis 500"
-        }
-      },
-      {
-        "driverIds": [
-          "ascari",
-          "farina",
-          "villoresi"
-        ],
-        "names": [
-          "Alberto Ascari",
-          "Nino Farina",
-          "Luigi Villoresi"
-        ],
-        "firstRace": {
-          "round": "3",
-          "raceName": "Belgian Grand Prix"
-        }
-      },
-      {
-        "driverIds": [
-          "fangio",
-          "gonzalez",
-          "villoresi"
-        ],
-        "names": [
-          "Juan Fangio",
-          "José Froilán González",
-          "Luigi Villoresi"
-        ],
-        "firstRace": {
-          "round": "4",
-          "raceName": "French Grand Prix"
-        }
-      },
-      {
-        "driverIds": [
-          "ascari",
-          "fangio",
-          "gonzalez"
-        ],
-        "names": [
-          "Alberto Ascari",
-          "Juan Fangio",
-          "José Froilán González"
-        ],
-        "firstRace": {
-          "round": "6",
-          "raceName": "German Grand Prix"
-        }
-      },
-      {
-        "driverIds": [
-          "ascari",
-          "bonetto",
-          "gonzalez"
-        ],
-        "names": [
-          "Alberto Ascari",
-          "Felice Bonetto",
-          "José Froilán González"
-        ],
-        "firstRace": {
-          "round": "7",
-          "raceName": "Italian Grand Prix"
-        }
-      },
-      {
-        "driverIds": [
-          "fangio",
-          "farina",
-          "gonzalez"
-        ],
-        "names": [
-          "Juan Fangio",
-          "Nino Farina",
-          "José Froilán González"
-        ],
-        "firstRace": {
-          "round": "8",
-          "raceName": "Spanish Grand Prix"
         }
       }
     ],
@@ -9147,12 +9227,44 @@
       {
         "driverIds": [
           "behra",
+          "hawthorn",
+          "musso"
+        ],
+        "names": [
+          "Jean Behra",
+          "Mike Hawthorn",
+          "Luigi Musso"
+        ],
+        "firstRace": {
+          "round": "1",
+          "raceName": "Argentine Grand Prix"
+        }
+      },
+      {
+        "driverIds": [
+          "behra",
           "fangio",
           "moss"
         ],
         "names": [
           "Jean Behra",
           "Juan Fangio",
+          "Stirling Moss"
+        ],
+        "firstRace": {
+          "round": "2",
+          "raceName": "Monaco Grand Prix"
+        }
+      },
+      {
+        "driverIds": [
+          "behra",
+          "collins",
+          "moss"
+        ],
+        "names": [
+          "Jean Behra",
+          "Peter Collins",
           "Stirling Moss"
         ],
         "firstRace": {
@@ -9194,6 +9306,22 @@
       },
       {
         "driverIds": [
+          "collins",
+          "frere",
+          "moss"
+        ],
+        "names": [
+          "Peter Collins",
+          "Paul Frère",
+          "Stirling Moss"
+        ],
+        "firstRace": {
+          "round": "4",
+          "raceName": "Belgian Grand Prix"
+        }
+      },
+      {
+        "driverIds": [
           "behra",
           "castellotti",
           "collins"
@@ -9206,6 +9334,22 @@
         "firstRace": {
           "round": "5",
           "raceName": "French Grand Prix"
+        }
+      },
+      {
+        "driverIds": [
+          "behra",
+          "fangio",
+          "portago"
+        ],
+        "names": [
+          "Jean Behra",
+          "Juan Fangio",
+          "Alfonso de Portago"
+        ],
+        "firstRace": {
+          "round": "6",
+          "raceName": "British Grand Prix"
         }
       },
       {
@@ -9239,9 +9383,41 @@
           "round": "8",
           "raceName": "Italian Grand Prix"
         }
+      },
+      {
+        "driverIds": [
+          "collins",
+          "flockhart",
+          "moss"
+        ],
+        "names": [
+          "Peter Collins",
+          "Ron Flockhart",
+          "Stirling Moss"
+        ],
+        "firstRace": {
+          "round": "8",
+          "raceName": "Italian Grand Prix"
+        }
       }
     ],
     "1960": [
+      {
+        "driverIds": [
+          "allison",
+          "mclaren",
+          "trintignant"
+        ],
+        "names": [
+          "Cliff Allison",
+          "Bruce McLaren",
+          "Maurice Trintignant"
+        ],
+        "firstRace": {
+          "round": "1",
+          "raceName": "Argentine Grand Prix"
+        }
+      },
       {
         "driverIds": [
           "allison",
@@ -9387,6 +9563,152 @@
         }
       }
     ],
+    "1954": [
+      {
+        "driverIds": [
+          "bryan",
+          "mcgrath",
+          "vukovich"
+        ],
+        "names": [
+          "Jimmy Bryan",
+          "Jack McGrath",
+          "Bill Vukovich"
+        ],
+        "firstRace": {
+          "round": "2",
+          "raceName": "Indianapolis 500"
+        }
+      },
+      {
+        "driverIds": [
+          "fangio",
+          "moss",
+          "trintignant"
+        ],
+        "names": [
+          "Juan Fangio",
+          "Stirling Moss",
+          "Maurice Trintignant"
+        ],
+        "firstRace": {
+          "round": "3",
+          "raceName": "Belgian Grand Prix"
+        }
+      },
+      {
+        "driverIds": [
+          "fangio",
+          "kling",
+          "manzon"
+        ],
+        "names": [
+          "Juan Fangio",
+          "Karl Kling",
+          "Robert Manzon"
+        ],
+        "firstRace": {
+          "round": "4",
+          "raceName": "French Grand Prix"
+        }
+      },
+      {
+        "driverIds": [
+          "gonzalez",
+          "hawthorn",
+          "marimon"
+        ],
+        "names": [
+          "José Froilán González",
+          "Mike Hawthorn",
+          "Onofre Marimón"
+        ],
+        "firstRace": {
+          "round": "5",
+          "raceName": "British Grand Prix"
+        }
+      },
+      {
+        "driverIds": [
+          "fangio",
+          "gonzalez",
+          "trintignant"
+        ],
+        "names": [
+          "Juan Fangio",
+          "José Froilán González",
+          "Maurice Trintignant"
+        ],
+        "firstRace": {
+          "round": "6",
+          "raceName": "German Grand Prix"
+        }
+      },
+      {
+        "driverIds": [
+          "fangio",
+          "hawthorn",
+          "trintignant"
+        ],
+        "names": [
+          "Juan Fangio",
+          "Mike Hawthorn",
+          "Maurice Trintignant"
+        ],
+        "firstRace": {
+          "round": "6",
+          "raceName": "German Grand Prix"
+        }
+      },
+      {
+        "driverIds": [
+          "fangio",
+          "gonzalez",
+          "herrmann"
+        ],
+        "names": [
+          "Juan Fangio",
+          "José Froilán González",
+          "Hans Herrmann"
+        ],
+        "firstRace": {
+          "round": "7",
+          "raceName": "Swiss Grand Prix"
+        }
+      },
+      {
+        "driverIds": [
+          "fangio",
+          "hawthorn",
+          "maglioli"
+        ],
+        "names": [
+          "Juan Fangio",
+          "Mike Hawthorn",
+          "Umberto Maglioli"
+        ],
+        "firstRace": {
+          "round": "8",
+          "raceName": "Italian Grand Prix"
+        }
+      },
+      {
+        "driverIds": [
+          "fangio",
+          "hawthorn",
+          "musso"
+        ],
+        "names": [
+          "Juan Fangio",
+          "Mike Hawthorn",
+          "Luigi Musso"
+        ],
+        "firstRace": {
+          "round": "9",
+          "raceName": "Spanish Grand Prix"
+        }
+      }
+    ],
     "1953": [
       {
         "driverIds": [
@@ -9406,14 +9728,30 @@
       },
       {
         "driverIds": [
+          "cross",
+          "hanks",
+          "vukovich"
+        ],
+        "names": [
+          "Art Cross",
+          "Sam Hanks",
+          "Bill Vukovich"
+        ],
+        "firstRace": {
+          "round": "2",
+          "raceName": "Indianapolis 500"
+        }
+      },
+      {
+        "driverIds": [
           "ascari",
-          "farina",
-          "gonzalez"
+          "bonetto",
+          "farina"
         ],
         "names": [
           "Alberto Ascari",
-          "Nino Farina",
-          "José Froilán González"
+          "Felice Bonetto",
+          "Nino Farina"
         ],
         "firstRace": {
           "round": "3",
@@ -9612,6 +9950,152 @@
         "firstRace": {
           "round": "10",
           "raceName": "Mexican Grand Prix"
+        }
+      }
+    ],
+    "1957": [
+      {
+        "driverIds": [
+          "behra",
+          "fangio",
+          "menditeguy"
+        ],
+        "names": [
+          "Jean Behra",
+          "Juan Fangio",
+          "Carlos Menditeguy"
+        ],
+        "firstRace": {
+          "round": "1",
+          "raceName": "Argentine Grand Prix"
+        }
+      },
+      {
+        "driverIds": [
+          "brooks",
+          "fangio",
+          "gregory"
+        ],
+        "names": [
+          "Tony Brooks",
+          "Juan Fangio",
+          "Masten Gregory"
+        ],
+        "firstRace": {
+          "round": "2",
+          "raceName": "Monaco Grand Prix"
+        }
+      },
+      {
+        "driverIds": [
+          "bryan",
+          "hanks",
+          "rathmann"
+        ],
+        "names": [
+          "Jimmy Bryan",
+          "Sam Hanks",
+          "Jim Rathmann"
+        ],
+        "firstRace": {
+          "round": "3",
+          "raceName": "Indianapolis 500"
+        }
+      },
+      {
+        "driverIds": [
+          "collins",
+          "fangio",
+          "musso"
+        ],
+        "names": [
+          "Peter Collins",
+          "Juan Fangio",
+          "Luigi Musso"
+        ],
+        "firstRace": {
+          "round": "4",
+          "raceName": "French Grand Prix"
+        }
+      },
+      {
+        "driverIds": [
+          "hawthorn",
+          "moss",
+          "musso"
+        ],
+        "names": [
+          "Mike Hawthorn",
+          "Stirling Moss",
+          "Luigi Musso"
+        ],
+        "firstRace": {
+          "round": "5",
+          "raceName": "British Grand Prix"
+        }
+      },
+      {
+        "driverIds": [
+          "brooks",
+          "hawthorn",
+          "musso"
+        ],
+        "names": [
+          "Tony Brooks",
+          "Mike Hawthorn",
+          "Luigi Musso"
+        ],
+        "firstRace": {
+          "round": "5",
+          "raceName": "British Grand Prix"
+        }
+      },
+      {
+        "driverIds": [
+          "collins",
+          "fangio",
+          "hawthorn"
+        ],
+        "names": [
+          "Peter Collins",
+          "Juan Fangio",
+          "Mike Hawthorn"
+        ],
+        "firstRace": {
+          "round": "6",
+          "raceName": "German Grand Prix"
+        }
+      },
+      {
+        "driverIds": [
+          "fangio",
+          "moss",
+          "schell"
+        ],
+        "names": [
+          "Juan Fangio",
+          "Stirling Moss",
+          "Harry Schell"
+        ],
+        "firstRace": {
+          "round": "7",
+          "raceName": "Pescara Grand Prix"
+        }
+      },
+      {
+        "driverIds": [
+          "fangio",
+          "moss",
+          "trips"
+        ],
+        "names": [
+          "Juan Fangio",
+          "Stirling Moss",
+          "Wolfgang von Trips"
+        ],
+        "firstRace": {
+          "round": "8",
+          "raceName": "Italian Grand Prix"
         }
       }
     ],
@@ -10842,6 +11326,22 @@
         "firstRace": {
           "round": "6",
           "raceName": "French Grand Prix"
+        }
+      },
+      {
+        "driverIds": [
+          "ascari",
+          "fagioli",
+          "farina"
+        ],
+        "names": [
+          "Alberto Ascari",
+          "Luigi Fagioli",
+          "Nino Farina"
+        ],
+        "firstRace": {
+          "round": "7",
+          "raceName": "Italian Grand Prix"
         }
       },
       {
@@ -12209,6 +12709,38 @@
       {
         "driverIds": [
           "fangio",
+          "gonzalez",
+          "maglioli"
+        ],
+        "names": [
+          "Juan Fangio",
+          "José Froilán González",
+          "Umberto Maglioli"
+        ],
+        "firstRace": {
+          "round": "1",
+          "raceName": "Argentine Grand Prix"
+        }
+      },
+      {
+        "driverIds": [
+          "fangio",
+          "farina",
+          "trintignant"
+        ],
+        "names": [
+          "Juan Fangio",
+          "Nino Farina",
+          "Maurice Trintignant"
+        ],
+        "firstRace": {
+          "round": "1",
+          "raceName": "Argentine Grand Prix"
+        }
+      },
+      {
+        "driverIds": [
+          "fangio",
           "farina",
           "maglioli"
         ],
@@ -12216,6 +12748,22 @@
           "Juan Fangio",
           "Nino Farina",
           "Umberto Maglioli"
+        ],
+        "firstRace": {
+          "round": "1",
+          "raceName": "Argentine Grand Prix"
+        }
+      },
+      {
+        "driverIds": [
+          "fangio",
+          "maglioli",
+          "trintignant"
+        ],
+        "names": [
+          "Juan Fangio",
+          "Umberto Maglioli",
+          "Maurice Trintignant"
         ],
         "firstRace": {
           "round": "1",
@@ -12240,6 +12788,22 @@
       },
       {
         "driverIds": [
+          "behra",
+          "castellotti",
+          "trintignant"
+        ],
+        "names": [
+          "Jean Behra",
+          "Eugenio Castellotti",
+          "Maurice Trintignant"
+        ],
+        "firstRace": {
+          "round": "2",
+          "raceName": "Monaco Grand Prix"
+        }
+      },
+      {
+        "driverIds": [
           "davies",
           "paul_russo",
           "sweikert"
@@ -12247,6 +12811,22 @@
         "names": [
           "Jimmy Davies",
           "Paul Russo",
+          "Bob Sweikert"
+        ],
+        "firstRace": {
+          "round": "3",
+          "raceName": "Indianapolis 500"
+        }
+      },
+      {
+        "driverIds": [
+          "bettenhausen",
+          "davies",
+          "sweikert"
+        ],
+        "names": [
+          "Tony Bettenhausen",
+          "Jimmy Davies",
           "Bob Sweikert"
         ],
         "firstRace": {
@@ -12465,153 +13045,7 @@
         }
       }
     ],
-    "1957": [
-      {
-        "driverIds": [
-          "behra",
-          "fangio",
-          "menditeguy"
-        ],
-        "names": [
-          "Jean Behra",
-          "Juan Fangio",
-          "Carlos Menditeguy"
-        ],
-        "firstRace": {
-          "round": "1",
-          "raceName": "Argentine Grand Prix"
-        }
-      },
-      {
-        "driverIds": [
-          "brooks",
-          "fangio",
-          "gregory"
-        ],
-        "names": [
-          "Tony Brooks",
-          "Juan Fangio",
-          "Masten Gregory"
-        ],
-        "firstRace": {
-          "round": "2",
-          "raceName": "Monaco Grand Prix"
-        }
-      },
-      {
-        "driverIds": [
-          "bryan",
-          "hanks",
-          "rathmann"
-        ],
-        "names": [
-          "Jimmy Bryan",
-          "Sam Hanks",
-          "Jim Rathmann"
-        ],
-        "firstRace": {
-          "round": "3",
-          "raceName": "Indianapolis 500"
-        }
-      },
-      {
-        "driverIds": [
-          "collins",
-          "fangio",
-          "musso"
-        ],
-        "names": [
-          "Peter Collins",
-          "Juan Fangio",
-          "Luigi Musso"
-        ],
-        "firstRace": {
-          "round": "4",
-          "raceName": "French Grand Prix"
-        }
-      },
-      {
-        "driverIds": [
-          "brooks",
-          "hawthorn",
-          "musso"
-        ],
-        "names": [
-          "Tony Brooks",
-          "Mike Hawthorn",
-          "Luigi Musso"
-        ],
-        "firstRace": {
-          "round": "5",
-          "raceName": "British Grand Prix"
-        }
-      },
-      {
-        "driverIds": [
-          "collins",
-          "fangio",
-          "hawthorn"
-        ],
-        "names": [
-          "Peter Collins",
-          "Juan Fangio",
-          "Mike Hawthorn"
-        ],
-        "firstRace": {
-          "round": "6",
-          "raceName": "German Grand Prix"
-        }
-      },
-      {
-        "driverIds": [
-          "fangio",
-          "moss",
-          "schell"
-        ],
-        "names": [
-          "Juan Fangio",
-          "Stirling Moss",
-          "Harry Schell"
-        ],
-        "firstRace": {
-          "round": "7",
-          "raceName": "Pescara Grand Prix"
-        }
-      },
-      {
-        "driverIds": [
-          "fangio",
-          "moss",
-          "trips"
-        ],
-        "names": [
-          "Juan Fangio",
-          "Stirling Moss",
-          "Wolfgang von Trips"
-        ],
-        "firstRace": {
-          "round": "8",
-          "raceName": "Italian Grand Prix"
-        }
-      }
-    ],
     "1958": [
-      {
-        "driverIds": [
-          "hawthorn",
-          "moss",
-          "musso"
-        ],
-        "names": [
-          "Mike Hawthorn",
-          "Stirling Moss",
-          "Luigi Musso"
-        ],
-        "firstRace": {
-          "round": "1",
-          "raceName": "Argentine Grand Prix"
-        }
-      },
       {
         "driverIds": [
           "collins",
@@ -12772,120 +13206,6 @@
           "raceName": "Moroccan Grand Prix"
         }
       }
-    ],
-    "1954": [
-      {
-        "driverIds": [
-          "bryan",
-          "mcgrath",
-          "vukovich"
-        ],
-        "names": [
-          "Jimmy Bryan",
-          "Jack McGrath",
-          "Bill Vukovich"
-        ],
-        "firstRace": {
-          "round": "2",
-          "raceName": "Indianapolis 500"
-        }
-      },
-      {
-        "driverIds": [
-          "fangio",
-          "moss",
-          "trintignant"
-        ],
-        "names": [
-          "Juan Fangio",
-          "Stirling Moss",
-          "Maurice Trintignant"
-        ],
-        "firstRace": {
-          "round": "3",
-          "raceName": "Belgian Grand Prix"
-        }
-      },
-      {
-        "driverIds": [
-          "fangio",
-          "kling",
-          "manzon"
-        ],
-        "names": [
-          "Juan Fangio",
-          "Karl Kling",
-          "Robert Manzon"
-        ],
-        "firstRace": {
-          "round": "4",
-          "raceName": "French Grand Prix"
-        }
-      },
-      {
-        "driverIds": [
-          "gonzalez",
-          "hawthorn",
-          "marimon"
-        ],
-        "names": [
-          "José Froilán González",
-          "Mike Hawthorn",
-          "Onofre Marimón"
-        ],
-        "firstRace": {
-          "round": "5",
-          "raceName": "British Grand Prix"
-        }
-      },
-      {
-        "driverIds": [
-          "fangio",
-          "hawthorn",
-          "trintignant"
-        ],
-        "names": [
-          "Juan Fangio",
-          "Mike Hawthorn",
-          "Maurice Trintignant"
-        ],
-        "firstRace": {
-          "round": "6",
-          "raceName": "German Grand Prix"
-        }
-      },
-      {
-        "driverIds": [
-          "fangio",
-          "gonzalez",
-          "herrmann"
-        ],
-        "names": [
-          "Juan Fangio",
-          "José Froilán González",
-          "Hans Herrmann"
-        ],
-        "firstRace": {
-          "round": "7",
-          "raceName": "Swiss Grand Prix"
-        }
-      },
-      {
-        "driverIds": [
-          "fangio",
-          "hawthorn",
-          "musso"
-        ],
-        "names": [
-          "Juan Fangio",
-          "Mike Hawthorn",
-          "Luigi Musso"
-        ],
-        "firstRace": {
-          "round": "9",
-          "raceName": "Spanish Grand Prix"
-        }
-      }
     ]
   },
   "seasonCounts": {
@@ -12930,9 +13250,9 @@
     "1974": 13,
     "2006": 11,
     "1971": 11,
+    "1951": 12,
     "1992": 8,
     "1952": 7,
-    "1951": 7,
     "1964": 8,
     "1967": 10,
     "1972": 11,
@@ -12942,17 +13262,19 @@
     "1981": 10,
     "1969": 10,
     "1975": 13,
-    "1956": 7,
-    "1960": 9,
-    "1953": 8,
+    "1956": 12,
+    "1960": 10,
+    "1954": 9,
+    "1953": 9,
     "1965": 6,
+    "1957": 9,
     "1989": 11,
     "1984": 15,
     "1978": 14,
     "1962": 9,
     "1961": 7,
     "1977": 14,
-    "1950": 7,
+    "1950": 8,
     "2020": 5,
     "1982": 16,
     "1987": 9,
@@ -12961,11 +13283,9 @@
     "1970": 12,
     "1968": 12,
     "1966": 8,
-    "1955": 7,
+    "1955": 12,
     "1959": 9,
-    "1957": 8,
-    "1958": 11,
-    "1954": 7
+    "1958": 10
   },
   "seasonRange": [
     1950,

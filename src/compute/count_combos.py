@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
+from compute.shared_drives import podium_drivers, podium_trios  # noqa: E402
 from datalib import save_combos  # noqa: E402
 
 DATA_DIR = Path(__file__).resolve().parents[2] / "data"
@@ -21,18 +22,20 @@ def main() -> int:
     name_by_id: dict[str, str] = {}
 
     for race in podiums:
-        ids = sorted([race["p1"]["driverId"], race["p2"]["driverId"], race["p3"]["driverId"]])
-        for slot in ("p1", "p2", "p3"):
-            name_by_id[race[slot]["driverId"]] = race[slot]["name"]
-        key = tuple(ids)
-        combo = combos.setdefault(
-            key,
-            {"driverIds": list(key), "count": 0, "races": []},
-        )
-        combo["count"] += 1
-        combo["races"].append(
-            {"season": race["season"], "round": race["round"], "raceName": race["raceName"]}
-        )
+        for d in podium_drivers(race):
+            name_by_id[d["driverId"]] = d["name"]
+        race_ref = {
+            "season": race["season"],
+            "round": race["round"],
+            "raceName": race["raceName"],
+        }
+        # A shared car puts four or more drivers on the podium, so one race can
+        # produce several distinct trios — each is a real combination, and each
+        # counts this race once.
+        for key in podium_trios(race):
+            combo = combos.setdefault(key, {"driverIds": list(key), "count": 0, "races": []})
+            combo["count"] += 1
+            combo["races"].append(dict(race_ref))
 
     out = []
     for combo in combos.values():
@@ -59,7 +62,7 @@ def main() -> int:
     total_races = sum(c["count"] for c in out)
     print(f"Wrote {OUT_PATH}")
     print(f"  unique combinations: {len(out)}")
-    print(f"  total podiums covered: {total_races} (expected {len(podiums)})")
+    print(f"  trio appearances: {total_races} across {len(podiums)} races")
     print()
     print("Top 10 by count:")
     for i, c in enumerate(out[:10], 1):

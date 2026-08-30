@@ -8,7 +8,7 @@ of silently passing through.
 
 from __future__ import annotations
 
-from pydantic import BaseModel, ConfigDict, model_validator
+from pydantic import BaseModel, ConfigDict, model_serializer, model_validator
 
 
 class _Base(BaseModel):
@@ -42,12 +42,33 @@ class DriverRef(_Base):
 
 
 class Podium(_Base):
+    """One race's podium.
+
+    ``p1``/``p2``/``p3`` name the first driver the API classifies at each
+    position. Before 1961 two or three drivers routinely shared one car and are
+    all classified at the same position; the extras live in ``coDrivers``, keyed
+    by slot.
+
+    The field is dropped from the serialisation when absent so the 1143 races
+    without a shared drive stay byte-identical. This is deliberately local to
+    this model: other datasets (podigami, model_eval, grid_penalties) do write
+    explicit nulls, and a global ``exclude_none`` would rewrite all of them.
+    """
+
     season: str
     round: str
     raceName: str
     p1: DriverRef
     p2: DriverRef
     p3: DriverRef
+    coDrivers: dict[str, list[DriverRef]] | None = None
+
+    @model_serializer(mode="wrap")
+    def _omit_absent_codrivers(self, handler):
+        data = handler(self)
+        if data.get("coDrivers") is None:
+            data.pop("coDrivers", None)
+        return data
 
 
 # --- combos.json -------------------------------------------------------------

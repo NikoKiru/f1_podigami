@@ -26,6 +26,7 @@ from itertools import combinations
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
+from compute.shared_drives import podium_drivers  # noqa: E402
 from datalib import save_overdue  # noqa: E402
 
 DATA_DIR = Path(__file__).resolve().parents[2] / "data"
@@ -86,8 +87,7 @@ def compute(
     podium_count: Counter[str] = Counter()
     name_by_id: dict[str, str] = {}
     for r in podiums:
-        for slot in ("p1", "p2", "p3"):
-            d = r[slot]
+        for d in podium_drivers(r):
             podium_count[d["driverId"]] += 1
             name_by_id[d["driverId"]] = d["name"]
 

@@ -15,6 +15,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "src"))
+from compute.shared_drives import podium_drivers  # noqa: E402
 from datalib import save_soulmates  # noqa: E402
 
 PODIUMS_PATH = ROOT / "data" / "podiums.json"
@@ -30,11 +31,9 @@ def main() -> int:
     totals: dict[str, int] = defaultdict(int)
     podium_years: dict[str, list[int]] = defaultdict(list)
     for r in races:
-        for slot in ("p1", "p2", "p3"):
-            d = r.get(slot)
-            if d:
-                totals[d["name"]] += 1
-                podium_years[d["name"]].append(int(r["season"]))
+        for d in podium_drivers(r):
+            totals[d["name"]] += 1
+            podium_years[d["name"]].append(int(r["season"]))
 
     top_names = sorted(totals.keys(), key=lambda n: (-totals[n], n))[:TOP_N]
     top_set = set(top_names)
@@ -52,8 +51,7 @@ def main() -> int:
 
     for r in races:
         year = int(r["season"])
-        names = [r.get(slot, {}).get("name") for slot in ("p1", "p2", "p3")]
-        names = [nm for nm in names if nm and nm in top_set]
+        names = [d["name"] for d in podium_drivers(r) if d["name"] in top_set]
         for a, b in combinations(names, 2):
             ia, ib = name_to_idx[a], name_to_idx[b]
             matrix[ia][ib] += 1

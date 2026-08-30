@@ -1,5 +1,13 @@
 # Release Notes
 
+## 2026-08-30
+
+### Features
+- Podiums won by a shared car now count for every driver who drove it. Until 1961 a driver could hand his car to a team-mate mid-race and both were classified at the finishing position, so 18 races in F1 history put **more than one** three-driver trio on the podium at once — and the site had been silently keeping only the first-listed driver of each shared step. `podiums.json` now carries the co-drivers, and a shared-drive podium expands into the full cross-product of real trios through every stage: combinations, podigami status, overdue, unlikeliest and soulmates. The clearest case is the 1956 Belgian Grand Prix, where Cesare Perdisa and Stirling Moss shared the third-placed Maserati
+- `combos.html` marks a trio whose podium involved a shared car, so a combination that looks like an odd pairing is explained rather than mysterious; the marker carries an accessible name for screen readers
+- The last-race recap renders a shared step as one podium step holding both drivers, so the podium stays three steps tall instead of dropping a name (dormant today — the last shared drive was the 1960 Argentine Grand Prix — but it can no longer silently lose a driver)
+- A new FAQ entry explains why some 1950s podiums list four drivers
+
 ## 2026-08-27
 
 ### Improvements

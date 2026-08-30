@@ -169,6 +169,17 @@ def test_single_seen_trio_is_impossible():
     assert res["candidates"] == []
 
 
+def test_shared_drive_trio_counts_as_already_seen():
+    """One car, two drivers: Cas handed his car to Dan mid-race, so alf+bob+dan
+    stood on that podium too and must never be offered as a brand-new trio."""
+    podiums = [race(2025, 1, "alf", "bob", "cas")]
+    podiums[0]["coDrivers"] = {"p3": [{"driverId": "dan", "name": "Dan"}]}
+    grid = [{"driverId": d, "name": d.title()} for d in ("alf", "bob", "dan")]
+    res = cp.compute(podiums, combos_from(podiums), grid)
+    assert res["chanceNextRaceNew"] == pytest.approx(0.0)
+    assert res["candidates"] == []
+
+
 # --- constructor strength -----------------------------------------------------
 
 

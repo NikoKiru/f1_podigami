@@ -130,46 +130,6 @@
     },
     {
       "driverIds": [
-        "collins",
-        "frere",
-        "perdisa"
-      ],
-      "names": [
-        "Peter Collins",
-        "Paul Frère",
-        "Cesare Perdisa"
-      ],
-      "racesTogether": 1,
-      "score": 0.0039,
-      "count": 1,
-      "happened": {
-        "season": "1956",
-        "round": "4",
-        "raceName": "Belgian Grand Prix"
-      },
-      "perDriver": [
-        {
-          "name": "Peter Collins",
-          "podiums": 7,
-          "starts": 36,
-          "rate": 0.1944
-        },
-        {
-          "name": "Paul Frère",
-          "podiums": 1,
-          "starts": 11,
-          "rate": 0.0909
-        },
-        {
-          "name": "Cesare Perdisa",
-          "podiums": 2,
-          "starts": 9,
-          "rate": 0.2222
-        }
-      ]
-    },
-    {
-      "driverIds": [
         "damon_hill",
         "morbidelli",
         "panis"
@@ -205,6 +165,46 @@
           "podiums": 5,
           "starts": 158,
           "rate": 0.0316
+        }
+      ]
+    },
+    {
+      "driverIds": [
+        "collins",
+        "frere",
+        "perdisa"
+      ],
+      "names": [
+        "Peter Collins",
+        "Paul Frère",
+        "Cesare Perdisa"
+      ],
+      "racesTogether": 1,
+      "score": 0.0051,
+      "count": 1,
+      "happened": {
+        "season": "1956",
+        "round": "4",
+        "raceName": "Belgian Grand Prix"
+      },
+      "perDriver": [
+        {
+          "name": "Peter Collins",
+          "podiums": 9,
+          "starts": 36,
+          "rate": 0.25
+        },
+        {
+          "name": "Paul Frère",
+          "podiums": 1,
+          "starts": 11,
+          "rate": 0.0909
+        },
+        {
+          "name": "Cesare Perdisa",
+          "podiums": 2,
+          "starts": 9,
+          "rate": 0.2222
         }
       ]
     },
@@ -770,6 +770,86 @@
     },
     {
       "driverIds": [
+        "allison",
+        "mclaren",
+        "trintignant"
+      ],
+      "names": [
+        "Cliff Allison",
+        "Bruce McLaren",
+        "Maurice Trintignant"
+      ],
+      "racesTogether": 9,
+      "score": 0.0145,
+      "count": 1,
+      "happened": {
+        "season": "1960",
+        "round": "1",
+        "raceName": "Argentine Grand Prix"
+      },
+      "perDriver": [
+        {
+          "name": "Cliff Allison",
+          "podiums": 1,
+          "starts": 17,
+          "rate": 0.0588
+        },
+        {
+          "name": "Bruce McLaren",
+          "podiums": 27,
+          "starts": 103,
+          "rate": 0.2621
+        },
+        {
+          "name": "Maurice Trintignant",
+          "podiums": 9,
+          "starts": 86,
+          "rate": 0.1047
+        }
+      ]
+    },
+    {
+      "driverIds": [
+        "collins",
+        "frere",
+        "moss"
+      ],
+      "names": [
+        "Peter Collins",
+        "Paul Frère",
+        "Stirling Moss"
+      ],
+      "racesTogether": 2,
+      "score": 0.0149,
+      "count": 1,
+      "happened": {
+        "season": "1956",
+        "round": "4",
+        "raceName": "Belgian Grand Prix"
+      },
+      "perDriver": [
+        {
+          "name": "Peter Collins",
+          "podiums": 9,
+          "starts": 36,
+          "rate": 0.25
+        },
+        {
+          "name": "Paul Frère",
+          "podiums": 1,
+          "starts": 11,
+          "rate": 0.0909
+        },
+        {
+          "name": "Stirling Moss",
+          "podiums": 24,
+          "starts": 73,
+          "rate": 0.3288
+        }
+      ]
+    },
+    {
+      "driverIds": [
         "love",
         "rodriguez",
         "surtees"
@@ -930,86 +1010,6 @@
     },
     {
       "driverIds": [
-        "castellotti",
-        "perdisa",
-        "trintignant"
-      ],
-      "names": [
-        "Eugenio Castellotti",
-        "Cesare Perdisa",
-        "Maurice Trintignant"
-      ],
-      "racesTogether": 6,
-      "score": 0.0192,
-      "count": 1,
-      "happened": {
-        "season": "1955",
-        "round": "2",
-        "raceName": "Monaco Grand Prix"
-      },
-      "perDriver": [
-        {
-          "name": "Eugenio Castellotti",
-          "podiums": 3,
-          "starts": 17,
-          "rate": 0.1765
-        },
-        {
-          "name": "Cesare Perdisa",
-          "podiums": 2,
-          "starts": 9,
-          "rate": 0.2222
-        },
-        {
-          "name": "Maurice Trintignant",
-          "podiums": 7,
-          "starts": 86,
-          "rate": 0.0814
-        }
-      ]
-    },
-    {
-      "driverIds": [
-        "brooks",
-        "salvadori",
-        "trintignant"
-      ],
-      "names": [
-        "Tony Brooks",
-        "Roy Salvadori",
-        "Maurice Trintignant"
-      ],
-      "racesTogether": 25,
-      "score": 0.0199,
-      "count": 1,
-      "happened": {
-        "season": "1958",
-        "round": "8",
-        "raceName": "German Grand Prix"
-      },
-      "perDriver": [
-        {
-          "name": "Tony Brooks",
-          "podiums": 10,
-          "starts": 41,
-          "rate": 0.2439
-        },
-        {
-          "name": "Roy Salvadori",
-          "podiums": 2,
-          "starts": 50,
-          "rate": 0.04
-        },
-        {
-          "name": "Maurice Trintignant",
-          "podiums": 7,
-          "starts": 86,
-          "rate": 0.0814
-        }
-      ]
-    },
-    {
-      "driverIds": [
         "frentzen",
         "ralf_schumacher",
         "salo"
@@ -1130,6 +1130,46 @@
     },
     {
       "driverIds": [
+        "castellotti",
+        "perdisa",
+        "trintignant"
+      ],
+      "names": [
+        "Eugenio Castellotti",
+        "Cesare Perdisa",
+        "Maurice Trintignant"
+      ],
+      "racesTogether": 6,
+      "score": 0.0246,
+      "count": 1,
+      "happened": {
+        "season": "1955",
+        "round": "2",
+        "raceName": "Monaco Grand Prix"
+      },
+      "perDriver": [
+        {
+          "name": "Eugenio Castellotti",
+          "podiums": 3,
+          "starts": 17,
+          "rate": 0.1765
+        },
+        {
+          "name": "Cesare Perdisa",
+          "podiums": 2,
+          "starts": 9,
+          "rate": 0.2222
+        },
+        {
+          "name": "Maurice Trintignant",
+          "podiums": 9,
+          "starts": 86,
+          "rate": 0.1047
+        }
+      ]
+    },
+    {
+      "driverIds": [
         "holland",
         "parsons",
         "rose"
@@ -1165,46 +1205,6 @@
           "podiums": 1,
           "starts": 2,
           "rate": 0.5
-        }
-      ]
-    },
-    {
-      "driverIds": [
-        "berger",
-        "panis",
-        "villeneuve"
-      ],
-      "names": [
-        "Gerhard Berger",
-        "Olivier Panis",
-        "Jacques Villeneuve"
-      ],
-      "racesTogether": 25,
-      "score": 0.0252,
-      "count": 1,
-      "happened": {
-        "season": "1997",
-        "round": "2",
-        "raceName": "Brazilian Grand Prix"
-      },
-      "perDriver": [
-        {
-          "name": "Gerhard Berger",
-          "podiums": 48,
-          "starts": 210,
-          "rate": 0.2286
-        },
-        {
-          "name": "Olivier Panis",
-          "podiums": 5,
-          "starts": 158,
-          "rate": 0.0316
-        },
-        {
-          "name": "Jacques Villeneuve",
-          "podiums": 23,
-          "starts": 165,
-          "rate": 0.1394
         }
       ]
     }

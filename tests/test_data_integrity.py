@@ -56,8 +56,9 @@ def test_combo_drivers_aligned_with_driver_ids():
     """drivers[i] must be the display name for driverIds[i] — parallel arrays must align."""
     name_by_id: dict[str, str] = {}
     for p in load_podiums():
-        for slot in (p.p1, p.p2, p.p3):
-            name_by_id[slot.driverId] = slot.name
+        for slot in ("p1", "p2", "p3"):
+            for d in [getattr(p, slot), *((p.coDrivers or {}).get(slot) or [])]:
+                name_by_id[d.driverId] = d.name
 
     for c in load_combos():
         assert len(c.drivers) == len(c.driverIds)
@@ -104,3 +105,39 @@ def test_race_results_podiums_agree_with_podiums_dataset():
         if [top3[1], top3[2], top3[3]] != podium_map[rk]:
             mismatches.append((rk, [top3[1], top3[2], top3[3]], podium_map[rk]))
     assert mismatches == [], f"{len(mismatches)} podium mismatches: {mismatches[:5]}"
+
+
+def test_codrivers_match_duplicate_positions_in_race_results():
+    """Every shared podium step in race_results.json is recorded in podiums.json
+    and vice versa — no shared drive silently dropped, none invented."""
+    from collections import defaultdict
+
+    truth: dict[tuple[str, str], dict[str, list[str]]] = {}
+    for race in load_race_results():
+        by_pos: dict[int, list[str]] = defaultdict(list)
+        for row in race.results:
+            if row.position in (1, 2, 3):
+                by_pos[row.position].append(row.driverId)
+        extra = {f"p{p}": ids[1:] for p, ids in by_pos.items() if len(ids) > 1}
+        if extra:
+            truth[(race.season, race.round)] = extra
+
+    recorded = {
+        (p.season, p.round): {k: [d.driverId for d in v] for k, v in (p.coDrivers or {}).items()}
+        for p in load_podiums()
+        if p.coDrivers
+    }
+
+    assert len(truth) == 18, f"expected 18 shared-drive races, found {len(truth)}"
+    assert recorded == truth
+
+
+def test_codriver_is_never_the_primary_of_its_own_slot():
+    for p in load_podiums():
+        for slot, extras in (p.coDrivers or {}).items():
+            assert slot in ("p1", "p2", "p3")
+            primary = getattr(p, slot).driverId
+            ids = [d.driverId for d in extras]
+            assert primary not in ids, f"{p.season} R{p.round} {slot} repeats {primary}"
+            assert len(set(ids)) == len(ids)
+            assert all(d.name.strip() for d in extras)
