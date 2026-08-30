@@ -32,6 +32,7 @@ No server. No database. No JavaScript framework. Just Python, one `requests` dep
 
 - 🔮 **Podigami predictor** — ranks the never-before podium trios most likely to debut next, with a scorigami-style *"% chance the next race is brand-new"*.
 - 🧮 **Backtested model** — the algorithm was *chosen by data*, not guesswork (see [the model](#-how-the-predictor-works)).
+- 🤝 **Shared drives** — until 1960 two drivers could share one car and both be classified, so those 18 races put more than one trio on the podium at once; every trio they produced counts, and the combinations table marks them.
 - 🏁 **Next race + last race** — countdown to the upcoming GP, plus a compact recap of the last race's podium trio with its podigami status and linked history.
 - 🗓️ **Season timeline** — drag a year slider to see every trio that debuted on a podium in each season since 1950.
 - ⏳ **Overdue trios** — driver pairs whose individual form says they *should* share a podium, but haven't yet.
@@ -49,7 +50,7 @@ No server. No database. No JavaScript framework. Just Python, one `requests` dep
 | | Page | What it shows |
 |---|---|---|
 | 🔮 | **`index.html`** | The **Podigami predictor** — next/last race (with the upcoming qualifying time), most likely brand-new trio and candidate rankings that **refresh after qualifying using the starting grid** (with a collapsible current-form tower), season debut timeline (with quick-pick season chips), FAQ, plus live-stat discovery hooks and a "Keep exploring" grid routing to every other page |
-| 🧩 | `combos.html` | Every unique three-driver combination that has shared a podium since 1950 — sortable, filterable, expandable |
+| 🧩 | `combos.html` | Every unique three-driver combination that has shared a podium since 1950 — sortable, filterable, expandable, with shared-drive podiums marked |
 | ⏳ | `overdue.html` | Trios "overdue" to appear — driver pairs whose current form suggests a shared podium is imminent |
 | 🎲 | `unlikeliest.html` | The mirror of Overdue — podium trios that *did* happen ranked by how statistically improbable they were, led by the single biggest fluke in F1 history |
 | 🤝 | `soulmates.html` | Shared-podium matrix — which drivers have stood on the box together most often |
@@ -196,7 +197,7 @@ python src/build_site.py
 ```bash
 pip install -r requirements-dev.txt   # tooling: ruff, pytest-cov, pip-audit
 ruff check . && ruff format --check .  # lint + format
-pytest --cov                          # 647 tests + coverage gate (≥70%)
+pytest --cov                          # 666 tests + coverage gate (≥70%)
 ```
 
 The suite covers **pure helpers**, **cross-dataset integrity** (combos derive from podiums, podigami
@@ -258,6 +259,7 @@ flowchart LR
 | `src/fetch/track_geo.py` | Resolve circuit SVG track paths from geo data |
 | **Compute** | |
 | `src/compute/count_combos.py` | Aggregate podiums into unique trios → `data/combos.json` |
+| `src/compute/shared_drives.py` | Expand a shared-drive podium (one car, two classified drivers) into every real trio |
 | `src/compute/compute_podigami.py` | 🔮 Predict the next brand-new trio → `data/podigami.json` |
 | `src/compute/compute_overdue.py` | Find trios overdue based on driver form → `data/overdue.json` |
 | `src/compute/compute_unlikeliest.py` | Rank podium trios that happened despite the odds → `data/unlikeliest.json` |

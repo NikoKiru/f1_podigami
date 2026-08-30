@@ -1793,3 +1793,13 @@ a.tl-where:hover {
         font-size: 0.75rem;
     }
 }
+
+/* A podium step held by one car that two drivers shared (pre-1961 only). */
+.lr-step.lr-shared {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 0.15em;
+    padding-left: 0.4em;
+    border-left: 2px solid var(--muted);
+    cursor: help;
+}

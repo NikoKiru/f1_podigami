@@ -37,6 +37,7 @@ from _layout import (  # noqa: E402  (needs the sys.path entry above)
 from flags import flag_svg  # noqa: E402
 from team_colors import team_color, text_on  # noqa: E402
 
+from compute.shared_drives import slot_drivers  # noqa: E402
 from datalib import (  # noqa: E402
     DATA_DIR,
     load_combos,
@@ -214,6 +215,40 @@ def _lookup_combo(trio_ids: list[str], combos: list[dict]) -> dict | None:
     return None
 
 
+def render_last_race_drivers(pod: dict, constructor_map: dict, meta: dict) -> str:
+    """The three podium steps of the last race.
+
+    A step held by a car two drivers shared renders both of them inside that one
+    step, marked as shared — the podium stays three steps tall. Dormant for
+    modern races; the last shared drive was the 1960 Argentine Grand Prix.
+    """
+    steps: list[str] = []
+    for pos in (1, 2, 3):
+        spans = []
+        for d in slot_drivers(pod, f"p{pos}"):
+            entry = {
+                "name": d["name"],
+                "driverId": d["driverId"],
+                "constructorId": constructor_map.get(d["driverId"], ""),
+            }
+            v = driver_view(entry, meta)
+            spans.append(
+                f'<span class="lr-driver" style="--team:{v["color"]}">'
+                f'<span class="cd-dot"></span>'
+                f'<span class="lr-code">{esc(v["code"])}</span>'
+                f"</span>"
+            )
+        if len(spans) > 1:
+            shared_desc = esc("One car, shared by both drivers")
+            steps.append(
+                f'<span class="lr-step lr-shared"'
+                f' title="{shared_desc}" aria-label="{shared_desc}">' + "".join(spans) + "</span>"
+            )
+        else:
+            steps.append(spans[0])
+    return '<span class="lr-sep">/</span>'.join(steps)
+
+
 def render_last_race(
     schedule: dict,
     podiums: list[dict],
@@ -248,21 +283,7 @@ def render_last_race(
     constructor_map = {d["driverId"]: d.get("constructorId", "") for d in driver_form}
     trio_ids = [pod["p1"]["driverId"], pod["p2"]["driverId"], pod["p3"]["driverId"]]
     trio_names = [pod[f"p{pos}"]["name"] for pos in (1, 2, 3)]
-    drivers_html = []
-    for pos, pid in enumerate(trio_ids, 1):
-        entry = {
-            "name": pod[f"p{pos}"]["name"],
-            "driverId": pid,
-            "constructorId": constructor_map.get(pid, ""),
-        }
-        v = driver_view(entry, meta)
-        drivers_html.append(
-            f'<span class="lr-driver" style="--team:{v["color"]}">'
-            f'<span class="cd-dot"></span>'
-            f'<span class="lr-code">{esc(v["code"])}</span>'
-            f"</span>"
-        )
-    trio_html = '<span class="lr-sep">/</span>'.join(drivers_html)
+    trio_html = render_last_race_drivers(pod, constructor_map, meta)
 
     combo = _lookup_combo(trio_ids, combos)
 
@@ -595,6 +616,14 @@ def faq_items(
             f"appeared across <strong>{total_races:,}</strong> races. Today&rsquo;s {grid_size}-driver "
             f"grid can produce <strong>{possible_trios:,}</strong> different trios per race, so most "
             f"combinations simply haven&rsquo;t come up yet.",
+        ),
+        (
+            "Why do some 1950s podiums list four drivers?",
+            "Until 1960 a driver could hand his car to a team-mate mid-race, and both were "
+            "classified at the finishing position. The 1956 Belgian Grand Prix is the clearest "
+            "case: Cesare Perdisa and Stirling Moss shared the third-placed Maserati, so that "
+            "race put two different trios on the podium at once. Eighteen races in history work "
+            "this way, and every trio they produced counts as having happened.",
         ),
         (
             "What else is on this site?",

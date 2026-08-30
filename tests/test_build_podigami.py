@@ -452,3 +452,32 @@ def test_live_post_quali_dropped_when_rounds_are_unreadable():
     """Garbage beats a wrong hero: an unparseable block falls back to pre-quali."""
     bad = {"asOf": {"season": "2026", "round": "11"}, "postQuali": {"season": "?", "round": "?"}}
     assert bp.live_post_quali(bad) is None
+
+
+def test_last_race_step_renders_both_drivers_of_a_shared_car():
+    """Dormant today (the last race is always modern) but must not silently
+    drop a driver if a podium step is ever shared again."""
+    from build.build_podigami_html import render_last_race_drivers
+
+    pod = {
+        "p1": {"driverId": "collins", "name": "Peter Collins"},
+        "p2": {"driverId": "frere", "name": "Paul Frère"},
+        "p3": {"driverId": "perdisa", "name": "Cesare Perdisa"},
+        "coDrivers": {"p3": [{"driverId": "moss", "name": "Stirling Moss"}]},
+    }
+    out = render_last_race_drivers(pod, {}, {})
+    assert out.count("lr-driver") == 4
+    assert "lr-shared" in out
+
+
+def test_last_race_step_is_unchanged_for_a_normal_podium():
+    from build.build_podigami_html import render_last_race_drivers
+
+    pod = {
+        "p1": {"driverId": "hamilton", "name": "Lewis Hamilton"},
+        "p2": {"driverId": "max_verstappen", "name": "Max Verstappen"},
+        "p3": {"driverId": "bottas", "name": "Valtteri Bottas"},
+    }
+    out = render_last_race_drivers(pod, {}, {})
+    assert out.count("lr-driver") == 3
+    assert "lr-shared" not in out
