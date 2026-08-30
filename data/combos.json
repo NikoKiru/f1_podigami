@@ -3973,6 +3973,47 @@
   },
   {
     "drivers": [
+      "Juan Fangio",
+      "Nino Farina",
+      "José Froilán González"
+    ],
+    "driverIds": [
+      "fangio",
+      "farina",
+      "gonzalez"
+    ],
+    "count": 3,
+    "lastRace": {
+      "season": "1955",
+      "round": "1",
+      "raceName": "Argentine Grand Prix"
+    },
+    "firstRace": {
+      "season": "1951",
+      "round": "8",
+      "raceName": "Spanish Grand Prix"
+    },
+    "lastRaceKey": 1955001,
+    "races": [
+      {
+        "season": "1951",
+        "round": "8",
+        "raceName": "Spanish Grand Prix"
+      },
+      {
+        "season": "1954",
+        "round": "1",
+        "raceName": "Argentine Grand Prix"
+      },
+      {
+        "season": "1955",
+        "round": "1",
+        "raceName": "Argentine Grand Prix"
+      }
+    ]
+  },
+  {
+    "drivers": [
       "Lewis Hamilton",
       "Felipe Massa",
       "Nico Rosberg"
@@ -4619,6 +4660,42 @@
         "season": "1953",
         "round": "1",
         "raceName": "Argentine Grand Prix"
+      }
+    ]
+  },
+  {
+    "drivers": [
+      "Alberto Ascari",
+      "Nino Farina",
+      "José Froilán González"
+    ],
+    "driverIds": [
+      "ascari",
+      "farina",
+      "gonzalez"
+    ],
+    "count": 2,
+    "lastRace": {
+      "season": "1953",
+      "round": "3",
+      "raceName": "Dutch Grand Prix"
+    },
+    "firstRace": {
+      "season": "1951",
+      "round": "7",
+      "raceName": "Italian Grand Prix"
+    },
+    "lastRaceKey": 1953003,
+    "races": [
+      {
+        "season": "1951",
+        "round": "7",
+        "raceName": "Italian Grand Prix"
+      },
+      {
+        "season": "1953",
+        "round": "3",
+        "raceName": "Dutch Grand Prix"
       }
     ]
   },
@@ -6246,6 +6323,42 @@
     "drivers": [
       "Juan Fangio",
       "José Froilán González",
+      "Maurice Trintignant"
+    ],
+    "driverIds": [
+      "fangio",
+      "gonzalez",
+      "trintignant"
+    ],
+    "count": 2,
+    "lastRace": {
+      "season": "1955",
+      "round": "1",
+      "raceName": "Argentine Grand Prix"
+    },
+    "firstRace": {
+      "season": "1954",
+      "round": "6",
+      "raceName": "German Grand Prix"
+    },
+    "lastRaceKey": 1955001,
+    "races": [
+      {
+        "season": "1954",
+        "round": "6",
+        "raceName": "German Grand Prix"
+      },
+      {
+        "season": "1955",
+        "round": "1",
+        "raceName": "Argentine Grand Prix"
+      }
+    ]
+  },
+  {
+    "drivers": [
+      "Juan Fangio",
+      "José Froilán González",
       "Mike Hawthorn"
     ],
     "driverIds": [
@@ -6275,42 +6388,6 @@
         "season": "1954",
         "round": "8",
         "raceName": "Italian Grand Prix"
-      }
-    ]
-  },
-  {
-    "drivers": [
-      "Juan Fangio",
-      "Nino Farina",
-      "José Froilán González"
-    ],
-    "driverIds": [
-      "fangio",
-      "farina",
-      "gonzalez"
-    ],
-    "count": 2,
-    "lastRace": {
-      "season": "1954",
-      "round": "1",
-      "raceName": "Argentine Grand Prix"
-    },
-    "firstRace": {
-      "season": "1951",
-      "round": "8",
-      "raceName": "Spanish Grand Prix"
-    },
-    "lastRaceKey": 1954001,
-    "races": [
-      {
-        "season": "1951",
-        "round": "8",
-        "raceName": "Spanish Grand Prix"
-      },
-      {
-        "season": "1954",
-        "round": "1",
-        "raceName": "Argentine Grand Prix"
       }
     ]
   },
@@ -6851,6 +6928,42 @@
         "season": "1986",
         "round": "12",
         "raceName": "Austrian Grand Prix"
+      }
+    ]
+  },
+  {
+    "drivers": [
+      "Mike Hawthorn",
+      "Stirling Moss",
+      "Luigi Musso"
+    ],
+    "driverIds": [
+      "hawthorn",
+      "moss",
+      "musso"
+    ],
+    "count": 2,
+    "lastRace": {
+      "season": "1958",
+      "round": "1",
+      "raceName": "Argentine Grand Prix"
+    },
+    "firstRace": {
+      "season": "1957",
+      "round": "5",
+      "raceName": "British Grand Prix"
+    },
+    "lastRaceKey": 1958001,
+    "races": [
+      {
+        "season": "1957",
+        "round": "5",
+        "raceName": "British Grand Prix"
+      },
+      {
+        "season": "1958",
+        "round": "1",
+        "raceName": "Argentine Grand Prix"
       }
     ]
   },
@@ -7841,6 +7954,37 @@
   {
     "drivers": [
       "Alberto Ascari",
+      "Felice Bonetto",
+      "Nino Farina"
+    ],
+    "driverIds": [
+      "ascari",
+      "bonetto",
+      "farina"
+    ],
+    "count": 1,
+    "lastRace": {
+      "season": "1953",
+      "round": "3",
+      "raceName": "Dutch Grand Prix"
+    },
+    "firstRace": {
+      "season": "1953",
+      "round": "3",
+      "raceName": "Dutch Grand Prix"
+    },
+    "lastRaceKey": 1953003,
+    "races": [
+      {
+        "season": "1953",
+        "round": "3",
+        "raceName": "Dutch Grand Prix"
+      }
+    ]
+  },
+  {
+    "drivers": [
+      "Alberto Ascari",
       "Juan Fangio",
       "José Froilán González"
     ],
@@ -7866,6 +8010,37 @@
         "season": "1951",
         "round": "6",
         "raceName": "German Grand Prix"
+      }
+    ]
+  },
+  {
+    "drivers": [
+      "Alberto Ascari",
+      "Juan Fangio",
+      "Luigi Villoresi"
+    ],
+    "driverIds": [
+      "ascari",
+      "fangio",
+      "villoresi"
+    ],
+    "count": 1,
+    "lastRace": {
+      "season": "1951",
+      "round": "4",
+      "raceName": "French Grand Prix"
+    },
+    "firstRace": {
+      "season": "1951",
+      "round": "4",
+      "raceName": "French Grand Prix"
+    },
+    "lastRaceKey": 1951004,
+    "races": [
+      {
+        "season": "1951",
+        "round": "4",
+        "raceName": "French Grand Prix"
       }
     ]
   },
@@ -7934,6 +8109,68 @@
   {
     "drivers": [
       "Alberto Ascari",
+      "Luigi Fagioli",
+      "Luigi Villoresi"
+    ],
+    "driverIds": [
+      "ascari",
+      "fagioli",
+      "villoresi"
+    ],
+    "count": 1,
+    "lastRace": {
+      "season": "1951",
+      "round": "4",
+      "raceName": "French Grand Prix"
+    },
+    "firstRace": {
+      "season": "1951",
+      "round": "4",
+      "raceName": "French Grand Prix"
+    },
+    "lastRaceKey": 1951004,
+    "races": [
+      {
+        "season": "1951",
+        "round": "4",
+        "raceName": "French Grand Prix"
+      }
+    ]
+  },
+  {
+    "drivers": [
+      "Alberto Ascari",
+      "Luigi Fagioli",
+      "Nino Farina"
+    ],
+    "driverIds": [
+      "ascari",
+      "fagioli",
+      "farina"
+    ],
+    "count": 1,
+    "lastRace": {
+      "season": "1950",
+      "round": "7",
+      "raceName": "Italian Grand Prix"
+    },
+    "firstRace": {
+      "season": "1950",
+      "round": "7",
+      "raceName": "Italian Grand Prix"
+    },
+    "lastRaceKey": 1950007,
+    "races": [
+      {
+        "season": "1950",
+        "round": "7",
+        "raceName": "Italian Grand Prix"
+      }
+    ]
+  },
+  {
+    "drivers": [
+      "Alberto Ascari",
       "Mike Hawthorn",
       "Piero Taruffi"
     ],
@@ -7959,37 +8196,6 @@
         "season": "1952",
         "round": "5",
         "raceName": "British Grand Prix"
-      }
-    ]
-  },
-  {
-    "drivers": [
-      "Alberto Ascari",
-      "Nino Farina",
-      "José Froilán González"
-    ],
-    "driverIds": [
-      "ascari",
-      "farina",
-      "gonzalez"
-    ],
-    "count": 1,
-    "lastRace": {
-      "season": "1953",
-      "round": "3",
-      "raceName": "Dutch Grand Prix"
-    },
-    "firstRace": {
-      "season": "1953",
-      "round": "3",
-      "raceName": "Dutch Grand Prix"
-    },
-    "lastRaceKey": 1953003,
-    "races": [
-      {
-        "season": "1953",
-        "round": "3",
-        "raceName": "Dutch Grand Prix"
       }
     ]
   },
@@ -8591,6 +8797,37 @@
     "driverIds": [
       "cross",
       "darter",
+      "vukovich"
+    ],
+    "count": 1,
+    "lastRace": {
+      "season": "1953",
+      "round": "2",
+      "raceName": "Indianapolis 500"
+    },
+    "firstRace": {
+      "season": "1953",
+      "round": "2",
+      "raceName": "Indianapolis 500"
+    },
+    "lastRaceKey": 1953002,
+    "races": [
+      {
+        "season": "1953",
+        "round": "2",
+        "raceName": "Indianapolis 500"
+      }
+    ]
+  },
+  {
+    "drivers": [
+      "Art Cross",
+      "Sam Hanks",
+      "Bill Vukovich"
+    ],
+    "driverIds": [
+      "cross",
+      "hanks",
       "vukovich"
     ],
     "count": 1,
@@ -9292,6 +9529,37 @@
         "season": "1969",
         "round": "4",
         "raceName": "Dutch Grand Prix"
+      }
+    ]
+  },
+  {
+    "drivers": [
+      "Cliff Allison",
+      "Bruce McLaren",
+      "Maurice Trintignant"
+    ],
+    "driverIds": [
+      "allison",
+      "mclaren",
+      "trintignant"
+    ],
+    "count": 1,
+    "lastRace": {
+      "season": "1960",
+      "round": "1",
+      "raceName": "Argentine Grand Prix"
+    },
+    "firstRace": {
+      "season": "1960",
+      "round": "1",
+      "raceName": "Argentine Grand Prix"
+    },
+    "lastRaceKey": 1960001,
+    "races": [
+      {
+        "season": "1960",
+        "round": "1",
+        "raceName": "Argentine Grand Prix"
       }
     ]
   },
@@ -16026,6 +16294,37 @@
     "drivers": [
       "Jean Behra",
       "Eugenio Castellotti",
+      "Maurice Trintignant"
+    ],
+    "driverIds": [
+      "behra",
+      "castellotti",
+      "trintignant"
+    ],
+    "count": 1,
+    "lastRace": {
+      "season": "1955",
+      "round": "2",
+      "raceName": "Monaco Grand Prix"
+    },
+    "firstRace": {
+      "season": "1955",
+      "round": "2",
+      "raceName": "Monaco Grand Prix"
+    },
+    "lastRaceKey": 1955002,
+    "races": [
+      {
+        "season": "1955",
+        "round": "2",
+        "raceName": "Monaco Grand Prix"
+      }
+    ]
+  },
+  {
+    "drivers": [
+      "Jean Behra",
+      "Eugenio Castellotti",
       "Peter Collins"
     ],
     "driverIds": [
@@ -16050,6 +16349,37 @@
         "season": "1956",
         "round": "5",
         "raceName": "French Grand Prix"
+      }
+    ]
+  },
+  {
+    "drivers": [
+      "Jean Behra",
+      "Juan Fangio",
+      "Alfonso de Portago"
+    ],
+    "driverIds": [
+      "behra",
+      "fangio",
+      "portago"
+    ],
+    "count": 1,
+    "lastRace": {
+      "season": "1956",
+      "round": "6",
+      "raceName": "British Grand Prix"
+    },
+    "firstRace": {
+      "season": "1956",
+      "round": "6",
+      "raceName": "British Grand Prix"
+    },
+    "lastRaceKey": 1956006,
+    "races": [
+      {
+        "season": "1956",
+        "round": "6",
+        "raceName": "British Grand Prix"
       }
     ]
   },
@@ -16118,6 +16448,37 @@
   {
     "drivers": [
       "Jean Behra",
+      "Mike Hawthorn",
+      "Luigi Musso"
+    ],
+    "driverIds": [
+      "behra",
+      "hawthorn",
+      "musso"
+    ],
+    "count": 1,
+    "lastRace": {
+      "season": "1956",
+      "round": "1",
+      "raceName": "Argentine Grand Prix"
+    },
+    "firstRace": {
+      "season": "1956",
+      "round": "1",
+      "raceName": "Argentine Grand Prix"
+    },
+    "lastRaceKey": 1956001,
+    "races": [
+      {
+        "season": "1956",
+        "round": "1",
+        "raceName": "Argentine Grand Prix"
+      }
+    ]
+  },
+  {
+    "drivers": [
+      "Jean Behra",
       "Peter Collins",
       "Juan Fangio"
     ],
@@ -16143,6 +16504,37 @@
         "season": "1956",
         "round": "6",
         "raceName": "British Grand Prix"
+      }
+    ]
+  },
+  {
+    "drivers": [
+      "Jean Behra",
+      "Peter Collins",
+      "Stirling Moss"
+    ],
+    "driverIds": [
+      "behra",
+      "collins",
+      "moss"
+    ],
+    "count": 1,
+    "lastRace": {
+      "season": "1956",
+      "round": "2",
+      "raceName": "Monaco Grand Prix"
+    },
+    "firstRace": {
+      "season": "1956",
+      "round": "2",
+      "raceName": "Monaco Grand Prix"
+    },
+    "lastRaceKey": 1956002,
+    "races": [
+      {
+        "season": "1956",
+        "round": "2",
+        "raceName": "Monaco Grand Prix"
       }
     ]
   },
@@ -17668,6 +18060,37 @@
   {
     "drivers": [
       "Juan Fangio",
+      "José Froilán González",
+      "Umberto Maglioli"
+    ],
+    "driverIds": [
+      "fangio",
+      "gonzalez",
+      "maglioli"
+    ],
+    "count": 1,
+    "lastRace": {
+      "season": "1955",
+      "round": "1",
+      "raceName": "Argentine Grand Prix"
+    },
+    "firstRace": {
+      "season": "1955",
+      "round": "1",
+      "raceName": "Argentine Grand Prix"
+    },
+    "lastRaceKey": 1955001,
+    "races": [
+      {
+        "season": "1955",
+        "round": "1",
+        "raceName": "Argentine Grand Prix"
+      }
+    ]
+  },
+  {
+    "drivers": [
+      "Juan Fangio",
       "Karl Kling",
       "Robert Manzon"
     ],
@@ -17792,6 +18215,37 @@
   {
     "drivers": [
       "Juan Fangio",
+      "Mike Hawthorn",
+      "Umberto Maglioli"
+    ],
+    "driverIds": [
+      "fangio",
+      "hawthorn",
+      "maglioli"
+    ],
+    "count": 1,
+    "lastRace": {
+      "season": "1954",
+      "round": "8",
+      "raceName": "Italian Grand Prix"
+    },
+    "firstRace": {
+      "season": "1954",
+      "round": "8",
+      "raceName": "Italian Grand Prix"
+    },
+    "lastRaceKey": 1954008,
+    "races": [
+      {
+        "season": "1954",
+        "round": "8",
+        "raceName": "Italian Grand Prix"
+      }
+    ]
+  },
+  {
+    "drivers": [
+      "Juan Fangio",
       "Nino Farina",
       "Luigi Villoresi"
     ],
@@ -17817,6 +18271,37 @@
         "season": "1953",
         "round": "9",
         "raceName": "Italian Grand Prix"
+      }
+    ]
+  },
+  {
+    "drivers": [
+      "Juan Fangio",
+      "Nino Farina",
+      "Maurice Trintignant"
+    ],
+    "driverIds": [
+      "fangio",
+      "farina",
+      "trintignant"
+    ],
+    "count": 1,
+    "lastRace": {
+      "season": "1955",
+      "round": "1",
+      "raceName": "Argentine Grand Prix"
+    },
+    "firstRace": {
+      "season": "1955",
+      "round": "1",
+      "raceName": "Argentine Grand Prix"
+    },
+    "lastRaceKey": 1955001,
+    "races": [
+      {
+        "season": "1955",
+        "round": "1",
+        "raceName": "Argentine Grand Prix"
       }
     ]
   },
@@ -18096,6 +18581,37 @@
         "season": "1957",
         "round": "8",
         "raceName": "Italian Grand Prix"
+      }
+    ]
+  },
+  {
+    "drivers": [
+      "Juan Fangio",
+      "Umberto Maglioli",
+      "Maurice Trintignant"
+    ],
+    "driverIds": [
+      "fangio",
+      "maglioli",
+      "trintignant"
+    ],
+    "count": 1,
+    "lastRace": {
+      "season": "1955",
+      "round": "1",
+      "raceName": "Argentine Grand Prix"
+    },
+    "firstRace": {
+      "season": "1955",
+      "round": "1",
+      "raceName": "Argentine Grand Prix"
+    },
+    "lastRaceKey": 1955001,
+    "races": [
+      {
+        "season": "1955",
+        "round": "1",
+        "raceName": "Argentine Grand Prix"
       }
     ]
   },
@@ -19218,6 +19734,37 @@
   {
     "drivers": [
       "Luigi Fagioli",
+      "José Froilán González",
+      "Luigi Villoresi"
+    ],
+    "driverIds": [
+      "fagioli",
+      "gonzalez",
+      "villoresi"
+    ],
+    "count": 1,
+    "lastRace": {
+      "season": "1951",
+      "round": "4",
+      "raceName": "French Grand Prix"
+    },
+    "firstRace": {
+      "season": "1951",
+      "round": "4",
+      "raceName": "French Grand Prix"
+    },
+    "lastRaceKey": 1951004,
+    "races": [
+      {
+        "season": "1951",
+        "round": "4",
+        "raceName": "French Grand Prix"
+      }
+    ]
+  },
+  {
+    "drivers": [
+      "Luigi Fagioli",
       "Juan Fangio",
       "Louis Rosier"
     ],
@@ -19367,6 +19914,37 @@
         "season": "1950",
         "round": "1",
         "raceName": "British Grand Prix"
+      }
+    ]
+  },
+  {
+    "drivers": [
+      "Manny Ayulo",
+      "Mike Nazaruk",
+      "Lee Wallard"
+    ],
+    "driverIds": [
+      "ayulo",
+      "nazaruk",
+      "wallard"
+    ],
+    "count": 1,
+    "lastRace": {
+      "season": "1951",
+      "round": "2",
+      "raceName": "Indianapolis 500"
+    },
+    "firstRace": {
+      "season": "1951",
+      "round": "2",
+      "raceName": "Indianapolis 500"
+    },
+    "lastRaceKey": 1951002,
+    "races": [
+      {
+        "season": "1951",
+        "round": "2",
+        "raceName": "Indianapolis 500"
       }
     ]
   },
@@ -20576,37 +21154,6 @@
         "season": "1994",
         "round": "3",
         "raceName": "San Marino Grand Prix"
-      }
-    ]
-  },
-  {
-    "drivers": [
-      "Mike Hawthorn",
-      "Stirling Moss",
-      "Luigi Musso"
-    ],
-    "driverIds": [
-      "hawthorn",
-      "moss",
-      "musso"
-    ],
-    "count": 1,
-    "lastRace": {
-      "season": "1958",
-      "round": "1",
-      "raceName": "Argentine Grand Prix"
-    },
-    "firstRace": {
-      "season": "1958",
-      "round": "1",
-      "raceName": "Argentine Grand Prix"
-    },
-    "lastRaceKey": 1958001,
-    "races": [
-      {
-        "season": "1958",
-        "round": "1",
-        "raceName": "Argentine Grand Prix"
       }
     ]
   },
@@ -22033,6 +22580,68 @@
         "season": "1956",
         "round": "4",
         "raceName": "Belgian Grand Prix"
+      }
+    ]
+  },
+  {
+    "drivers": [
+      "Peter Collins",
+      "Paul Frère",
+      "Stirling Moss"
+    ],
+    "driverIds": [
+      "collins",
+      "frere",
+      "moss"
+    ],
+    "count": 1,
+    "lastRace": {
+      "season": "1956",
+      "round": "4",
+      "raceName": "Belgian Grand Prix"
+    },
+    "firstRace": {
+      "season": "1956",
+      "round": "4",
+      "raceName": "Belgian Grand Prix"
+    },
+    "lastRaceKey": 1956004,
+    "races": [
+      {
+        "season": "1956",
+        "round": "4",
+        "raceName": "Belgian Grand Prix"
+      }
+    ]
+  },
+  {
+    "drivers": [
+      "Peter Collins",
+      "Ron Flockhart",
+      "Stirling Moss"
+    ],
+    "driverIds": [
+      "collins",
+      "flockhart",
+      "moss"
+    ],
+    "count": 1,
+    "lastRace": {
+      "season": "1956",
+      "round": "8",
+      "raceName": "Italian Grand Prix"
+    },
+    "firstRace": {
+      "season": "1956",
+      "round": "8",
+      "raceName": "Italian Grand Prix"
+    },
+    "lastRaceKey": 1956008,
+    "races": [
+      {
+        "season": "1956",
+        "round": "8",
+        "raceName": "Italian Grand Prix"
       }
     ]
   },
@@ -24172,6 +24781,37 @@
         "season": "2008",
         "round": "11",
         "raceName": "Hungarian Grand Prix"
+      }
+    ]
+  },
+  {
+    "drivers": [
+      "Tony Bettenhausen",
+      "Jimmy Davies",
+      "Bob Sweikert"
+    ],
+    "driverIds": [
+      "bettenhausen",
+      "davies",
+      "sweikert"
+    ],
+    "count": 1,
+    "lastRace": {
+      "season": "1955",
+      "round": "3",
+      "raceName": "Indianapolis 500"
+    },
+    "firstRace": {
+      "season": "1955",
+      "round": "3",
+      "raceName": "Indianapolis 500"
+    },
+    "lastRaceKey": 1955003,
+    "races": [
+      {
+        "season": "1955",
+        "round": "3",
+        "raceName": "Indianapolis 500"
       }
     ]
   },

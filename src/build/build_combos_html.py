@@ -59,30 +59,48 @@ def dataset_schema(
 OUT_PATH = ROOT / "dist" / "combos.html"
 
 
-def render_race_pills(races: list[RaceRef], links: dict | None = None) -> str:
-    """Group races by season; each season gets a row with year + race pills."""
+def render_race_pills(
+    races: list[RaceRef],
+    links: dict | None = None,
+    shared: dict[tuple[str, str], str] | None = None,
+) -> str:
+    """Group races by season; each season gets a row with year + race pills.
+
+    ``shared`` maps (season, round) to the co-driver names for the pre-1961
+    races where a podium car was shared, so the pill can say whose drive it was.
+    """
     import html
 
     links = links or {}
+    shared = shared or {}
     races_sorted = sorted(races, key=lambda r: (int(r.season), int(r.round)))
     parts: list[str] = []
     for season, group in itertools.groupby(races_sorted, key=lambda r: r.season):
         group_list = list(group)
-        pills = "".join(
-            f'<a class="race-pill" href="{html.escape(race_url(links, r.season, r.round, r.raceName), quote=True)}"'
-            f' target="_blank" rel="noopener"'
-            f' title="{html.escape(r.season + " " + r.raceName, quote=True)} &mdash; race report">'
-            f'<span class="round">R{html.escape(r.round)}</span>'
-            f"{html.escape(short_race_name(r.raceName))}"
-            f"</a>"
-            for r in group_list
-        )
+        pill_parts: list[str] = []
+        for r in group_list:
+            co = shared.get((r.season, r.round))
+            cls = "race-pill race-pill-shared" if co else "race-pill"
+            title = f"{r.season} {r.raceName} — race report"
+            if co:
+                title = f"{title} (shared car with {co})"
+            mark = '<span class="shared-mark" aria-hidden="true">&#8644;</span>' if co else ""
+            aria_label = f' aria-label="{html.escape(title, quote=True)}"' if co else ""
+            pill_parts.append(
+                f'<a class="{cls}" href="{html.escape(race_url(links, r.season, r.round, r.raceName), quote=True)}"'
+                f' target="_blank" rel="noopener"'
+                f' title="{html.escape(title, quote=True)}"{aria_label}>'
+                f'<span class="round">R{html.escape(r.round)}</span>'
+                f"{html.escape(short_race_name(r.raceName))}"
+                f"{mark}"
+                f"</a>"
+            )
         ct = len(group_list)
         ct_html = f'<span class="ct">x{ct}</span>' if ct > 1 else ""
         parts.append(
             f'<div class="season-row">'
             f'<div class="season-label">{html.escape(season)}{ct_html}</div>'
-            f'<div class="race-list">{pills}</div>'
+            f'<div class="race-list">{"".join(pill_parts)}</div>'
             f"</div>"
         )
     return "".join(parts)
@@ -95,8 +113,15 @@ def short_race_name(name: str) -> str:
     return name
 
 
-def render_combo(rank: int, combo: Combo, links: dict | None = None) -> str:
+def render_combo(
+    rank: int,
+    combo: Combo,
+    links: dict | None = None,
+    shared: dict[tuple[str, str], str] | None = None,
+) -> str:
     import html
+
+    shared = shared or {}
 
     drivers_html = '<span class="sep">/</span>'.join(
         f'<span class="driver">'
@@ -113,12 +138,23 @@ def render_combo(rank: int, combo: Combo, links: dict | None = None) -> str:
     )
     n = combo.count
 
+    is_shared = any((r.season, r.round) in shared for r in combo.races)
+    shared_desc = "One podium step was a car shared by two drivers"
+    badge = (
+        f'<span class="shared-badge" role="img"'
+        f' aria-label="{html.escape(shared_desc, quote=True)}"'
+        f' title="{html.escape(shared_desc, quote=True)}">'
+        "&#8644;</span>"
+        if is_shared
+        else ""
+    )
+
     combo_row = (
         f'<tr class="combo" data-count="{n}"'
         f' data-last="{combo.lastRaceKey}"'
         f' data-drivers="{html.escape(drivers_data, quote=True)}">'
         f'<td class="rank">{rank}</td>'
-        f'<td class="drivers">{drivers_html}</td>'
+        f'<td class="drivers">{drivers_html}{badge}</td>'
         f'<td class="count">{n}</td>'
         f'<td class="last">{last_html}</td>'
         f'<td class="expand"><span class="chev">&#9662;</span></td>'
@@ -127,7 +163,7 @@ def render_combo(rank: int, combo: Combo, links: dict | None = None) -> str:
     detail_row = (
         f'<tr class="detail">'
         f'<td colspan="5">'
-        f'<div class="detail-inner">{render_race_pills(combo.races, links)}</div>'
+        f'<div class="detail-inner">{render_race_pills(combo.races, links, shared)}</div>'
         f"</td></tr>"
     )
     return combo_row + detail_row
@@ -142,8 +178,21 @@ def main() -> int:
     unique_combos = len(combos)
     season_min, season_max = seasons[0], seasons[-1]
 
+    # Pre-1961 races where a podium car was shared. Derived here rather than
+    # stored on Combo: RaceRef is reused for firstRace/lastRace, so an optional
+    # field would write "shared": null onto every race entry in combos.json.
+    shared = {
+        (p.season, p.round): ", ".join(
+            dict.fromkeys(
+                d.name for slot in ("p1", "p2", "p3") for d in ((p.coDrivers or {}).get(slot) or [])
+            )
+        )
+        for p in podiums
+        if p.coDrivers
+    }
+
     links = load_race_links()
-    rows_html = "\n".join(render_combo(i, c, links) for i, c in enumerate(combos, 1))
+    rows_html = "\n".join(render_combo(i, c, links, shared) for i, c in enumerate(combos, 1))
 
     page = f"""{
         head(
