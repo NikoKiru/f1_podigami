@@ -530,6 +530,46 @@
     },
     {
       "driverIds": [
+        "bettenhausen",
+        "davies",
+        "sweikert"
+      ],
+      "names": [
+        "Tony Bettenhausen",
+        "Jimmy Davies",
+        "Bob Sweikert"
+      ],
+      "racesTogether": 3,
+      "score": 0.0077,
+      "count": 1,
+      "happened": {
+        "season": "1955",
+        "round": "3",
+        "raceName": "Indianapolis 500"
+      },
+      "perDriver": [
+        {
+          "name": "Tony Bettenhausen",
+          "podiums": 1,
+          "starts": 13,
+          "rate": 0.0769
+        },
+        {
+          "name": "Jimmy Davies",
+          "podiums": 1,
+          "starts": 6,
+          "rate": 0.1667
+        },
+        {
+          "name": "Bob Sweikert",
+          "podiums": 1,
+          "starts": 5,
+          "rate": 0.2
+        }
+      ]
+    },
+    {
+      "driverIds": [
         "emerson_fittipaldi",
         "rodriguez",
         "wisell"
@@ -1165,46 +1205,6 @@
           "podiums": 9,
           "starts": 86,
           "rate": 0.1047
-        }
-      ]
-    },
-    {
-      "driverIds": [
-        "holland",
-        "parsons",
-        "rose"
-      ],
-      "names": [
-        "Bill Holland",
-        "Johnnie Parsons",
-        "Mauri Rose"
-      ],
-      "racesTogether": 1,
-      "score": 0.025,
-      "count": 1,
-      "happened": {
-        "season": "1950",
-        "round": "3",
-        "raceName": "Indianapolis 500"
-      },
-      "perDriver": [
-        {
-          "name": "Bill Holland",
-          "podiums": 1,
-          "starts": 2,
-          "rate": 0.5
-        },
-        {
-          "name": "Johnnie Parsons",
-          "podiums": 1,
-          "starts": 10,
-          "rate": 0.1
-        },
-        {
-          "name": "Mauri Rose",
-          "podiums": 1,
-          "starts": 2,
-          "rate": 0.5
         }
       ]
     }
