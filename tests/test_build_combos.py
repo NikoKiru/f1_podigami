@@ -225,3 +225,64 @@ def test_render_combo_shared_badge_has_aria_label():
     out = bc.render_combo(1, c, None, shared)
     assert 'role="img"' in out
     assert 'aria-label="One podium step was a car shared by two drivers"' in out
+
+
+# ── season control + data-races ───────────────────────────────────────────────
+
+
+def test_render_combo_carries_every_race_in_data_races():
+    races = [
+        race_ref("2001", "3", "Brazilian Grand Prix"),
+        race_ref("2003", "9", "British Grand Prix"),
+    ]
+    c = combo(
+        ["A", "B", "C"],
+        ["a", "b", "c"],
+        2,
+        races[1],
+        races[0],
+        2003009,
+        races,
+    )
+    out = bc.render_combo(1, c)
+    assert 'data-races="2001|3|Brazilian Grand Prix;2003|9|British Grand Prix"' in out
+
+
+def test_render_combo_escapes_race_names_in_data_races():
+    races = [race_ref("2020", "1", 'A "quoted" Grand Prix')]
+    c = combo(["A", "B", "C"], ["a", "b", "c"], 1, races[0], races[0], 2020001, races)
+    out = bc.render_combo(1, c)
+    assert "&quot;quoted&quot;" in out
+    assert 'data-races="2020|1|A &quot;quoted&quot; Grand Prix"' in out
+
+
+def test_render_race_pills_tags_each_season_row():
+    races = [
+        race_ref("2020", "5", "Spanish Grand Prix"),
+        race_ref("2021", "1", "Bahrain Grand Prix"),
+    ]
+    out = bc.render_race_pills(races)
+    assert 'class="season-row" data-season="2020"' in out
+    assert 'class="season-row" data-season="2021"' in out
+
+
+def test_season_control_bounds_and_handles():
+    out = bc.render_season_control(1950, 2026)
+    assert 'class="season-range" data-min="1950" data-max="2026"' in out
+    # two range handles, defaulting to the full window
+    assert 'id="season-from" type="range" min="1950" max="2026" step="1" value="1950"' in out
+    assert 'id="season-to" type="range" min="1950" max="2026" step="1" value="2026"' in out
+    assert 'aria-label="Earliest season"' in out
+    assert 'aria-label="Latest season"' in out
+
+
+def test_season_control_mobile_selects_cover_every_season():
+    out = bc.render_season_control(1950, 2026)
+    assert 'id="season-from-sel"' in out
+    assert 'id="season-to-sel"' in out
+    # one <option> per season, in each of the two selects
+    assert out.count('<option value="1998">1998</option>') == 2
+    assert out.count("<option") == 2 * (2026 - 1950 + 1)
+    # each select opens on its own end of the range
+    assert '<option value="1950" selected>1950</option>' in out
+    assert '<option value="2026" selected>2026</option>' in out
