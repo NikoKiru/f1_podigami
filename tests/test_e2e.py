@@ -228,6 +228,257 @@ def test_combos_deep_link_prefills_filters(dist):
         browser.close()
 
 
+# ── Combos season range (index.js) ─────────────────────────────────────────
+
+
+def _set_range(page, lo, hi):
+    """Drive the widescreen slider the way a drag would."""
+    page.evaluate(
+        """([lo, hi]) => {
+            const to = document.getElementById('season-to');
+            const from = document.getElementById('season-from');
+            to.value = hi; to.dispatchEvent(new Event('input'));
+            from.value = lo; from.dispatchEvent(new Event('input'));
+        }""",
+        [str(lo), str(hi)],
+    )
+
+
+def test_season_range_keeps_only_trios_that_raced_in_it(dist):
+    """A narrowed window hides every trio without a podium inside it."""
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        page = browser.new_page(viewport={"width": 1200, "height": 900})
+        page.goto(_url(dist, "combos.html"))
+        page.wait_for_selector("tr.combo")
+
+        total = int(page.text_content("#visible-count") or "0")
+        _set_range(page, 2001, 2003)
+        visible = int(page.text_content("#visible-count") or "0")
+        assert 0 < visible < total
+
+        every_row_raced_in_window = page.evaluate(
+            """() =>
+            Array.from(document.querySelectorAll('tr.combo'))
+                .filter(r => r.style.display !== 'none')
+                .every(r => r.dataset.races.split(';').some(e => {
+                    const y = Number(e.split('|')[0]);
+                    return y >= 2001 && y <= 2003;
+                }))
+            """
+        )
+        assert every_row_raced_in_window
+        assert page.text_content("#season-readout") == "2001 – 2003"
+        browser.close()
+
+
+def test_season_range_recomputes_count_and_last_seen(dist):
+    """Count and Last seen describe the window, not the trio's whole life."""
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        page = browser.new_page(viewport={"width": 1200, "height": 900})
+        page.goto(_url(dist, "combos.html"))
+        page.wait_for_selector("tr.combo")
+
+        _set_range(page, 2001, 2003)
+
+        agrees = page.evaluate(
+            """() =>
+            Array.from(document.querySelectorAll('tr.combo'))
+                .filter(r => r.style.display !== 'none')
+                .every(r => {
+                    const inRange = r.dataset.races.split(';')
+                        .map(e => e.split('|'))
+                        .filter(e => Number(e[0]) >= 2001 && Number(e[0]) <= 2003);
+                    const shownCount = Number(r.querySelector('.count').textContent);
+                    const shownYear = r.querySelector('.last .year').textContent;
+                    const latest = inRange.reduce((a, b) =>
+                        Number(a[0]) * 1000 + Number(a[1]) >= Number(b[0]) * 1000 + Number(b[1]) ? a : b);
+                    return shownCount === inRange.length && shownYear === latest[0];
+                })
+            """
+        )
+        assert agrees
+        browser.close()
+
+
+def test_season_range_restores_lifetime_figures(dist):
+    """Widening back to the full span puts the all-time numbers back."""
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        page = browser.new_page(viewport={"width": 1200, "height": 900})
+        page.goto(_url(dist, "combos.html"))
+        page.wait_for_selector("tr.combo")
+
+        def counts():
+            return page.evaluate(
+                "() => Array.from(document.querySelectorAll('tr.combo'))"
+                ".map(r => r.dataset.drivers + ':' + r.querySelector('.count').textContent)"
+                ".sort().join()"
+            )
+
+        before = counts()
+        _set_range(page, 2001, 2003)
+        _set_range(page, 1950, 2026)
+
+        assert counts() == before
+        assert page.text_content("#season-readout") == "All seasons"
+        browser.close()
+
+
+def test_season_range_hides_out_of_window_pills(dist):
+    """The expanded detail shows only the seasons the window covers, so the
+    pills add up to the Count beside them."""
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        page = browser.new_page(viewport={"width": 1200, "height": 900})
+        page.goto(_url(dist, "combos.html"))
+        page.wait_for_selector("tr.combo")
+
+        _set_range(page, 2001, 2003)
+        consistent = page.evaluate(
+            """() => {
+                const row = Array.from(document.querySelectorAll('tr.combo'))
+                    .find(r => r.style.display !== 'none');
+                const detail = row.nextElementSibling;
+                const shown = Array.from(detail.querySelectorAll('.season-row'))
+                    .filter(sr => sr.style.display !== 'none');
+                const seasons = shown.map(sr => Number(sr.dataset.season));
+                const pills = shown.reduce(
+                    (n, sr) => n + sr.querySelectorAll('.race-pill').length, 0);
+                return seasons.every(y => y >= 2001 && y <= 2003)
+                    && pills === Number(row.querySelector('.count').textContent);
+            }"""
+        )
+        assert consistent
+        browser.close()
+
+
+def test_season_range_handles_do_not_cross(dist):
+    """Dragging "from" past "to" stops it at "to" rather than inverting."""
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        page = browser.new_page(viewport={"width": 1200, "height": 900})
+        page.goto(_url(dist, "combos.html"))
+        page.wait_for_selector("tr.combo")
+
+        _set_range(page, 1990, 2000)
+        page.evaluate(
+            """() => {
+                const from = document.getElementById('season-from');
+                from.value = '2020'; from.dispatchEvent(new Event('input'));
+            }"""
+        )
+        assert page.input_value("#season-from") == "2000"
+        assert page.input_value("#season-to") == "2000"
+        browser.close()
+
+
+def test_season_selects_mirror_the_slider(dist):
+    """On mobile the From/To selects drive the same state, and push past each
+    other rather than clamping."""
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        page = browser.new_page(viewport={"width": 390, "height": 844})
+        page.goto(_url(dist, "combos.html"))
+        page.wait_for_selector("tr.combo")
+
+        assert page.locator("#season-from-sel").is_visible()
+        assert not page.locator("#season-from").is_visible()
+
+        page.select_option("#season-from-sel", "2010")
+        page.select_option("#season-to-sel", "2012")
+        assert page.input_value("#season-from") == "2010"
+        assert page.input_value("#season-to") == "2012"
+
+        # picking a From beyond the current To pushes To along
+        page.select_option("#season-from-sel", "2015")
+        assert page.input_value("#season-to-sel") == "2015"
+        browser.close()
+
+
+def test_season_range_deep_link(dist):
+    """?from=&to= pre-sets the window on load."""
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        page = browser.new_page(viewport={"width": 1200, "height": 900})
+        page.goto(_url(dist, "combos.html", "?from=2001&to=2003"))
+        page.wait_for_selector("tr.combo")
+
+        assert page.input_value("#season-from") == "2001"
+        assert page.input_value("#season-to") == "2003"
+        assert page.text_content("#season-readout") == "2001 – 2003"
+        assert "from 2001–2003" in (page.text_content("#range-note") or "")
+
+        total = int(page.text_content("#total-count") or "0")
+        visible = int(page.text_content("#visible-count") or "0")
+        assert 0 < visible < total
+        browser.close()
+
+
+def test_season_range_deep_link_swaps_reversed_bounds(dist):
+    """A reversed ?from/?to is read as the window it describes."""
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        page = browser.new_page(viewport={"width": 1200, "height": 900})
+        page.goto(_url(dist, "combos.html", "?from=2003&to=2001"))
+        page.wait_for_selector("tr.combo")
+
+        assert page.input_value("#season-from") == "2001"
+        assert page.input_value("#season-to") == "2003"
+        browser.close()
+
+
+def test_clear_button_resets_the_season_range(dist):
+    """Clear is enabled by a narrowed window alone, and resets it."""
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        page = browser.new_page(viewport={"width": 1200, "height": 900})
+        page.goto(_url(dist, "combos.html"))
+        page.wait_for_selector("tr.combo")
+
+        total = int(page.text_content("#total-count") or "0")
+        assert page.locator("#clear-filters").is_disabled()
+        _set_range(page, 2001, 2003)
+        assert page.locator("#clear-filters").is_enabled()
+
+        page.locator("#clear-filters").click()
+        assert page.input_value("#season-from") == "1950"
+        assert page.input_value("#season-to") == "2026"
+        assert page.text_content("#season-readout") == "All seasons"
+        assert int(page.text_content("#visible-count") or "0") == total
+        browser.close()
+
+
+def test_season_range_combines_with_driver_filter(dist):
+    """The two filters intersect rather than replacing one another."""
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        page = browser.new_page(viewport={"width": 1200, "height": 900})
+        page.goto(_url(dist, "combos.html"))
+        page.wait_for_selector("tr.combo")
+
+        page.locator(".filters input[data-filter]").first.fill("schumacher")
+        with_driver = int(page.text_content("#visible-count") or "0")
+        _set_range(page, 2001, 2003)
+        both = int(page.text_content("#visible-count") or "0")
+        assert 0 < both < with_driver
+
+        all_match = page.evaluate(
+            """() =>
+            Array.from(document.querySelectorAll('tr.combo'))
+                .filter(r => r.style.display !== 'none')
+                .every(r => r.dataset.drivers.includes('schumacher')
+                    && r.dataset.races.split(';').some(e => {
+                        const y = Number(e.split('|')[0]);
+                        return y >= 2001 && y <= 2003;
+                    }))
+            """
+        )
+        assert all_match
+        browser.close()
+
+
 # ── Combos sort (index.js) ─────────────────────────────────────────────────
 
 

@@ -98,7 +98,7 @@ def render_race_pills(
         ct = len(group_list)
         ct_html = f'<span class="ct">x{ct}</span>' if ct > 1 else ""
         parts.append(
-            f'<div class="season-row">'
+            f'<div class="season-row" data-season="{html.escape(season, quote=True)}">'
             f'<div class="season-label">{html.escape(season)}{ct_html}</div>'
             f'<div class="race-list">{"".join(pill_parts)}</div>'
             f"</div>"
@@ -149,9 +149,12 @@ def render_combo(
         else ""
     )
 
+    races_data = ";".join(f"{r.season}|{r.round}|{r.raceName}" for r in combo.races)
+
     combo_row = (
         f'<tr class="combo" data-count="{n}"'
         f' data-last="{combo.lastRaceKey}"'
+        f' data-races="{html.escape(races_data, quote=True)}"'
         f' data-drivers="{html.escape(drivers_data, quote=True)}">'
         f'<td class="rank">{rank}</td>'
         f'<td class="drivers">{drivers_html}{badge}</td>'
@@ -167,6 +170,37 @@ def render_combo(
         f"</td></tr>"
     )
     return combo_row + detail_row
+
+
+def render_season_control(season_min: int, season_max: int) -> str:
+    """The season-range filter: a dual-handle slider on widescreen, a pair of
+    From/To selects on mobile (mirroring how .mobile-sort mirrors the sortable
+    table headers). Both write to the same state in index.js.
+    """
+    opts = "".join(f'<option value="{y}">{y}</option>' for y in range(season_min, season_max + 1))
+    from_opts = opts.replace(f'value="{season_min}"', f'value="{season_min}" selected', 1)
+    to_opts = opts.replace(f'value="{season_max}"', f'value="{season_max}" selected', 1)
+    return f"""<div class="season-range" data-min="{season_min}" data-max="{season_max}">
+                    <div class="sr-head">
+                        <span class="sr-label">Seasons</span>
+                        <output class="sr-readout" id="season-readout" for="season-from season-to">All seasons</output>
+                    </div>
+                    <div class="sr-track" id="season-track">
+                        <div class="sr-rail"></div>
+                        <div class="sr-fill" id="season-fill"></div>
+                        <input class="sr-input sr-from" id="season-from" type="range" min="{season_min}" max="{season_max}" step="1" value="{season_min}" aria-label="Earliest season">
+                        <input class="sr-input sr-to" id="season-to" type="range" min="{season_min}" max="{season_max}" step="1" value="{season_max}" aria-label="Latest season">
+                    </div>
+                    <div class="sr-bounds"><span>{season_min}</span><span>{season_max}</span></div>
+                </div>
+                <div class="filter-group mobile-seasons">
+                    <label for="season-from-sel">Seasons</label>
+                    <div class="ms-pair">
+                        <select id="season-from-sel" aria-label="Earliest season">{from_opts}</select>
+                        <span class="ms-dash" aria-hidden="true">&ndash;</span>
+                        <select id="season-to-sel" aria-label="Latest season">{to_opts}</select>
+                    </div>
+                </div>"""
 
 
 def main() -> int:
@@ -228,6 +262,7 @@ def main() -> int:
                 <div class="search-wrap">
                     <input data-filter type="search" placeholder="Driver 3..." aria-label="Driver 3 filter">
                 </div>
+                {render_season_control(season_min, season_max)}
                 <button id="clear-filters" type="button" class="clear-btn" disabled>Clear</button>
                 <div class="filter-group mobile-sort">
                     <label for="mobile-sort">Sort</label>
@@ -244,7 +279,9 @@ def main() -> int:
             <div class="hint">
                 Showing <strong id="visible-count">{
         unique_combos
-    }</strong> of <span id="total-count">{unique_combos}</span> unique podium trios
+    }</strong><span id="of-total"> of <span id="total-count">{
+        unique_combos
+    }</span></span> unique podium trios<span id="range-note"></span>
                 &middot; click a row to expand
             </div>
         </div>

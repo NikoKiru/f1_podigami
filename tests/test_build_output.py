@@ -113,6 +113,38 @@ def test_combos_has_nav_and_combo_rows(dist):
     assert 'class="combo"' in html
 
 
+def test_combos_season_filter_controls(dist):
+    """Both season controls ship: the widescreen dual-handle slider and the
+    mobile From/To selects, over the real span of seasons on the page."""
+    html = (dist / "combos.html").read_text(encoding="utf-8")
+    assert 'class="season-range" data-min="1950"' in html
+    assert 'id="season-from"' in html and 'id="season-to"' in html
+    assert 'id="season-from-sel"' in html and 'id="season-to-sel"' in html
+    assert 'id="season-readout"' in html
+    assert 'id="range-note"' in html
+
+
+def test_combos_rows_carry_race_seasons(dist):
+    """Every combo row exposes its races to the season filter, and those
+    seasons match the season rows rendered in its expanded detail."""
+    import re
+
+    html = (dist / "combos.html").read_text(encoding="utf-8")
+    rows = re.findall(r'<tr class="combo"[^>]*data-races="([^"]*)"[^>]*>', html)
+    assert len(rows) > 700, "every combo row should carry data-races"
+
+    # data-races entries are season|round|raceName, and their count matches
+    # the row's data-count.
+    counts = re.findall(r'<tr class="combo" data-count="(\d+)"', html)
+    assert len(counts) == len(rows)
+    for races, count in zip(rows[:50], counts[:50], strict=True):
+        entries = races.split(";")
+        assert len(entries) == int(count)
+        for entry in entries:
+            season, rnd, _name = entry.split("|", 2)
+            assert season.isdigit() and rnd.isdigit()
+
+
 def test_combos_shared_drive_marker_counts(dist):
     """Locks the shared-drive badge/pill counts so a regression in the shared
     map or trio expansion is caught in CI rather than a manual grep."""
