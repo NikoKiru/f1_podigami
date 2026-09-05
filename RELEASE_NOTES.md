@@ -1,5 +1,11 @@
 # Release Notes
 
+## 2026-09-05
+
+### Fixes
+- The post-qualifying prediction for the 2026 Italian Grand Prix now starts every car from its real grid slot. `data/grid_penalties.json` is hand-curated and had no round 13 entry, so the stewards' penalties were invisible to the model and the qualifying classification was used as the starting grid: Piastri +3 (impeding), and power-unit quota drops for Antonelli (+30), Lawson (+35) and Albon (+20). With the penalties recorded the grid rebuilds to the official order — Piastri P3→P6, Antonelli P7→P20, Lawson P14→P21, Albon P18→P22, promoting everyone else — which moves the causal track-position term, the displayed grid chips and the headline: the most likely brand-new trio flips from Antonelli/Piastri/Russell (4.82%) to Leclerc/Norris/Russell (4.51%), and P(brand-new trio) settles at 38.2% instead of 39.5%
+- Added a regression test covering several place penalties that each overshoot the field size (30/35/20 places on a 22-car grid), which must stack at the back in qualifying order rather than contest one slot
+
 ## 2026-08-30
 
 ### Features

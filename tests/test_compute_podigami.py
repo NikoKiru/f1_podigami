@@ -674,6 +674,74 @@ def test_apply_grid_penalties_pins_exact_slot_hungary_2026():
     }
 
 
+def test_apply_grid_penalties_multiple_overshooting_penalties_italy_2026():
+    """Several power-unit penalties that each overshoot the field all land at the
+    back, keeping their qualifying order relative to one another.
+
+    Real case (2026 Italian GP, round 13): Piastri P3 drops 3, while Antonelli
+    P7 (+30), Lawson P14 (+35) and Albon P18 (+20) are all pinned far past the
+    22-car field. The official grid puts Piastri 6th and stacks the three
+    overshoots into 20-21-22 in qualifying order.
+    """
+    order = [
+        "gasly",
+        "russell",
+        "piastri",
+        "leclerc",
+        "hamilton",
+        "max_verstappen",
+        "antonelli",
+        "colapinto",
+        "norris",
+        "arvid_lindblad",
+        "bortoleto",
+        "bearman",
+        "hulkenberg",
+        "lawson",
+        "sainz",
+        "ocon",
+        "tsunoda",
+        "albon",
+        "bottas",
+        "perez",
+        "alonso",
+        "stroll",
+    ]
+    qpos = {d: i + 1 for i, d in enumerate(order)}
+    pens = [
+        {"driverId": "piastri", "penaltyPlaces": 3},
+        {"driverId": "antonelli", "penaltyPlaces": 30},
+        {"driverId": "lawson", "penaltyPlaces": 35},
+        {"driverId": "albon", "penaltyPlaces": 20},
+    ]
+    out = cp._apply_grid_penalties(qpos, pens)
+    expected = [
+        "gasly",
+        "russell",
+        "leclerc",
+        "hamilton",
+        "max_verstappen",
+        "piastri",
+        "colapinto",
+        "norris",
+        "arvid_lindblad",
+        "bortoleto",
+        "bearman",
+        "hulkenberg",
+        "sainz",
+        "ocon",
+        "tsunoda",
+        "bottas",
+        "perez",
+        "alonso",
+        "stroll",
+        "antonelli",
+        "lawson",
+        "albon",
+    ]
+    assert out == {d: i + 1 for i, d in enumerate(expected)}
+
+
 def test_apply_grid_penalties_two_penalised_contesting_one_slot():
     """Two penalised cars pinned to the same slot: the one that qualified ahead
     keeps it, the other takes the next slot down."""
