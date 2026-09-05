@@ -114,3 +114,30 @@ def test_rank_rows_swap_race_into_panel_on_mobile():
     assert ".rr-drivers .dn-full" in block and ".rr-drivers .dn-abbr" in block, (
         "row driver names must swap to abbreviated form on mobile"
     )
+
+
+def test_season_slider_swaps_for_selects_on_mobile():
+    """The dual-handle slider is a pointer control: below the 720px breakpoint
+    it gives way to the From/To selects, the way .mobile-sort mirrors the
+    sortable table headers.
+    """
+    import re
+
+    s = css("index.css")
+    assert ".filter-group.mobile-seasons {\n    display: none;\n}" in s
+
+    block = re.search(r"@media \(max-width: 720px\) \{.*?\n\}\n", s, re.S)
+    assert block, "expected a 720px breakpoint block"
+    mobile = block.group(0)
+    assert re.search(r"\.season-range \{\s*display: none;", mobile)
+    assert re.search(r"\.filter-group\.mobile-seasons \{\s*display: flex;", mobile)
+
+
+def test_season_slider_thumbs_stay_grabbable():
+    """The two range inputs overlap, so the input surfaces must be
+    click-through with pointer events restored on the thumbs alone.
+    """
+    s = css("index.css")
+    assert ".sr-input {" in s
+    assert "pointer-events: none;" in s
+    assert s.count("pointer-events: auto;") >= 2  # webkit + moz thumb

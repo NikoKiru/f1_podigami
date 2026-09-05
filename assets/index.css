@@ -38,7 +38,7 @@ main {
     pointer-events: none;
 }
 
-.filters input {
+.filters input[type="search"] {
     width: 100%;
     background: var(--surface);
     color: var(--text);
@@ -49,17 +49,17 @@ main {
     transition: border-color 0.15s, box-shadow 0.15s;
 }
 
-.filters input:focus {
+.filters input[type="search"]:focus {
     outline: none;
     border-color: var(--accent);
     box-shadow: 0 0 0 3px rgba(225, 6, 0, 0.15);
 }
 
-.filters input:not(:placeholder-shown) {
+.filters input[type="search"]:not(:placeholder-shown) {
     border-color: var(--accent-dim);
 }
 
-.filters input::placeholder {
+.filters input[type="search"]::placeholder {
     color: var(--muted-dim);
 }
 
@@ -84,6 +84,167 @@ main {
 .clear-btn:disabled {
     opacity: 0.45;
     cursor: default;
+}
+
+/* ---------- season range (dual-handle slider, widescreen) ---------- */
+
+.season-range {
+    flex: 1 1 250px;
+    min-width: 210px;
+    max-width: 330px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.sr-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.sr-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.sr-readout {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.sr-track {
+    position: relative;
+    height: 20px;
+}
+
+.sr-rail,
+.sr-fill {
+    position: absolute;
+    top: 50%;
+    height: 4px;
+    margin-top: -2px;
+    border-radius: 2px;
+    pointer-events: none;
+}
+
+.sr-rail {
+    left: 0;
+    right: 0;
+    background: var(--border);
+}
+
+.sr-fill {
+    background: var(--accent);
+}
+
+/* Two range inputs share one track: the input surfaces are click-through so
+   both thumbs stay grabbable, and only the thumbs take pointer events. */
+.sr-input {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 20px;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    appearance: none;
+    -webkit-appearance: none;
+    pointer-events: none;
+}
+
+.sr-from {
+    z-index: 3;
+}
+
+.sr-to {
+    z-index: 4;
+}
+
+.sr-input:focus {
+    outline: none;
+}
+
+.sr-input::-webkit-slider-runnable-track {
+    height: 20px;
+    background: transparent;
+    border: none;
+}
+
+.sr-input::-moz-range-track {
+    height: 20px;
+    background: transparent;
+    border: none;
+}
+
+.sr-input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    pointer-events: auto;
+    width: 16px;
+    height: 16px;
+    margin-top: 2px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 2px solid var(--accent);
+    cursor: pointer;
+    transition: box-shadow 0.15s, border-color 0.15s;
+}
+
+.sr-input::-moz-range-thumb {
+    pointer-events: auto;
+    width: 16px;
+    height: 16px;
+    box-sizing: border-box;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 2px solid var(--accent);
+    cursor: pointer;
+    transition: box-shadow 0.15s, border-color 0.15s;
+}
+
+.sr-input:hover::-webkit-slider-thumb,
+.sr-input:focus-visible::-webkit-slider-thumb {
+    box-shadow: 0 0 0 4px rgba(225, 6, 0, 0.18);
+}
+
+.sr-input:hover::-moz-range-thumb,
+.sr-input:focus-visible::-moz-range-thumb {
+    box-shadow: 0 0 0 4px rgba(225, 6, 0, 0.18);
+}
+
+.sr-bounds {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--muted-dim);
+    font-variant-numeric: tabular-nums;
+}
+
+.filter-group.mobile-seasons {
+    display: none;
+}
+
+.ms-pair {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ms-pair select {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.ms-dash {
+    color: var(--muted);
 }
 
 .filter-group.mobile-sort {
@@ -473,7 +634,7 @@ a.race-pill:hover {
         max-width: none;
     }
 
-    .filters input {
+    .filters input[type="search"] {
         font-size: 16px;
     }
 
@@ -486,6 +647,14 @@ a.race-pill:hover {
     .clear-btn {
         width: 100%;
         padding: 11px 14px;
+    }
+
+    .season-range {
+        display: none;
+    }
+
+    .filter-group.mobile-seasons {
+        display: flex;
     }
 
     .filter-group.mobile-sort {
