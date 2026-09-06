@@ -19,28 +19,28 @@
     {
       "constructorId": "mclaren",
       "name": "McLaren",
-      "points": 263.0,
+      "points": 265.0,
       "position": 3,
       "wins": 2
     },
     {
       "constructorId": "red_bull",
       "name": "Red Bull",
-      "points": 186.0,
+      "points": 189.0,
       "position": 4,
       "wins": 0
     },
     {
       "constructorId": "rb",
       "name": "RB F1 Team",
-      "points": 66.0,
+      "points": 70.0,
       "position": 5,
       "wins": 0
     },
     {
       "constructorId": "alpine",
       "name": "Alpine F1 Team",
-      "points": 63.0,
+      "points": 54.0,
       "position": 6,
       "wins": 0
     },
