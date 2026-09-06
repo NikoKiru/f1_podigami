@@ -16,7 +16,7 @@ No server. No database. No JavaScript framework. Just Python, one `requests` dep
 [![Live site](https://img.shields.io/badge/live-nikokiru.github.io-e10600?style=flat-square&logo=githubpages&logoColor=white)](https://nikokiru.github.io/f1podigami/)
 
 [![Python](https://img.shields.io/badge/python-3.11%20|%203.12%20|%203.13-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
-[![Tests](https://img.shields.io/badge/tests-686%20passing-brightgreen?style=flat-square&logo=pytest&logoColor=white)](tests/)
+[![Tests](https://img.shields.io/badge/tests-694%20passing-brightgreen?style=flat-square&logo=pytest&logoColor=white)](tests/)
 [![Coverage](https://img.shields.io/badge/coverage-%E2%89%A570%25-brightgreen?style=flat-square&logo=codecov&logoColor=white)](pyproject.toml)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json&style=flat-square)](https://github.com/astral-sh/ruff)
 [![Data: Jolpica F1](https://img.shields.io/badge/data-Jolpica%20F1%20API-15151E?style=flat-square&logo=formula1&logoColor=white)](https://api.jolpi.ca)
@@ -73,7 +73,7 @@ The predictor is a **dynamic Bayesian rating engine** ([`src/compute/model_v2.py
 - **Time** — ratings diffuse a little every race, more over a winter, a lot for cars when the technical regulations reset (2009, 2014, 2022, 2026…).
 - **Survival** — exponentially-decayed DNF hazards, era-relative: mechanical failures charge the car, incidents charge the driver.
 - **Chaos** — each circuit's grid→finish shuffle and DNF propensity adjust the prediction temperature and finish odds.
-- **Grid** — once a race's qualifying is classified, the grid order feeds back through the ratings and a **circuit-modulated track-position term** shifts each driver's finishing odds — amplified at processional circuits where the grid rarely reshuffles, damped where it does — so the headline refreshes after qualifying. Known grid penalties (hand-curated in `data/grid_penalties.json`: place drops and back-of-grid starts) rebuild the actual starting slots for this term, while the qualifying order itself still counts at face value — a penalised driver demonstrated that pace regardless of where they start.
+- **Grid** — once a race's qualifying is classified, the grid order feeds back through the ratings and a **circuit-modulated track-position term** shifts each driver's finishing odds — amplified at processional circuits where the grid rarely reshuffles, damped where it does — so the headline refreshes after qualifying. Known grid penalties (hand-curated in `data/grid_penalties.json`: place drops and back-of-grid starts) rebuild the actual starting slots for this term, while the qualifying order itself still counts at face value — a penalised driver demonstrated that pace regardless of where they start. Mid-race retirements can be recorded the same way (`data/retirements.json`), taking a crashed or broken-down car out of the running field so the headline can be refreshed while the race is live.
 - **Prediction** — the engine simulates the next race (deterministic seed): skill noise + who survives, with *exact* conditional Plackett–Luce trio probabilities per draw. `P(next race is new)` is the exact complement of every already-seen trio.
 
 > **Why this model?** Walk-forward evaluation — tuned on 2010–2018 only, then scored once on a frozen 2019–2026 test window (161 races) it never saw:
@@ -156,7 +156,7 @@ src/
 assets/         source CSS + JS (copied into dist/ at build time)
 data/           committed JSON datasets the site builds from
 dist/           generated, deployable site (git-ignored)
-tests/          pytest suite (686 tests, run in CI)
+tests/          pytest suite (694 tests, run in CI)
 ```
 
 </details>
@@ -197,7 +197,7 @@ python src/build_site.py
 ```bash
 pip install -r requirements-dev.txt   # tooling: ruff, pytest-cov, pip-audit
 ruff check . && ruff format --check .  # lint + format
-pytest --cov                          # 686 tests + coverage gate (≥70%)
+pytest --cov                          # 694 tests + coverage gate (≥70%)
 ```
 
 The suite covers **pure helpers**, **cross-dataset integrity** (combos derive from podiums, podigami

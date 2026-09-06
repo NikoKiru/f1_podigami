@@ -529,3 +529,20 @@ class GridPenaltyRace(_Base):
     season: str
     round: str
     penalties: list[GridPenalty]
+
+
+# --- retirements.json ---------------------------------------------------------
+
+
+class RetirementRace(_Base):
+    """Cars already out of a *running* race, curated by hand for a live update.
+
+    Lets the post-qualifying prediction be recomputed over the field still
+    circulating: a listed driver keeps the grid slot he started from but leaves
+    the simulated entrant set. Self-expiring — once the race is classified the
+    post-quali block is dropped anyway, so stale rounds are simply ignored.
+    """
+
+    season: str
+    round: str
+    driverIds: list[str]

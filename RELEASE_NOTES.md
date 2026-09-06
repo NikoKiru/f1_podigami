@@ -1,5 +1,11 @@
 # Release Notes
 
+## 2026-09-06
+
+### Features
+- The post-qualifying prediction can be refreshed **during** a race for cars that are already out. `data/retirements.json` is a new hand-curated dataset naming the drivers who have retired from a running race, and any trio containing one drops to zero: the retired car leaves the simulated field entirely, so P(brand-new trio) is recomputed over the cars still circulating rather than merely filtered afterwards. Applied to the 2026 Italian Grand Prix after Leclerc's lap-3 crash, the headline moves from 38.2% to 40.8% and the most likely brand-new trio flips from Leclerc/Norris/Russell (4.51%) to Antonelli/Piastri/Russell (5.52%)
+- A retired driver keeps the grid slot he actually started from, so the field's track-position offsets stay centred on the grid that formed, and his qualifying lap still counts as evidence for everyone else's rating — only his ability to finish is removed. The override is self-expiring: once the race is classified the post-qualifying block is dropped anyway, so stale rounds are ignored like stale grid penalties
+
 ## 2026-09-05
 
 ### Features
