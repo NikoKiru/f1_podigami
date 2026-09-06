@@ -610,6 +610,46 @@
     },
     {
       "driverIds": [
+        "gasly",
+        "sainz",
+        "stroll"
+      ],
+      "names": [
+        "Pierre Gasly",
+        "Carlos Sainz",
+        "Lance Stroll"
+      ],
+      "racesTogether": 187,
+      "score": 0.0086,
+      "count": 1,
+      "happened": {
+        "season": "2020",
+        "round": "8",
+        "raceName": "Italian Grand Prix"
+      },
+      "perDriver": [
+        {
+          "name": "Pierre Gasly",
+          "podiums": 5,
+          "starts": 190,
+          "rate": 0.0263
+        },
+        {
+          "name": "Carlos Sainz",
+          "podiums": 29,
+          "starts": 244,
+          "rate": 0.1189
+        },
+        {
+          "name": "Lance Stroll",
+          "podiums": 3,
+          "starts": 203,
+          "rate": 0.0148
+        }
+      ]
+    },
+    {
+      "driverIds": [
         "button",
         "kevin_magnussen",
         "rosberg"
@@ -645,46 +685,6 @@
           "podiums": 57,
           "starts": 206,
           "rate": 0.2767
-        }
-      ]
-    },
-    {
-      "driverIds": [
-        "gasly",
-        "sainz",
-        "stroll"
-      ],
-      "names": [
-        "Pierre Gasly",
-        "Carlos Sainz",
-        "Lance Stroll"
-      ],
-      "racesTogether": 187,
-      "score": 0.0104,
-      "count": 1,
-      "happened": {
-        "season": "2020",
-        "round": "8",
-        "raceName": "Italian Grand Prix"
-      },
-      "perDriver": [
-        {
-          "name": "Pierre Gasly",
-          "podiums": 6,
-          "starts": 190,
-          "rate": 0.0316
-        },
-        {
-          "name": "Carlos Sainz",
-          "podiums": 29,
-          "starts": 244,
-          "rate": 0.1189
-        },
-        {
-          "name": "Lance Stroll",
-          "podiums": 3,
-          "starts": 203,
-          "rate": 0.0148
         }
       ]
     },
