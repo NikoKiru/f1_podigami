@@ -6,6 +6,9 @@
 - The post-qualifying prediction can be refreshed **during** a race for cars that are already out. `data/retirements.json` is a new hand-curated dataset naming the drivers who have retired from a running race, and any trio containing one drops to zero: the retired car leaves the simulated field entirely, so P(brand-new trio) is recomputed over the cars still circulating rather than merely filtered afterwards. Applied to the 2026 Italian Grand Prix after Leclerc's lap-3 crash, the headline moves from 38.2% to 40.8% and the most likely brand-new trio flips from Leclerc/Norris/Russell (4.51%) to Antonelli/Piastri/Russell (5.52%)
 - A retired driver keeps the grid slot he actually started from, so the field's track-position offsets stay centred on the grid that formed, and his qualifying lap still counts as evidence for everyone else's rating — only his ability to finish is removed. The override is self-expiring: once the race is classified the post-qualifying block is dropped anyway, so stale rounds are ignored like stale grid penalties
 
+### Fixes
+- The driver-races fetcher now rides out a drained API rate limit instead of aborting the run. It is the last fetcher `update.py` invokes, so on a `--full` pass it meets an hourly budget already spent by the podium, results and qualifying sweeps — but it kept only 6 retries (~1 min of backoff) where those fetchers were deliberately given 8 (~4 min). A manual full reconciliation died on `drivers/max_verstappen/results.json` after `(6/6)`, taking the whole run down at step 11 of 15 and leaving no data PR; the weekly Monday `--full` job runs the same gauntlet. Raised to 8 to match, with a regression test that survives a 7-long 429 streak (#282)
+
 ## 2026-09-05
 
 ### Features
