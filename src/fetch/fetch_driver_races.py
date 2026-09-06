@@ -34,7 +34,11 @@ from datalib import save_driver_races  # noqa: E402
 API_ROOT = "https://api.jolpi.ca/ergast/f1"
 SLEEP_BETWEEN = 1.0
 PAGE = 100
-MAX_BACKOFF_RETRIES = 6
+# This is the last fetcher update.py runs, so on a --full pass it meets an API
+# budget already drained by the podium/results/qualifying sweeps. Match the 8
+# retries (~4 min of cumulative backoff) those fetchers were given; the old 6
+# gave up after ~1 min and failed the weekly full reconciliation.
+MAX_BACKOFF_RETRIES = 8
 USER_AGENT = "f1podigami/0.2 (https://github.com/local/f1podigami)"
 POOL_N = 60  # top drivers by career podiums included for the all-time list
 
