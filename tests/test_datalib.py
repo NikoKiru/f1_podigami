@@ -331,6 +331,19 @@ def test_save_grid_penalties_roundtrips(tmp_path, monkeypatch):
     assert loaded[0].penalties[1].backOfGrid is True
 
 
+def test_save_retirements_roundtrips(tmp_path, monkeypatch):
+    from datalib import repository
+
+    monkeypatch.setattr(repository, "DATA_DIR", tmp_path)
+    repository.save_retirements([{"season": "2026", "round": "13", "driverIds": ["leclerc"]}])
+    raw = (tmp_path / "retirements.json").read_text(encoding="utf-8")
+    adapter = REGISTRY["retirements.json"]
+    dumped = adapter.dump_python(adapter.validate_python(json.loads(raw)), mode="json")
+    assert json.dumps(dumped, indent=2, ensure_ascii=False) == raw
+    loaded = repository.load_retirements()
+    assert loaded[0].driverIds == ["leclerc"]
+
+
 def test_validate_cli_succeeds_on_committed_data():
     from datalib import validate
 

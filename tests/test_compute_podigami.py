@@ -905,3 +905,102 @@ def test_post_quali_payload_satisfies_schema(scenario_post_quali):
         schedule=SCHED_R6,
     )
     REGISTRY["podigami.json"].validate_python(res)  # must not raise
+
+
+# --- live retirements ---------------------------------------------------------
+
+
+def _retirements(season, rnd, *driver_ids):
+    return [{"season": str(season), "round": str(rnd), "driverIds": list(driver_ids)}]
+
+
+def test_post_quali_retirement_removes_driver_from_the_running(scenario_post_quali):
+    """A retired car leaves the simulation but not the grid it started from."""
+    podiums, combos, grid, con, rres, quali = scenario_post_quali
+    kw = {"constructor_data": con, "race_results": rres, "qualifying": quali, "schedule": SCHED_R6}
+    plain = cp.compute(podiums, combos, grid, **kw)
+    live = cp.compute(podiums, combos, grid, retirements=_retirements(2025, 6, "eli"), **kw)
+
+    pq = live["postQuali"]
+    form = {d["driverId"]: d["gridPosition"] for d in pq["driverForm"]}
+    assert "eli" not in form  # gone from the form list entirely
+    # the survivors keep the slot they actually lined up in — no compression
+    assert form == {"alf": 2, "bob": 3, "cas": 4, "dan": 5}
+    assert not any(
+        p["driverId"] == "eli" for c in pq["candidates"] for p in c["perDriver"]
+    )  # and out of every candidate trio
+    # the headline is genuinely recomputed over the surviving field
+    assert pq["chanceNextRaceNew"] != plain["postQuali"]["chanceNextRaceNew"]
+    # pre-quali block is untouched, as with grid penalties
+    for k in ("chanceNextRaceNew", "candidates", "driverForm", "asOf"):
+        assert live[k] == plain[k]
+    from datalib import REGISTRY
+
+    REGISTRY["podigami.json"].validate_python(live)
+
+
+def test_post_quali_retirement_keeps_the_quali_information(scenario_post_quali):
+    """The retired car's qualifying pace still informs the others' ratings.
+
+    Dropping him from the observed order instead would silently re-rate every
+    surviving driver, so the two must not agree.
+    """
+    podiums, combos, grid, con, rres, quali = scenario_post_quali
+    kw = {"constructor_data": con, "race_results": rres, "schedule": SCHED_R6}
+    retired = cp.compute(
+        podiums, combos, grid, qualifying=quali, retirements=_retirements(2025, 6, "eli"), **kw
+    )
+    # the same field, but "eli" never qualified at all
+    without = cp.compute(
+        podiums,
+        combos,
+        grid,
+        qualifying=[q_entry(2025, 6, ["alf", "bob", "cas", "dan"], con["driverConstructor"])],
+        **kw,
+    )
+    assert retired["postQuali"]["chanceNextRaceNew"] != without["postQuali"]["chanceNextRaceNew"]
+
+
+def test_post_quali_retirement_other_round_ignored(scenario_post_quali):
+    podiums, combos, grid, con, rres, quali = scenario_post_quali
+    kw = {"constructor_data": con, "race_results": rres, "qualifying": quali, "schedule": SCHED_R6}
+    stale = _retirements(2025, 5, "eli")
+    assert cp.compute(podiums, combos, grid, retirements=stale, **kw) == cp.compute(
+        podiums, combos, grid, **kw
+    )
+
+
+def test_post_quali_retirement_unknown_driver_is_a_noop(scenario_post_quali):
+    podiums, combos, grid, con, rres, quali = scenario_post_quali
+    kw = {"constructor_data": con, "race_results": rres, "qualifying": quali, "schedule": SCHED_R6}
+    assert cp.compute(
+        podiums, combos, grid, retirements=_retirements(2025, 6, "zzz"), **kw
+    ) == cp.compute(podiums, combos, grid, **kw)
+
+
+def test_post_quali_retirement_below_three_survivors_drops_the_block(scenario_post_quali):
+    """Fewer than three cars running can't form a podium — fall back to pre-quali."""
+    podiums, combos, grid, con, rres, quali = scenario_post_quali
+    res = cp.compute(
+        podiums,
+        combos,
+        grid,
+        constructor_data=con,
+        race_results=rres,
+        qualifying=quali,
+        schedule=SCHED_R6,
+        retirements=_retirements(2025, 6, "eli", "alf", "bob"),
+    )
+    assert res["postQuali"] is None
+
+
+def test_post_quali_retirement_deterministic(scenario_post_quali):
+    podiums, combos, grid, con, rres, quali = scenario_post_quali
+    kw = {
+        "constructor_data": con,
+        "race_results": rres,
+        "qualifying": quali,
+        "schedule": SCHED_R6,
+        "retirements": _retirements(2025, 6, "eli"),
+    }
+    assert cp.compute(podiums, combos, grid, **kw) == cp.compute(podiums, combos, grid, **kw)

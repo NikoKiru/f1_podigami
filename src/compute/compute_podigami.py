@@ -12,7 +12,8 @@ podium together.
 
 Inputs : data/podiums.json, data/combos.json, data/current_drivers.json,
          data/constructor_standings.json, data/race_results.json,
-         data/qualifying.json, data/schedule.json, data/grid_penalties.json
+         data/qualifying.json, data/schedule.json, data/grid_penalties.json,
+         data/retirements.json
          (the last five optional)
 Output : data/podigami.json
 """
@@ -42,6 +43,7 @@ RACE_RESULTS_PATH = DATA_DIR / "race_results.json"
 QUALIFYING_PATH = DATA_DIR / "qualifying.json"
 SCHEDULE_PATH = DATA_DIR / "schedule.json"
 GRID_PENALTIES_PATH = DATA_DIR / "grid_penalties.json"
+RETIREMENTS_PATH = DATA_DIR / "retirements.json"
 OUT_PATH = DATA_DIR / "podigami.json"
 
 RECENT_WINDOW = 10  # races, for the "recent form" display stat
@@ -268,6 +270,7 @@ def _post_quali_block(
     cid_strength: dict[str, float],
     using_constructors: bool,
     grid_penalties: list[dict] | None = None,
+    retirements: list[dict] | None = None,
 ) -> dict | None:
     """Grid-aware prediction for the next race, or None before its quali exists.
 
@@ -282,6 +285,11 @@ def _post_quali_block(
     still demonstrated that pace — but the causal grid term and the displayed
     ``gridPosition`` use the actual starting slots, i.e. the classification
     adjusted by any ``grid_penalties`` entry for this season/round.
+
+    A ``retirements`` entry marks cars already out of the *running* race. They
+    keep their start slot (the grid offsets stay centred on the grid that
+    actually formed) but leave the simulated field, so no trio containing one
+    can score and P(new) is recomputed over the cars still circulating.
 
     NOTE: mutates v2["hf"] (the quali observation) — call only after every
     pre-quali value has been extracted from ``v2``.
@@ -327,18 +335,32 @@ def _post_quali_block(
     )
     gpos = _apply_grid_penalties(qpos, pens)
 
+    # Cars already out of the running race: off the entrant list, still on the
+    # grid that set the offsets. Unknown driverIds are ignored (a stale or
+    # mistyped row must not silently shrink the field).
+    retired = {
+        d
+        for e in (retirements or [])
+        if e["season"] == season and e["round"] == rnd
+        for d in e["driverIds"]
+        if d in qpos
+    }
+    running = [d for d in sorted(qpos) if d not in retired]
+    if len(running) < 3:
+        return None
+
     # Causal track-position effect: grid offsets folded into the means.
     offsets = model_v2.grid_offsets(gpos, disp, params)
     mu_var: dict[str, tuple[float, float]] = {}
     p_fin: dict[str, float] = {}
-    for d in qpos:
+    for d in running:
         mu, var = hf.engine.combined(d, qcid[d])
         mu_var[d] = (mu + offsets[d], var)
         p_fin[d] = hf.p_finish_adjusted(d, qcid[d], delta)
 
     seed = SEED + int(season) * 100 + int(rnd)
     out = model_v2.predict_race(
-        sorted(qpos), mu_var, p_fin, temp, params, seen, n_draws=N_DRAWS, seed=seed
+        running, mu_var, p_fin, temp, params, seen, n_draws=N_DRAWS, seed=seed
     )
 
     def entry(d: str) -> dict:
@@ -367,7 +389,7 @@ def _post_quali_block(
         }
         for t, p in out["ranked_new"][:TOP_CANDIDATES]
     ]
-    driver_form = sorted((entry(d) for d in sorted(qpos)), key=lambda x: -x["weight"])
+    driver_form = sorted((entry(d) for d in running), key=lambda x: -x["weight"])
     return {
         "season": season,
         "round": rnd,
@@ -387,6 +409,7 @@ def compute(
     qualifying: list[dict] | None = None,
     schedule: dict | None = None,
     grid_penalties: list[dict] | None = None,
+    retirements: list[dict] | None = None,
 ) -> dict:
     """Pure core: returns the podigami.json payload. No file IO."""
     races = sorted(podiums, key=lambda r: (int(r["season"]), int(r["round"])))
@@ -499,6 +522,7 @@ def compute(
             cid_strength,
             using_constructors,
             grid_penalties=grid_penalties,
+            retirements=retirements,
         )
 
     # Per-season debut trios (podigamis), grouped from combos[].firstRace.
@@ -581,6 +605,9 @@ def main() -> int:
     grid_penalties = None
     if GRID_PENALTIES_PATH.exists():
         grid_penalties = json.loads(GRID_PENALTIES_PATH.read_text(encoding="utf-8"))
+    retirements = None
+    if RETIREMENTS_PATH.exists():
+        retirements = json.loads(RETIREMENTS_PATH.read_text(encoding="utf-8"))
 
     payload = compute(
         podiums,
@@ -591,6 +618,7 @@ def main() -> int:
         qualifying=qualifying,
         schedule=schedule,
         grid_penalties=grid_penalties,
+        retirements=retirements,
     )
     save_podigami(payload)
 

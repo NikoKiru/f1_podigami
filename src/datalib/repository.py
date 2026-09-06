@@ -32,6 +32,7 @@ from .schemas import (
     QualifyingEntry,
     RaceLink,
     RaceResult,
+    RetirementRace,
     Schedule,
     Soulmates,
     Unlikeliest,
@@ -56,6 +57,7 @@ REGISTRY: dict[str, TypeAdapter] = {
     "race_results.json": TypeAdapter(list[RaceResult]),
     "qualifying.json": TypeAdapter(list[QualifyingEntry]),
     "grid_penalties.json": TypeAdapter(list[GridPenaltyRace]),
+    "retirements.json": TypeAdapter(list[RetirementRace]),
 }
 
 # Bulky raw datasets written single-line to keep the repo (and git deltas) lean.
@@ -205,3 +207,11 @@ def load_grid_penalties() -> list[GridPenaltyRace]:
 
 def save_grid_penalties(data: Any) -> None:
     _save("grid_penalties.json", data)
+
+
+def load_retirements() -> list[RetirementRace]:
+    return _load("retirements.json")
+
+
+def save_retirements(data: Any) -> None:
+    _save("retirements.json", data)
