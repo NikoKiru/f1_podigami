@@ -1,5 +1,10 @@
 # Release Notes
 
+## 2026-09-07
+
+### Features
+- The landing page's ranked panel is now a **trio board**: every trio the model rates as a live chance at the next race, already-happened and brand-new ranked together, with the never-happened ones highlighted by an accent bar and a `NEW` pill and the rest muted. Hovering (or tapping, on mobile) a muted row shows how many times that trio has stood on a podium and when it last did, with a link through to its filtered view on the combinations page. Previously the panel listed only never-happened trios, so a visitor could not tell whether a trio they had in mind was missing because it already happened or because the model rated it too unlikely to list — on the current grid, six of the ten likeliest podiums have happened before. The board takes every trio at 1% or better (27 rows pre-qualifying, 21 after, which shortens itself as the grid sharpens the odds), shows 12 at a time in a scrollable card and adds `trioBoard` to `podigami.json`. No model change: `predict_race` already computed the already-happened trios' probabilities and discarded them, so the prediction, P(brand-new trio) and the backtest are untouched
+
 ## 2026-09-06
 
 ### Features

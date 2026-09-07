@@ -691,6 +691,28 @@ main {
 }
 
 /* candidate list */
+/* The board window: --board-rows is the one number that sets how many rows are
+   visible before it scrolls (row height is padding + names + gap + bar). */
+.cand-scroll {
+    --board-rows: 12;
+    --board-row-h: 55px;
+    /* The +18px leaves a sliver of the next row showing under the fade, so the
+       list reads as continuing rather than ending on a full row. */
+    max-height: calc(var(--board-rows) * var(--board-row-h) + 18px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+}
+
+/* Fade the last rows so a cut-off row reads as "more below". Applied only while
+   podigami.js says there is more — a permanent fade would promise rows that
+   aren't there once you reach the end, and without JS no fade is the safe
+   default since the list still scrolls natively. */
+.cand-scroll.has-more {
+    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 32px), transparent);
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 32px), transparent);
+}
+
 .cand-list {
     list-style: none;
     margin: 0;
@@ -787,6 +809,97 @@ main {
     font-weight: 600;
     min-width: 56px;
     text-align: right;
+}
+
+/* ── Trio board: already-happened vs never-happened ──────────────────────────
+   Done rows recede so the new ones read as the highlight, but stay legible —
+   their history is the content, not noise. */
+.cand-done .cd-code,
+.cand-done .cand-prob {
+    color: var(--muted);
+}
+
+.cand-done .cd-dot {
+    opacity: 0.55;
+}
+
+.cand-done .cand-bar {
+    background: var(--muted-dim);
+    opacity: 0.5;
+}
+
+.cand-new .cand-prob {
+    color: var(--text);
+}
+
+.cand-pill {
+    margin-left: 10px;
+    padding: 1px 6px;
+    border-radius: 99px;
+    /* --accent, not --accent-bright: white clears 4.5:1 on it in both themes,
+       where the brighter red only reaches 3.7:1 in dark mode. */
+    background: var(--accent);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+}
+
+/* A done row's history. The bubble is position:fixed — an absolutely positioned
+   popover would be clipped by .cand-scroll's overflow — so podigami.js sets its
+   coordinates and toggles .open for hover, focus and tap alike. */
+.trio-tip {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    cursor: help;
+    outline: none;
+    border-radius: 4px;
+}
+
+.trio-tip:focus-visible {
+    outline: 2px solid var(--accent-bright);
+    outline-offset: 2px;
+}
+
+.trio-tip:hover .cd-code {
+    color: var(--text-dim);
+}
+
+/* Two-class selector on purpose: .info-bubble supplies the visual chrome and is
+   defined later in this file, so a bare .trio-bubble would lose the position
+   override to it. */
+.trio-tip > .trio-bubble {
+    position: fixed;
+    display: none;
+    top: auto;
+    left: auto;
+    transform: none;
+    min-width: 180px;
+    max-width: 260px;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.trio-tip.open > .trio-bubble {
+    display: block;
+}
+
+.trio-bubble b {
+    color: var(--text);
+    font-weight: 600;
+}
+
+.trio-bubble a {
+    display: inline-block;
+    margin-top: 6px;
+    color: var(--accent-link);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.trio-bubble a:hover {
+    text-decoration: underline;
 }
 
 /* ── Soulmates fun-fact grid ─────────────────────────────────────────────────
@@ -1374,6 +1487,19 @@ a.tl-where:hover {
        stand alone (matching how the combinations table drops its <thead>). */
     .rank-head {
         display: none;
+    }
+
+    /* Twelve rows is a desktop-sized window; on a phone the chips wrap onto a
+       second line (75px a row, not 55px), so twelve would run past the viewport
+       and the panel would swallow the page. Six keeps the card thumb-sized. */
+    .cand-scroll {
+        --board-rows: 6;
+        --board-row-h: 75px;
+    }
+
+    .trio-tip > .trio-bubble {
+        min-width: 0;
+        max-width: calc(100vw - 24px);
     }
 
     .sm-facts {

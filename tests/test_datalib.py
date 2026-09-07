@@ -125,6 +125,43 @@ def test_save_podigami_roundtrips_with_optional_fields_absent(tmp_path, monkeypa
     assert redumped == raw
 
 
+def test_podigami_without_trio_board_still_loads(tmp_path, monkeypatch):
+    """The live site can run on a podigami.json written before the board existed:
+    deploy.yml builds main from committed data and a promotion's three-way merge
+    keeps main's newer data/, so the field must stay optional. It must load, and
+    canonicalise to an empty board the builder can fall back from."""
+    from datalib import repository
+
+    payload = _podigami_payload_constructors_off()
+    assert "trioBoard" not in payload
+
+    monkeypatch.setattr(repository, "DATA_DIR", tmp_path)
+    repository.save_podigami(payload)
+    assert repository.load_podigami().trioBoard == []
+
+
+def test_save_podigami_roundtrips_trio_board(tmp_path, monkeypatch):
+    from datalib import repository
+
+    payload = _podigami_payload_constructors_off()
+    payload["trioBoard"] = [
+        {"driverIds": ["hamilton", "leclerc", "russell"], "prob": 6.295, "happened": True},
+        {"driverIds": ["antonelli", "piastri", "russell"], "prob": 3.815, "happened": False},
+    ]
+
+    monkeypatch.setattr(repository, "DATA_DIR", tmp_path)
+    repository.save_podigami(payload)
+
+    raw = (tmp_path / "podigami.json").read_text(encoding="utf-8")
+    adapter = REGISTRY["podigami.json"]
+    dumped = adapter.dump_python(adapter.validate_python(json.loads(raw)), mode="json")
+    assert json.dumps(dumped, indent=2, ensure_ascii=False) == raw
+
+    board = repository.load_podigami().trioBoard
+    assert [r.happened for r in board] == [True, False]
+    assert board[0].prob == 6.295
+
+
 def test_loaders_return_typed_objects():
     combos = load_combos()
     assert isinstance(combos, list) and isinstance(combos[0], Combo)

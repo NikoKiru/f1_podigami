@@ -481,3 +481,115 @@ def test_last_race_step_is_unchanged_for_a_normal_podium():
     out = render_last_race_drivers(pod, {}, {})
     assert out.count("lr-driver") == 3
     assert "lr-shared" not in out
+
+
+# ── trio board ───────────────────────────────────────────────────────────────
+# The panel merges already-happened trios in beside the new ones so a visitor
+# can tell "this already happened" from "the model rates this too low to list".
+
+BOARD_FORM = [
+    pd("antonelli", "Andrea Kimi Antonelli", "mercedes"),
+    pd("norris", "Lando Norris", "mclaren"),
+    pd("russell", "George Russell", "mercedes"),
+    pd("piastri", "Oscar Piastri", "mclaren"),
+]
+
+BOARD_COMBOS = [
+    {
+        "driverIds": ["antonelli", "norris", "russell"],
+        "drivers": ["Andrea Kimi Antonelli", "Lando Norris", "George Russell"],
+        "count": 3,
+        "lastRace": {"season": "2026", "round": "12", "raceName": "Dutch Grand Prix"},
+    }
+]
+
+
+def _board():
+    return [
+        {"driverIds": ["antonelli", "norris", "russell"], "prob": 6.23, "happened": True},
+        {"driverIds": ["antonelli", "piastri", "russell"], "prob": 3.82, "happened": False},
+    ]
+
+
+def _render_board(**kw):
+    kw.setdefault("board", _board())
+    kw.setdefault("driver_form", BOARD_FORM)
+    kw.setdefault("combos", BOARD_COMBOS)
+    return bp.render_candidates(_grid_cands(), META, **kw)
+
+
+def test_board_renders_happened_and_new_rows():
+    out = _render_board()
+    assert out.count('class="cand cand-done"') == 1
+    assert out.count('class="cand cand-new"') == 1
+    assert "ANT" in out and "PIA" in out
+
+
+def test_board_row_order_follows_the_data():
+    out = _render_board()
+    assert out.index("cand-done") < out.index("cand-new")
+
+
+def test_board_marks_new_rows_with_a_pill():
+    out = _render_board()
+    assert out.count("cand-pill") == 1  # only the never-happened row
+
+
+def test_board_done_row_carries_history_and_combos_link():
+    out = _render_board()
+    assert "3 times" in out
+    assert "Dutch Grand Prix" in out
+    assert "combos.html?d=" in out
+
+
+def test_board_new_row_has_no_bubble():
+    board = [{"driverIds": ["antonelli", "piastri", "russell"], "prob": 3.82, "happened": False}]
+    out = _render_board(board=board)
+    assert "trio-bubble" not in out
+    assert "trio-tip" not in out
+
+
+def test_board_done_row_without_combos_match_degrades():
+    """combos.json and podiums.json are derived from the same source, so a miss
+    means upstream drift — render the row plainly rather than break the build."""
+    out = _render_board(combos=[])
+    assert "cand-done" in out
+    assert "trio-bubble" not in out
+
+
+def test_board_resolves_display_from_driver_form():
+    out = _render_board()
+    assert 'title="Oscar PIASTRI"' in out  # name came from driverForm, not the board row
+    assert "--team:" in out
+
+
+def test_board_survives_driver_missing_from_form():
+    out = _render_board(driver_form=[])
+    assert "cand-done" in out and "cand-new" in out
+
+
+def test_board_shows_grid_positions_when_grid_aware():
+    out = _render_board(grid_aware=True)
+    form = [{**d, "gridPosition": i + 1} for i, d in enumerate(BOARD_FORM)]
+    out = _render_board(grid_aware=True, driver_form=form)
+    assert "cd-grid" in out and ">P1<" in out
+
+
+def test_board_uses_scroll_window():
+    out = _render_board()
+    assert "cand-scroll" in out
+
+
+def test_empty_board_falls_back_to_candidate_list():
+    """The live site can run on a podigami.json written before the board existed
+    (see the schema note on trioBoard) — that must render today's new-only list."""
+    out = _render_board(board=[])
+    assert "cand-done" not in out and "cand-pill" not in out
+    assert 'class="cand"' in out
+    assert "cand-bar" in out
+
+
+def test_panel_title_is_no_longer_new_only():
+    out = _render_board()
+    assert "Most likely trios" in out
+    assert "Most likely new trios" not in out
