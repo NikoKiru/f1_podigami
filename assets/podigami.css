@@ -381,11 +381,6 @@ main {
     user-select: none;
 }
 
-.rh-rank {
-    flex: 0 0 auto;
-    min-width: 30px;
-}
-
 .rh-drivers {
     flex: 1;
     min-width: 0;
@@ -456,15 +451,6 @@ main {
     display: none;
 }
 
-.rr-rank {
-    flex: 0 0 auto;
-    min-width: 30px;
-    font-size: 13px;
-    font-weight: 800;
-    color: var(--muted);
-    font-variant-numeric: tabular-nums;
-}
-
 .rr-drivers {
     flex: 1;
     min-width: 0;
@@ -520,10 +506,6 @@ main {
 
 /* #1 sits a size up — enough to read as the headline entry, not enough to
    break the column rhythm. */
-.rankrow-hero .rr-rank {
-    font-size: 15px;
-}
-
 .rankrow-hero .rr-drivers {
     font-size: 19px;
 }
@@ -1535,14 +1517,6 @@ a.tl-where:hover {
     .rr-face {
         padding: 12px 14px;
         gap: 10px;
-    }
-
-    /* No column strip on phones, so the rank carries its own "#" (matching
-       the combinations table's stacked rows). */
-    .rr-rank::before {
-        content: "#";
-        color: var(--accent);
-        opacity: 0.55;
     }
 
     .rr-drivers {

@@ -68,7 +68,7 @@ def render_pairs(pairs: list[SoulmatePair]) -> str:
     if not pairs:
         return '<p class="panel-sub">No partnerships yet.</p>'
     rows = "".join(
-        render_row(i, render_pair(p), str(p.count), _pair_stats(p), hero=(i == 1))
+        render_row(render_pair(p), str(p.count), _pair_stats(p), hero=(i == 1))
         for i, p in enumerate(pairs, 1)
     )
     return render_table(rows, value_label="Shared podiums", value_width=140, group_label="Duo")

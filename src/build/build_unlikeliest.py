@@ -104,13 +104,10 @@ def _stats(e: UnlikeliestTrio, race: str) -> str:
     )
 
 
-def render_row_entry(
-    rank: int, e: UnlikeliestTrio, links: dict | None = None, hero: bool = False
-) -> str:
-    """One leaderboard row. ``hero`` marks rank #1: open and accented."""
+def render_row_entry(e: UnlikeliestTrio, links: dict | None = None, hero: bool = False) -> str:
+    """One leaderboard row. ``hero`` marks the top entry: open and accented."""
     race = _race_link(e, links)
     return render_row(
-        rank,
         render_trio(e.names),
         format_odds(e.score),
         _stats(e, race),
@@ -122,7 +119,7 @@ def render_row_entry(
 def render_cards(entries: list[UnlikeliestTrio], links: dict | None = None) -> str:
     if not entries:
         return '<p class="panel-sub">No trios.</p>'
-    rows = "".join(render_row_entry(i, e, links, hero=(i == 1)) for i, e in enumerate(entries, 1))
+    rows = "".join(render_row_entry(e, links, hero=(i == 1)) for i, e in enumerate(entries, 1))
     return render_table(
         rows,
         value_label="Chance it ever happened",
