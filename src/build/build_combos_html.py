@@ -114,7 +114,6 @@ def short_race_name(name: str) -> str:
 
 
 def render_combo(
-    rank: int,
     combo: Combo,
     links: dict | None = None,
     shared: dict[tuple[str, str], str] | None = None,
@@ -156,7 +155,6 @@ def render_combo(
         f' data-last="{combo.lastRaceKey}"'
         f' data-races="{html.escape(races_data, quote=True)}"'
         f' data-drivers="{html.escape(drivers_data, quote=True)}">'
-        f'<td class="rank">{rank}</td>'
         f'<td class="drivers">{drivers_html}{badge}</td>'
         f'<td class="count">{n}</td>'
         f'<td class="last">{last_html}</td>'
@@ -165,7 +163,7 @@ def render_combo(
     )
     detail_row = (
         f'<tr class="detail">'
-        f'<td colspan="5">'
+        f'<td colspan="4">'
         f'<div class="detail-inner">{render_race_pills(combo.races, links, shared)}</div>'
         f"</td></tr>"
     )
@@ -226,7 +224,7 @@ def main() -> int:
     }
 
     links = load_race_links()
-    rows_html = "\n".join(render_combo(i, c, links, shared) for i, c in enumerate(combos, 1))
+    rows_html = "\n".join(render_combo(c, links, shared) for c in combos)
 
     page = f"""{
         head(
@@ -288,7 +286,6 @@ def main() -> int:
         <div class="table-wrap">
             <table>
                 <colgroup>
-                    <col class="col-rank">
                     <col class="col-drivers">
                     <col class="col-count">
                     <col class="col-last">
@@ -296,7 +293,6 @@ def main() -> int:
                 </colgroup>
                 <thead>
                     <tr>
-                        <th>#</th>
                         <th data-sort="drivers">Trios</th>
                         <th data-sort="count">Count</th>
                         <th data-sort="last">Last seen</th>

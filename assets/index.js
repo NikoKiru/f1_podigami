@@ -111,8 +111,7 @@ function applySort() {
         if (key === 'last') return (Number(a.dataset.last) - Number(b.dataset.last)) * mult;
         return a.dataset.drivers.localeCompare(b.dataset.drivers) * mult;
     });
-    sorted.forEach((row, i) => {
-        row.querySelector('.rank').textContent = i + 1;
+    sorted.forEach(row => {
         const detail = row.nextElementSibling;
         tbody.appendChild(row);
         if (detail && detail.classList.contains('detail')) tbody.appendChild(detail);
