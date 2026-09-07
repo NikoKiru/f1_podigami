@@ -712,3 +712,93 @@ def test_predict_race_dnf_risk_drains_a_drivers_trios():
     assert risky["trio_probs"][("a", "b", "c")] < sure["trio_probs"][("a", "b", "c")]
     # mass moves to trios without a
     assert risky["trio_probs"][("b", "c", "d")] > sure["trio_probs"][("b", "c", "d")]
+
+
+# --- constructor gauge ------------------------------------------------------------
+
+_FIELD = [(f"d{t}{s}", f"t{t}") for t in range(1, 11) for s in (0, 1)]
+
+
+def _grid_race(season, rnd, order):
+    rows = [_rrow(did, cid, i + 1, i + 1, 50, "Finished") for i, (did, cid) in enumerate(order)]
+    return _rrace(season, rnd, "somewhere", rows)
+
+
+def _settled_field(seasons=20, rounds=10):
+    """A long history with a stable pecking order — where the scale drifts."""
+    hf = model_v2.HistoryFilter(dict(DEFAULT_PARAMS_V2))
+    for season in range(2000, 2000 + seasons):
+        for rnd in range(1, rounds + 1):
+            hf.step(_grid_race(season, rnd, _FIELD))
+    return hf
+
+
+def _field_median(hf):
+    mus = sorted(hf.engine.constructor(f"t{t}").mu for t in range(1, 11))
+    return 0.5 * (mus[4] + mus[5])
+
+
+def test_recenter_subtracts_one_common_offset():
+    # Re-centring is a gauge fix, so it may not change any rating *difference*.
+    eng = engine()
+    eng.observe_order([("a", "x"), ("b", "y"), ("c", "z")])
+    before = {c: eng.constructor(c).mu for c in "xyz"}
+    var_before = {c: eng.constructor(c).var for c in "xyz"}
+    eng.recenter(["x", "y", "z"])
+    shifts = {round(before[c] - eng.constructor(c).mu, 12) for c in "xyz"}
+    assert len(shifts) == 1
+    assert all(eng.constructor(c).var == var_before[c] for c in "xyz")
+
+
+def test_recenter_puts_the_field_median_at_the_origin():
+    eng = engine()
+    eng.observe_order([("a", "x"), ("b", "y"), ("c", "z")])
+    eng.recenter(["x", "y", "z"])
+    assert sorted(eng.constructor(c).mu for c in "xyz")[1] == pytest.approx(0.0, abs=1e-12)
+
+
+def test_recenter_moves_constructors_that_are_not_racing():
+    # A dormant team must keep its place relative to the field that is racing.
+    eng = engine()
+    eng.observe_order([("a", "x"), ("b", "y"), ("c", "z")])
+    dormant = eng.constructor("mothballed")
+    gap = dormant.mu - eng.constructor("x").mu
+    eng.recenter(["x", "y", "z"])
+    assert dormant.mu - eng.constructor("x").mu == pytest.approx(gap, rel=1e-12)
+
+
+def test_recenter_follows_the_lineage_root():
+    eng = engine()
+    eng.observe_order([("a", "toro_rosso"), ("b", "y"), ("c", "z")])
+    eng.recenter(["rb", "y", "z"])  # same lineage as toro_rosso
+    assert sorted(eng.constructor(c).mu for c in ("minardi", "y", "z"))[1] == pytest.approx(
+        0.0, abs=1e-12
+    )
+
+
+def test_constructor_scale_stays_anchored_over_a_long_history():
+    # Ungauged, the constructor field drifts decade on decade, which silently
+    # invalidates newteam_mu — an offset expressed on the absolute scale.
+    assert abs(_field_median(_settled_field())) < 0.5
+
+
+def test_a_debutant_enters_a_fixed_distance_below_the_settled_field():
+    hf = _settled_field()
+    seed = hf.engine.constructor("newco").mu
+    assert seed - _field_median(hf) == pytest.approx(DEFAULT_PARAMS_V2["newteam_mu"], abs=1e-9)
+
+
+def test_a_debutant_running_last_all_season_is_rated_last():
+    hf = _settled_field()
+    order = _FIELD + [("d7", "newco"), ("d8", "newco")]
+    for rnd in range(1, 15):
+        hf.step(_grid_race(2020, rnd, order))
+    slowest = min(hf.engine.constructor(f"t{t}").mu for t in range(1, 11))
+    assert hf.engine.constructor("newco").mu < slowest
+
+
+def test_locked_priors_carry_their_derivation():
+    # Both were re-derived in PR "power ranking" (2026-09-07); see model_v2's
+    # DEFAULT_PARAMS_V2 comments for the evidence behind each.
+    assert DEFAULT_PARAMS_V2["sigma0_drv"] == 1.0
+    assert DEFAULT_PARAMS_V2["newteam_mu"] == -2.0
