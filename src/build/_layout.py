@@ -11,6 +11,7 @@ them). The import works both when a builder is run as a script
 from __future__ import annotations
 
 import hashlib
+import html
 import json
 import urllib.parse
 from functools import cache
@@ -143,7 +144,13 @@ def head(
     stylesheets (e.g. ``"podigami.css"``). ``json_ld`` schema objects are
     embedded as ``application/ld+json`` blocks; ``noindex`` marks a page
     (the 404) as not for search indexes.
+
+    ``title`` and ``description`` are escaped: both are repeated into ``content``
+    attributes, where a bare ``&`` is already invalid (the landing page's own
+    title has one) and a quote would end the attribute early.
     """
+    title = html.escape(title)
+    description = html.escape(description)
     links = "\n".join(
         f'<link rel="stylesheet" href="{asset(href)}">' for href in ("style.css", *css_files)
     )

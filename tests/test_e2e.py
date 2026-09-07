@@ -479,6 +479,50 @@ def test_season_range_combines_with_driver_filter(dist):
         browser.close()
 
 
+def test_clear_button_drops_the_driver_deep_link(dist):
+    """Clear empties the URL too, so a reload can't put the filter back.
+
+    A visitor arriving from a trio link elsewhere on the site lands with ?d=
+    names in the URL. Clearing has to retract those as well as the inputs —
+    otherwise the table shows everything while the address bar still says it is
+    filtered, and the next reload silently re-applies it.
+    """
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        page = browser.new_page(viewport={"width": 1200, "height": 900})
+        page.goto(_url(dist, "combos.html", "?d=Max+Verstappen&d=George+Russell"))
+        # attached, not visible: the deep link hides the first row on arrival.
+        page.wait_for_selector("tr.combo", state="attached")
+
+        total = int(page.text_content("#total-count") or "0")
+        assert page.input_value(".filters input[data-filter] >> nth=0") == "Max Verstappen"
+        filtered = int(page.text_content("#visible-count") or "0")
+        assert 0 < filtered < total
+
+        page.locator("#clear-filters").click()
+
+        assert page.evaluate("() => location.search") == ""
+        assert int(page.text_content("#visible-count") or "0") == total
+        browser.close()
+
+
+def test_driver_filter_is_reflected_in_the_url(dist):
+    """Typing a driver name makes the view shareable, the way ?from/?to already are."""
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        page = browser.new_page(viewport={"width": 1200, "height": 900})
+        page.goto(_url(dist, "combos.html"))
+        page.wait_for_selector("tr.combo")
+
+        assert page.evaluate("() => location.search") == ""
+        page.locator(".filters input[data-filter]").first.fill("hamilton")
+
+        assert page.evaluate("() => new URLSearchParams(location.search).getAll('d')") == [
+            "hamilton"
+        ]
+        browser.close()
+
+
 # ── Combos sort (index.js) ─────────────────────────────────────────────────
 
 
