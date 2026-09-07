@@ -753,14 +753,6 @@ main {
     border-bottom: none;
 }
 
-.cand-rank {
-    width: 22px;
-    text-align: right;
-    color: var(--muted-dim);
-    font-variant-numeric: tabular-nums;
-    font-size: 13px;
-}
-
 .cand-body {
     flex: 1;
     min-width: 0;
