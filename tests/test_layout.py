@@ -56,6 +56,24 @@ def test_head_without_extra_css_still_links_base():
     assert 'href="style.css?v=' in out
 
 
+def test_head_escapes_the_title_and_description():
+    """Title and description land in attributes, so they must be escaped.
+
+    A bare ``&`` is already invalid there (index.html's own title carries one),
+    and a quote would close the attribute and spill the rest of the string into
+    the markup as tags.
+    """
+    out = head('Trio: "A" & B', description="X & Y <script>alert(1)</script>")
+
+    assert "<title>Trio: &quot;A&quot; &amp; B</title>" in out
+    assert '<meta property="og:title" content="Trio: &quot;A&quot; &amp; B">' in out
+    assert '<meta name="twitter:title" content="Trio: &quot;A&quot; &amp; B">' in out
+    for prop in ('name="description"', 'property="og:description"', 'name="twitter:description"'):
+        assert f'<meta {prop} content="X &amp; Y &lt;script&gt;alert(1)&lt;/script&gt;">' in out
+    # nothing escaped its attribute
+    assert "<script>alert(1)</script>" not in out
+
+
 def test_nav_marks_only_the_active_link():
     out = nav("combos.html")
     assert '<a href="combos.html" class="active">Combinations</a>' in out
