@@ -60,21 +60,23 @@ def test_hook_grids_collapse_on_mobile():
     ), "hook-row/explore-grid must collapse to 1 column inside the 600px breakpoint"
 
 
-def test_podigami_hero_collapses_at_720px():
-    """Hero switches to single-column at 720px to fix the 601-720px dead zone.
+def test_podigami_hero_trio_stacks_on_mobile():
+    """The hero's three driver columns must stack on a phone.
 
-    Without this, the container already has 14px padding from the 720px nav rule
-    (style.css) but the hero grid stays in 2-column desktop mode until 600px,
-    leaving the right column too narrow for 3 driver cards side by side.
+    Replaces the old 720px check: the hero is no longer a two-column grid, so
+    the 601-720px dead zone it guarded (#116) cannot recur. The surviving risk
+    is the 3-up trio row, which at 600px would leave ~158px a column — narrower
+    than "Andrea Kimi Antonelli".
     """
     import re
 
     s = css("podigami.css")
+    mobile = re.search(r"@media \(max-width: 600px\)[\s\S]*", s)
+    assert mobile, "podigami.css must keep the 600px breakpoint"
     assert re.search(
-        r"@media \(max-width: 720px\).*?grid-template-columns:\s*1fr",
-        s,
-        re.DOTALL,
-    ), "Hero must switch to single-column grid inside a max-width:720px block (fixes #116)"
+        r"\.hero-drivers\s*\{[^}]*grid-template-columns:\s*1fr",
+        mobile.group(0),
+    ), ".hero-drivers must collapse to one column inside the 600px breakpoint"
 
 
 def test_shared_nav_collapses_to_drawer_on_mobile():

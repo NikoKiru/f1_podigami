@@ -175,7 +175,7 @@ def test_landing_page_has_broadcast_driver_treatment(dist):
     html = (dist / "index.html").read_text(encoding="utf-8")
     assert "--team:" in html  # team-colour custom property drives the accents
     assert 'class="tower-row"' in html  # timing-tower current-form rows
-    assert 'class="d-code"' in html  # hero TLA codes
+    assert 'class="cd-code"' in html  # candidate-row TLA codes
     assert 'class="tr-num"' in html  # car-number chips
 
 
@@ -184,7 +184,7 @@ def test_landing_page_has_faq_section(dist):
     assert "faq-section" in html  # dedicated FAQ section
     assert "Frequently asked questions" in html
     assert 'class="faq-item"' in html  # expandable items
-    assert 'class="acc-badge"' in html  # compact backtest badge still present
+    assert "top three" in html  # backtest hit rate, stated in the hero's footing line
 
 
 def test_landing_page_has_info_tooltips(dist):
