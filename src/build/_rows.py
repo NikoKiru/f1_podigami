@@ -2,18 +2,21 @@
 
 The three pages present the same shape of content — a ranked list of driver
 groupings, each with one headline number and a handful of supporting stats — so
-they render through one component that deliberately mirrors the Combinations
-table: a single bordered container, an uppercase column-label strip, hairline
-row dividers and zebra striping. No floating per-row cards, no bespoke hero
-card per page.
+they render through one component that mirrors the Combinations table
+cell-for-cell: a single hairline frame with no outer panel, an uppercase
+column-label strip, flat rows at the page type size, and an expanded drawer on
+``--bg-2`` behind an accent rail.
 
 Every entry is one native ``<details>`` row: the ``<summary>`` is the row face
-(drivers, headline number, optional race link) and the body holds the stat
-cells. The list carries no ordinal column — it is an ordered ``<ol>`` and
-position says the same thing — so the top entry is marked by rendering it
-``hero=True``: open by default, accented, and slightly larger, showing the
-stats readers care about most without a click while still sitting in the
-table.
+(drivers, headline number, optional race) and the body holds the stat cells.
+Closed shows the headline stat only; open reveals the detail — including for
+#1, which is a normal closed row carrying nothing but an accent rail to mark it
+as the leader. The list carries no ordinal column: it is an ordered ``<ol>``
+and position says the same thing.
+
+Column geometry lives in one custom property (``--rank-cols``, a CSS grid track
+list set per page), shared by the label strip and every row face, so labels sit
+directly above their values with no layout engine.
 
 Callers pass pre-escaped HTML fragments (driver spans, stat cells, race link);
 this module only assembles structure.
@@ -29,19 +32,21 @@ def render_row(
     race_html: str = "",
     hero: bool = False,
 ) -> str:
-    """One expandable row. ``race_html`` (Unlikeliest only) sits on the row face
-    on desktop; CSS moves it into the stats panel on phones. ``hero`` marks the
-    top entry: rendered open and accented."""
+    """One expandable row. Column order mirrors the combinations table: group,
+    headline value, context, chevron. ``race_html`` (Unlikeliest only) sits on
+    the row face on desktop; CSS moves it into the stats drawer on phones.
+    ``hero`` marks the top entry, which differs only by an accent rail — same
+    type size, and closed by default like every other row."""
     race = f'<span class="rr-race">{race_html}</span>' if race_html else ""
     cls = "rankrow rankrow-hero" if hero else "rankrow"
     return (
         f'<li class="{cls}">'
-        f"<details{' open' if hero else ''}>"
+        "<details>"
         '<summary class="rr-face">'
         f'<span class="rr-drivers">{drivers_html}</span>'
-        f"{race}"
         f'<span class="rr-num">{num}</span>'
-        '<span class="rr-chev" aria-hidden="true">&#9662;</span>'
+        f"{race}"
+        '<span class="rr-chev" aria-hidden="true"><span class="chev">&#9662;</span></span>'
         "</summary>"
         f'<div class="rr-stats">{stats_html}</div>'
         "</details>"
@@ -50,7 +55,7 @@ def render_row(
 
 
 def render_stat(label: str, value: str, extra_class: str = "") -> str:
-    """One labelled stat cell for a row's expanded panel. All three pages use
+    """One labelled stat cell for a row's expanded drawer. All three pages use
     the same cell so the styling lives in one place."""
     cls = f"rr-stat {extra_class}".strip()
     return (
@@ -65,31 +70,40 @@ def render_table(
     rows_html: str,
     *,
     value_label: str,
-    value_width: int,
+    cols: str,
     group_label: str = "Trio",
     race_label: str = "",
-    race_width: int = 0,
 ) -> str:
-    """Wrap rendered rows in the container + column-label strip.
+    """Wrap rendered rows in the frame + column-label strip.
 
-    ``value_width``/``race_width`` (px) are handed to CSS as custom properties
-    so the label strip and every row face share the same column geometry —
-    labels sit directly above their values without a layout engine. The strip
-    is hidden on phones, where rows stack instead.
+    ``cols`` is the CSS grid track list (group, value, [race], chevron) handed
+    to CSS as ``--rank-cols`` so the strip and every row face share the same
+    geometry. The strip is hidden on phones, where rows stack instead. Keep
+    ``value_label`` short — like the combinations table's "Count" and "Last
+    seen" — since a label wider than its track is truncated, not wrapped.
     """
-    style = f"--rank-num-w:{value_width}px"
-    race_head = ""
-    if race_label:
-        style += f";--rank-race-w:{race_width}px"
-        race_head = f'<span class="rh-race">{race_label}</span>'
+    race_head = f'<span class="rh-race">{race_label}</span>' if race_label else ""
     return (
-        f'<div class="rank-wrap" style="{style}">'
+        f'<div class="rank-wrap" style="--rank-cols:{cols}">'
         '<div class="rank-head">'
         f'<span class="rh-drivers">{group_label}</span>'
-        f"{race_head}"
         f'<span class="rh-num">{value_label}</span>'
-        '<span class="rh-chev" aria-hidden="true"></span>'
+        f"{race_head}"
+        '<span class="rh-chev"></span>'
         "</div>"
         f'<ol class="rank-list">{rows_html}</ol>'
         "</div>"
+    )
+
+
+def render_section(title: str, sub: str, body_html: str) -> str:
+    """A heading and one-line description sitting directly above the table, with
+    no surrounding panel box — the combinations page's heading/hint/table
+    rhythm, so the table itself is the only framed element on the page."""
+    return (
+        f'<section class="rank-section">'
+        f"<h2>{title}</h2>"
+        f'<p class="rank-sub">{sub}</p>'
+        f"{body_html}"
+        f"</section>"
     )

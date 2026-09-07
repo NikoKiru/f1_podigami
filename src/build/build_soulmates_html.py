@@ -1,10 +1,11 @@
 """Render soulmates.html — the driver-partnership leaderboard.
 
 Shares the site's ranked table (Overdue / Unlikeliest, via ``_rows``): one
-bordered container with a column-label strip and a native ``<details>`` row per
-rank that expands to show the partnership's stats, the #1 duo open and accented.
-A second panel surfaces the fun-fact stat cards computed from the full 40×40
-matrix.
+bordered table with a column-label strip and a native ``<details>`` row per
+rank that expands to show the partnership's stats, the #1 duo marked only by an
+accent rail. A second section surfaces the fun-fact stat cards computed from
+the full 40×40 matrix. Neither section sits in a panel box — the table is the
+only framed element, matching the combinations page.
 """
 
 from __future__ import annotations
@@ -25,11 +26,15 @@ from _layout import (  # noqa: E402  (needs the sys.path entry above)
     nav,
     organization_schema,
 )
-from _rows import render_row, render_stat, render_table  # noqa: E402
+from _rows import render_row, render_section, render_stat, render_table  # noqa: E402
 
 from datalib import SoulmatePair, Soulmates, load_soulmates  # noqa: E402
 
 OUT_PATH = ROOT / "dist" / "soulmates.html"
+
+# Grid tracks shared by the label strip and every row face: duo, value,
+# chevron.
+COLS = "minmax(0,1fr) 200px 26px"
 
 
 def esc(s: str) -> str:
@@ -66,12 +71,12 @@ def _pair_stats(p: SoulmatePair) -> str:
 
 def render_pairs(pairs: list[SoulmatePair]) -> str:
     if not pairs:
-        return '<p class="panel-sub">No partnerships yet.</p>'
+        return '<p class="rank-sub">No partnerships yet.</p>'
     rows = "".join(
         render_row(render_pair(p), str(p.count), _pair_stats(p), hero=(i == 1))
         for i, p in enumerate(pairs, 1)
     )
-    return render_table(rows, value_label="Shared podiums", value_width=140, group_label="Duo")
+    return render_table(rows, value_label="Shared podiums", cols=COLS, group_label="Duo")
 
 
 def _compute_facts(soulmates: Soulmates) -> list[dict]:
@@ -210,8 +215,18 @@ def main() -> int:
     top_pairs = soulmates.topPairs
     n_drivers = len(soulmates.drivers)
 
-    pairs_html = render_pairs(top_pairs)
-    facts_html = _render_facts(_compute_facts(soulmates))
+    pairs_section = render_section(
+        "Closest partnerships",
+        "Ranked by how many World Championship podiums each duo shared &mdash; "
+        f"{len(top_pairs)} partnerships drawn from the all-time top {n_drivers} drivers "
+        "by career podiums.",
+        render_pairs(top_pairs),
+    )
+    facts_section = render_section(
+        "Did you know",
+        f"The quirks hiding inside the full {n_drivers}&times;{n_drivers} shared-podium matrix.",
+        f'<div class="sm-facts">{_render_facts(_compute_facts(soulmates))}</div>',
+    )
 
     page = f"""{
         head(
@@ -235,23 +250,9 @@ def main() -> int:
 </header>
 <main>
     <div class="container">
-        <section class="panel">
-            <h2>Closest partnerships</h2>
-            <p class="panel-sub">Ranked by how many World Championship podiums each duo shared &mdash; {
-        len(top_pairs)
-    } partnerships drawn from the all-time top {n_drivers} drivers by career podiums.</p>
-            {pairs_html}
-        </section>
+        {pairs_section}
 
-        <section class="panel">
-            <h2>Did you know</h2>
-            <p class="panel-sub">The quirks hiding inside the full {n_drivers}&times;{
-        n_drivers
-    } shared-podium matrix.</p>
-            <div class="sm-facts">
-                {facts_html}
-            </div>
-        </section>
+        {facts_section}
 
         <p class="as-of">Shared podiums count every World Championship race where both drivers finished in the top three, across all F1 rounds since 1950. The field is the all-time top {
         n_drivers

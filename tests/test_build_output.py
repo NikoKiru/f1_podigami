@@ -369,10 +369,10 @@ def test_overdue_has_two_ranked_tables(dist):
 def test_unlikeliest_has_ranked_table(dist):
     html = (dist / "unlikeliest.html").read_text(encoding="utf-8")
     assert html.count('class="rank-wrap"') == 1
-    assert html.count("rankrow-hero") == 1  # only the #1 trio is the open hero
-    assert html.count("<details open>") == 1
+    assert html.count("rankrow-hero") == 1  # the #1 trio, marked by an accent rail
+    assert "<details open>" not in html  # every row starts closed, #1 included
     assert 'class="rankrow"' in html
-    assert 'class="rr-stat rr-stat-race"' in html  # race repeats in the row panel
+    assert 'class="rr-stat rr-stat-race"' in html  # race repeats in the row drawer
 
 
 def test_ranked_pages_share_one_table_component(dist):
@@ -389,14 +389,14 @@ def test_ranked_pages_share_one_table_component(dist):
 
 
 def test_soulmates_uses_shared_ranked_layout(dist):
-    """Soulmates must share the site's panel + ranked-table chrome rather than
-    its old bespoke bar-chart list."""
+    """Soulmates must share the site's ranked-table chrome rather than its old
+    bespoke bar-chart list."""
     html = (dist / "soulmates.html").read_text(encoding="utf-8")
     assert 'class="nav"' in html
-    assert 'class="panel"' in html  # site-standard panels
+    assert 'class="rank-section"' in html  # naked heading, no panel box
     assert html.count('class="rank-wrap"') == 1
     assert '<span class="rh-num">Shared podiums</span>' in html
-    assert html.count("rankrow-hero") == 1  # only the #1 duo is the open hero
+    assert html.count("rankrow-hero") == 1  # the #1 duo, marked by an accent rail
     assert 'class="rankrow"' in html  # the rest are shared leaderboard rows
     assert 'class="fact-card"' in html  # did-you-know cards retained
     # the old bespoke layout is gone
