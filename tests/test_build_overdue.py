@@ -69,7 +69,7 @@ def test_render_trio_escapes_and_separates():
 
 def test_render_row_entry_carries_score_and_stats():
     e = entry(["A Driver", "B Driver", "C Driver"], ["a", "b", "c"], 10, 2.0, [0.3, 0.2, 0.1])
-    html = bo.render_row_entry(2, e)
+    html = bo.render_row_entry(e)
     assert 'class="rankrow"' in html
     assert "2.0×" in html  # headline number on the row face
     assert "Chance by now" in html and "86%" in html  # stats in the details body
@@ -79,8 +79,8 @@ def test_render_row_entry_carries_score_and_stats():
 
 def test_render_row_entry_hero_is_open():
     e = entry(["A Driver", "B Driver", "C Driver"], ["a", "b", "c"], 10, 2.0, [0.3, 0.2, 0.1])
-    assert "rankrow-hero" in bo.render_row_entry(1, e, hero=True)
-    assert "rankrow-hero" not in bo.render_row_entry(2, e)
+    assert "rankrow-hero" in bo.render_row_entry(e, hero=True)
+    assert "rankrow-hero" not in bo.render_row_entry(e)
 
 
 # ── render_cards ─────────────────────────────────────────────────────────────
@@ -101,8 +101,7 @@ def test_render_cards_table_with_hero_first_row():
     assert html.count('class="rankrow') == 3
     assert html.count("rankrow-hero") == 1
     assert html.count("<details open>") == 1
-    assert '<span class="rr-rank">1</span>' in html
-    assert '<span class="rr-rank">3</span>' in html
+    assert 'class="rr-rank"' not in html  # ordered <ol>; no ordinal column
 
 
 def test_render_cards_empty():

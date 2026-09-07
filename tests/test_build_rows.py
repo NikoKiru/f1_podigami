@@ -4,12 +4,12 @@ from build._rows import render_row, render_stat, render_table
 
 
 def test_render_row_structure():
-    out = render_row(2, "<span>A &middot; B &middot; C</span>", "1 in 440", "<div>stats</div>")
+    out = render_row("<span>A &middot; B &middot; C</span>", "1 in 440", "<div>stats</div>")
     assert out.startswith('<li class="rankrow">')
     assert out.endswith("</li>")
     assert "<details>" in out
     assert '<summary class="rr-face">' in out
-    assert '<span class="rr-rank">2</span>' in out
+    assert 'class="rr-rank"' not in out  # ordered <ol>; no ordinal column
     assert '<span class="rr-drivers"><span>A &middot; B &middot; C</span></span>' in out
     assert '<span class="rr-num">1 in 440</span>' in out
     assert '<span class="rr-chev" aria-hidden="true">&#9662;</span>' in out
@@ -17,21 +17,21 @@ def test_render_row_structure():
 
 
 def test_render_row_race_optional():
-    assert 'class="rr-race"' not in render_row(2, "d", "n", "s")
-    out = render_row(3, "d", "n", "s", race_html='<a href="x">1990 Japanese GP</a>')
+    assert 'class="rr-race"' not in render_row("d", "n", "s")
+    out = render_row("d", "n", "s", race_html='<a href="x">1990 Japanese GP</a>')
     assert '<span class="rr-race"><a href="x">1990 Japanese GP</a></span>' in out
 
 
 def test_render_row_hero_is_open_and_flagged():
     """#1 stays a table row — just opened and accented — so its stats are
     visible without a click."""
-    out = render_row(1, "d", "n", "s", hero=True)
+    out = render_row("d", "n", "s", hero=True)
     assert out.startswith('<li class="rankrow rankrow-hero">')
     assert "<details open>" in out
 
 
 def test_render_row_default_is_closed():
-    out = render_row(2, "d", "n", "s")
+    out = render_row("d", "n", "s")
     assert "<details open>" not in out
     assert "rankrow-hero" not in out
 
@@ -62,7 +62,7 @@ def test_render_table_wraps_rows_with_label_strip():
     out = render_table("<li>row</li>", value_label="Shared podiums", value_width=140)
     assert '<div class="rank-wrap" style="--rank-num-w:140px">' in out
     assert '<div class="rank-head">' in out
-    assert '<span class="rh-rank">#</span>' in out
+    assert 'class="rh-rank"' not in out  # no "#" label above a column that's gone
     assert '<span class="rh-drivers">Trio</span>' in out
     assert '<span class="rh-num">Shared podiums</span>' in out
     assert '<ol class="rank-list"><li>row</li></ol>' in out
