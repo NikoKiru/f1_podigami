@@ -379,46 +379,141 @@ def render_hero(
     )
 
 
+def _trio_chips(per_driver: list[dict], meta: dict) -> str:
+    """The team-coloured TLA chips shared by candidate rows and board rows."""
+    chips = []
+    for p in per_driver:
+        v = driver_view(p, meta)
+        gp = p.get("gridPosition")
+        grid_chip = f'<span class="cd-grid">P{gp}</span>' if gp else ""
+        chips.append(
+            f'<span class="cd" style="--team:{v["color"]}" title="{esc(display_name(v["name"]))}">'
+            f'<span class="cd-dot"></span><span class="cd-code">{esc(v["code"])}</span>{grid_chip}'
+            f"</span>"
+        )
+    return '<span class="cd-sep">/</span>'.join(chips)
+
+
+def _cand_row(rank: int, names: str, pct: int, prob: float, cls: str = "", extra: str = "") -> str:
+    return (
+        f'<li class="cand{cls}">'
+        f'<span class="cand-rank">{rank}</span>'
+        f'<div class="cand-body">'
+        f'  <div class="cand-names">{names}{extra}</div>'
+        f'  <div class="cand-bar-wrap"><div class="cand-bar" style="width:{pct}%"></div></div>'
+        f"</div>"
+        f'<span class="cand-prob">{prob:.2f}%</span>'
+        f"</li>"
+    )
+
+
+def _board_history(row: dict, combos: list[dict] | None) -> tuple[str, str]:
+    """The hover/tap bubble for an already-happened trio: how many times and when.
+
+    combos.json and podiums.json are derived from the same source, so a lookup
+    miss means upstream drift, not a page that should break — the row then
+    renders plainly, with no bubble and nothing to hover.
+    """
+    combo = _lookup_combo(row["driverIds"], combos or [])
+    if not combo:
+        return "", ""
+    n = combo["count"]
+    last = combo.get("lastRace") or {}
+    when = f"{last.get('season', '')} {last.get('raceName', '')}".strip()
+    times = f"{n} time{'s' if n != 1 else ''}"
+    label = f"Happened {times}" + (f" — last: {when}" if when else "")
+    link = combos_link(combo.get("drivers") or [])
+    bubble = (
+        f'<span class="info-bubble trio-bubble">'
+        f"<b>Happened {esc(times)}</b>"
+        + (f"<br>Last: {esc(when)}" if when else "")
+        + f'<br><a href="{esc(link)}">See all &rarr;</a>'
+        f"</span>"
+    )
+    return bubble, label
+
+
+def _board_rows(board: list[dict], meta: dict, driver_form: list[dict], combos) -> list[str]:
+    by_id = {d["driverId"]: d for d in (driver_form or [])}
+
+    def entry(did: str) -> dict:
+        # driverForm carries name/constructor (and gridPosition post-quali) for
+        # every entrant; meta and the id itself are the fallbacks.
+        return by_id.get(did) or {
+            "driverId": did,
+            "name": meta.get(did, {}).get("name")
+            or " ".join(w.capitalize() for w in did.split("_")),
+            "constructorId": "",
+        }
+
+    top = board[0]["prob"] or 1
+    rows = []
+    for i, r in enumerate(board, 1):
+        names = _trio_chips([entry(d) for d in r["driverIds"]], meta)
+        pct = round(100 * r["prob"] / top)
+        if not r["happened"]:
+            rows.append(
+                _cand_row(
+                    i, names, pct, r["prob"], " cand-new", '<span class="cand-pill">NEW</span>'
+                )
+            )
+            continue
+        bubble, label = _board_history(r, combos)
+        if bubble:
+            names = (
+                f'<span class="trio-tip" tabindex="0" role="button" aria-expanded="false"'
+                f' aria-label="{esc(label)}">{names}{bubble}</span>'
+            )
+        rows.append(_cand_row(i, names, pct, r["prob"], " cand-done"))
+    return rows
+
+
 def render_candidates(
-    cands: list[dict], meta: dict, form_html: str = "", grid_aware: bool = False
+    cands: list[dict],
+    meta: dict,
+    form_html: str = "",
+    grid_aware: bool = False,
+    board: list[dict] | None = None,
+    driver_form: list[dict] | None = None,
+    combos: list[dict] | None = None,
 ) -> str:
-    if not cands:
+    """The ranked panel: the trio board when there is one, else the new-only list.
+
+    The fallback is not dead code. deploy.yml builds main from committed data and
+    a promotion's three-way merge keeps main's newer data/, so the live site can
+    run on a podigami.json written before ``trioBoard`` existed.
+    """
+    if board:
+        rows = _board_rows(board, meta, driver_form or [], combos)
+        tip = (
+            "Every trio the model rates as a live chance at the next race. "
+            "Highlighted ones have never shared a podium; hover or tap the rest "
+            "to see when they did."
+        )
+    elif cands:
+        top = cands[0]["prob"] or 1
+        rows = [
+            _cand_row(i, _trio_chips(c["perDriver"], meta), round(100 * c["prob"] / top), c["prob"])
+            for i, c in enumerate(cands, 1)
+        ]
+        tip = (
+            "Trios that have never shared a podium, ranked by the model's "
+            "probability they do it next."
+        )
+    else:
         return ""
     badge = '<span class="panel-badge">grid-aware</span>' if grid_aware else ""
-    top = cands[0]["prob"] or 1
-    rows = []
-    for i, c in enumerate(cands, 1):
-        pct = round(100 * c["prob"] / top)
-        chips = []
-        for p in c["perDriver"]:
-            v = driver_view(p, meta)
-            gp = p.get("gridPosition")
-            grid_chip = f'<span class="cd-grid">P{gp}</span>' if gp else ""
-            chips.append(
-                f'<span class="cd" style="--team:{v["color"]}" title="{esc(display_name(v["name"]))}">'
-                f'<span class="cd-dot"></span><span class="cd-code">{esc(v["code"])}</span>{grid_chip}'
-                f"</span>"
-            )
-        names = '<span class="cd-sep">/</span>'.join(chips)
-        rows.append(
-            f'<li class="cand">'
-            f'<span class="cand-rank">{i}</span>'
-            f'<div class="cand-body">'
-            f'  <div class="cand-names">{names}</div>'
-            f'  <div class="cand-bar-wrap"><div class="cand-bar" style="width:{pct}%"></div></div>'
-            f"</div>"
-            f'<span class="cand-prob">{c["prob"]:.2f}%</span>'
-            f"</li>"
-        )
     return (
         f'<section class="panel">'
-        f"  <h2>Most likely new trios"
+        f"  <h2>Most likely trios"
         f'    <span class="info-tip" tabindex="0" aria-label="More info">'
         f'      <span class="info-icon">i</span>'
-        f'      <span class="info-bubble">Trios that have never shared a podium, ranked by the model\'s probability they do it next.</span>'
+        f'      <span class="info-bubble">{tip}</span>'
         f"    </span>"
         f"  {badge}</h2>"
-        f'  <ol class="cand-list">{"".join(rows)}</ol>'
+        f'  <div class="cand-scroll">'
+        f'    <ol class="cand-list">{"".join(rows)}</ol>'
+        f"  </div>"
         f"  {form_html}"
         f"</section>"
     )
@@ -850,7 +945,16 @@ def main() -> int:
         data["params"].get("halfLife", 6.0),
         is_v2=data["params"].get("model") == "dbpl-v2",
     )
-    candidates = render_candidates(active_cands, meta, form, grid_aware=bool(post))
+    active_board = (post or data).get("trioBoard") or []
+    candidates = render_candidates(
+        active_cands,
+        meta,
+        form,
+        grid_aware=bool(post),
+        board=active_board,
+        driver_form=active_form,
+        combos=combos_dicts,
+    )
     timeline = render_timeline(data)
     faq_pairs = faq_items(
         data, model_eval, total_combos, total_races, possible_trios, grid_size, lo

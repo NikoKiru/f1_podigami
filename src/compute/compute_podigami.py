@@ -51,9 +51,46 @@ TOP_CANDIDATES = 12
 N_DRAWS = 512  # prediction simulation draws (deterministic seed)
 SEED = 20260704
 
+# Trio board: every trio in play for the next race, new and already-seen ranked
+# together, so the page can say "this one has happened" instead of leaving a
+# visitor to guess whether a missing trio is done or merely unlikely.
+BOARD_MIN_PROB = 0.01  # include every trio at >= 1%
+BOARD_MIN_ROWS = 12  # floor, so a concentrated era can't leave the card half-built
+BOARD_MAX_ROWS = 40  # bound the dataset; needs a sub-2.5% favourite to ever bind
+
 
 def trio_key(ids) -> tuple[str, str, str]:
     return model.trio_key(ids)
+
+
+def build_trio_board(
+    trio_probs: dict[tuple[str, str, str], float],
+    seen: set[tuple[str, str, str]],
+    entrants: list[str],
+) -> list[dict]:
+    """Rank every trio in play for the next race, new and already-seen together.
+
+    ``trio_probs`` is the simulation's own output, so the board is a view of the
+    same numbers the candidate list is drawn from — never a second opinion.
+    ``seen`` is global history, so it is narrowed to trios all of whose drivers
+    are entered: a trio needing a driver who isn't racing cannot happen here and
+    must not be flagged as one that already did.
+
+    Rows are every trio at ``BOARD_MIN_PROB`` or better, which lets the board
+    shorten itself once qualifying sharpens the odds. ``BOARD_MIN_ROWS`` keeps a
+    concentrated era from leaving the card half-built; ``BOARD_MAX_ROWS`` bounds
+    the dataset.
+    """
+    entered = set(entrants)
+    seen_here = {t for t in seen if all(d in entered for d in t)}
+    ranked = sorted(trio_probs.items(), key=lambda kv: (-kv[1], kv[0]))
+    rows = [(t, p) for t, p in ranked if p >= BOARD_MIN_PROB]
+    if len(rows) < BOARD_MIN_ROWS:
+        rows = ranked[:BOARD_MIN_ROWS]
+    return [
+        {"driverIds": list(t), "prob": round(100 * p, 3), "happened": t in seen_here}
+        for t, p in rows[:BOARD_MAX_ROWS]
+    ]
 
 
 def _latest_seats(race_results: list[dict] | None, season: int) -> dict[str, tuple[int, str]]:
@@ -154,7 +191,7 @@ def _v2_next_race_model(
     filter state simply misses the newest race until results catch up.
 
     Returns {"mu_var", "p_fin", "temp", "circuit", "chance_new", "ranked_new",
-    "params", "hf", "next_race", "next_season"}.
+    "trio_probs", "params", "hf", "next_race", "next_season"}.
     """
     params = dict(model_v2.DEFAULT_PARAMS_V2)
     qmap = {(q["season"], q["round"]): q for q in (qualifying or [])}
@@ -192,8 +229,9 @@ def _v2_next_race_model(
             grid_ids, mu_var, p_fin, temp, params, seen, n_draws=N_DRAWS, seed=SEED
         )
         chance_new, ranked_new = out["p_new"], out["ranked_new"]
+        trio_probs = out["trio_probs"]
     else:
-        chance_new, ranked_new = 0.0, []
+        chance_new, ranked_new, trio_probs = 0.0, [], {}
 
     return {
         "mu_var": mu_var,
@@ -202,6 +240,7 @@ def _v2_next_race_model(
         "circuit": circuit,
         "chance_new": chance_new,
         "ranked_new": ranked_new,
+        "trio_probs": trio_probs,
         "params": params,
         "hf": hf,
         "next_race": next_race,
@@ -396,6 +435,7 @@ def _post_quali_block(
         "raceName": nxt.get("raceName", ""),
         "chanceNextRaceNew": round(100 * out["p_new"], 1),
         "candidates": candidates,
+        "trioBoard": build_trio_board(out["trio_probs"], seen, running),
         "driverForm": driver_form,
     }
 
@@ -484,10 +524,12 @@ def compute(
 
     if v2 is not None:
         ranked_new, chance_new = v2["ranked_new"], v2["chance_new"]
+        trio_probs = v2["trio_probs"]
     else:
         set_probs = model.all_set_probs(lam, grid_ids)
         ranked, chance_new = model.rank_and_new(set_probs, seen)
         ranked_new = [(t, p) for t, p in ranked if t not in seen]
+        trio_probs = set_probs
 
     candidates: list[dict] = []
     for t, p in ranked_new:
@@ -575,6 +617,7 @@ def compute(
         "gridSize": len(grid_ids),
         "chanceNextRaceNew": round(100 * chance_new, 1),
         "candidates": candidates[:TOP_CANDIDATES],
+        "trioBoard": build_trio_board(trio_probs, seen, grid_ids),
         "driverForm": driver_form,
         "postQuali": post_quali,
         "bySeason": dict(by_season),

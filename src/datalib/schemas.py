@@ -310,6 +310,20 @@ class PodigamiCandidate(_Base):
     perDriver: list[DriverStrength]
 
 
+class TrioBoardEntry(_Base):
+    """One row of the landing page's trio board.
+
+    Deliberately light: the per-driver display data already lives in
+    ``driverForm`` and the occurrence history already lives in combos.json, so a
+    row carries only what neither of those can supply — the modelled probability
+    and whether this trio has happened before.
+    """
+
+    driverIds: list[str]
+    prob: float
+    happened: bool
+
+
 class RoundRace(_Base):
     """A race reference without the season (the season is the ``bySeason`` key)."""
 
@@ -336,6 +350,7 @@ class PodigamiPostQuali(_Base):
     raceName: str
     chanceNextRaceNew: float
     candidates: list[PodigamiCandidate]
+    trioBoard: list[TrioBoardEntry] = []
     driverForm: list[DriverStrength]
 
 
@@ -346,6 +361,11 @@ class Podigami(_Base):
     gridSize: int
     chanceNextRaceNew: float
     candidates: list[PodigamiCandidate]
+    # Optional so the site still builds from a podigami.json written before the
+    # board existed: deploy.yml builds main from committed data, and a
+    # promotion's three-way merge keeps main's newer data/, so the live file can
+    # lag a release. The builder falls back to the new-only candidate list.
+    trioBoard: list[TrioBoardEntry] = []
     driverForm: list[DriverStrength]
     postQuali: PodigamiPostQuali | None = None
     bySeason: dict[str, list[SeasonDebut]]

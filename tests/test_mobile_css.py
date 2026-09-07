@@ -141,3 +141,25 @@ def test_season_slider_thumbs_stay_grabbable():
     assert ".sr-input {" in s
     assert "pointer-events: none;" in s
     assert s.count("pointer-events: auto;") >= 2  # webkit + moz thumb
+
+
+def test_trio_board_window_shrinks_on_mobile():
+    """A 12-row window is desktop-sized; on a phone it outgrows the viewport and
+    the panel swallows the page, so the breakpoint must shorten it."""
+    import re
+
+    s = css("podigami.css")
+    assert "--board-rows: 12" in s  # desktop default
+    mobile = s[s.index("@media (max-width: 600px)") :]
+    block = re.search(r"\.cand-scroll\s*\{([^}]*)\}", mobile)
+    assert block, ".cand-scroll has no mobile override"
+    rows = re.search(r"--board-rows:\s*(\d+)", block.group(1))
+    assert rows and int(rows.group(1)) < 12
+
+
+def test_trio_board_bubble_fits_phone_width():
+    """A fixed-width popover overflows a narrow screen; the bubble must cap to
+    the viewport so it can't push the page sideways."""
+    s = css("podigami.css")
+    mobile = s[s.index("@media (max-width: 600px)") :]
+    assert "max-width: calc(100vw" in mobile

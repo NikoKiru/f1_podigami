@@ -686,6 +686,251 @@
       ]
     }
   ],
+  "trioBoard": [
+    {
+      "driverIds": [
+        "antonelli",
+        "leclerc",
+        "russell"
+      ],
+      "prob": 7.171,
+      "happened": true
+    },
+    {
+      "driverIds": [
+        "antonelli",
+        "max_verstappen",
+        "russell"
+      ],
+      "prob": 6.389,
+      "happened": true
+    },
+    {
+      "driverIds": [
+        "antonelli",
+        "norris",
+        "russell"
+      ],
+      "prob": 6.072,
+      "happened": true
+    },
+    {
+      "driverIds": [
+        "antonelli",
+        "hamilton",
+        "russell"
+      ],
+      "prob": 5.615,
+      "happened": true
+    },
+    {
+      "driverIds": [
+        "antonelli",
+        "piastri",
+        "russell"
+      ],
+      "prob": 3.837,
+      "happened": false
+    },
+    {
+      "driverIds": [
+        "leclerc",
+        "max_verstappen",
+        "russell"
+      ],
+      "prob": 3.025,
+      "happened": true
+    },
+    {
+      "driverIds": [
+        "leclerc",
+        "norris",
+        "russell"
+      ],
+      "prob": 2.805,
+      "happened": false
+    },
+    {
+      "driverIds": [
+        "antonelli",
+        "leclerc",
+        "norris"
+      ],
+      "prob": 2.59,
+      "happened": false
+    },
+    {
+      "driverIds": [
+        "antonelli",
+        "leclerc",
+        "max_verstappen"
+      ],
+      "prob": 2.577,
+      "happened": true
+    },
+    {
+      "driverIds": [
+        "max_verstappen",
+        "norris",
+        "russell"
+      ],
+      "prob": 2.537,
+      "happened": true
+    },
+    {
+      "driverIds": [
+        "hamilton",
+        "leclerc",
+        "russell"
+      ],
+      "prob": 2.44,
+      "happened": true
+    },
+    {
+      "driverIds": [
+        "antonelli",
+        "hamilton",
+        "leclerc"
+      ],
+      "prob": 2.341,
+      "happened": false
+    },
+    {
+      "driverIds": [
+        "antonelli",
+        "max_verstappen",
+        "norris"
+      ],
+      "prob": 2.193,
+      "happened": true
+    },
+    {
+      "driverIds": [
+        "hamilton",
+        "max_verstappen",
+        "russell"
+      ],
+      "prob": 2.156,
+      "happened": true
+    },
+    {
+      "driverIds": [
+        "antonelli",
+        "hamilton",
+        "norris"
+      ],
+      "prob": 2.129,
+      "happened": false
+    },
+    {
+      "driverIds": [
+        "hamilton",
+        "norris",
+        "russell"
+      ],
+      "prob": 2.086,
+      "happened": true
+    },
+    {
+      "driverIds": [
+        "antonelli",
+        "hamilton",
+        "max_verstappen"
+      ],
+      "prob": 2.071,
+      "happened": true
+    },
+    {
+      "driverIds": [
+        "leclerc",
+        "piastri",
+        "russell"
+      ],
+      "prob": 1.827,
+      "happened": true
+    },
+    {
+      "driverIds": [
+        "antonelli",
+        "leclerc",
+        "piastri"
+      ],
+      "prob": 1.754,
+      "happened": true
+    },
+    {
+      "driverIds": [
+        "max_verstappen",
+        "piastri",
+        "russell"
+      ],
+      "prob": 1.526,
+      "happened": false
+    },
+    {
+      "driverIds": [
+        "antonelli",
+        "norris",
+        "piastri"
+      ],
+      "prob": 1.48,
+      "happened": true
+    },
+    {
+      "driverIds": [
+        "antonelli",
+        "hadjar",
+        "russell"
+      ],
+      "prob": 1.467,
+      "happened": false
+    },
+    {
+      "driverIds": [
+        "norris",
+        "piastri",
+        "russell"
+      ],
+      "prob": 1.463,
+      "happened": true
+    },
+    {
+      "driverIds": [
+        "antonelli",
+        "max_verstappen",
+        "piastri"
+      ],
+      "prob": 1.459,
+      "happened": false
+    },
+    {
+      "driverIds": [
+        "antonelli",
+        "hamilton",
+        "piastri"
+      ],
+      "prob": 1.319,
+      "happened": false
+    },
+    {
+      "driverIds": [
+        "hamilton",
+        "piastri",
+        "russell"
+      ],
+      "prob": 1.283,
+      "happened": false
+    },
+    {
+      "driverIds": [
+        "leclerc",
+        "max_verstappen",
+        "norris"
+      ],
+      "prob": 1.009,
+      "happened": true
+    }
+  ],
   "driverForm": [
     {
       "driverId": "russell",
