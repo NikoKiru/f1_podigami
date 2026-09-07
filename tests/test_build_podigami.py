@@ -2,12 +2,17 @@
 
 from build import build_podigami_html as bp
 
+TEAM_NAMES = {"mercedes": "Mercedes", "mclaren": "McLaren", "ferrari": "Ferrari"}
+
 
 def pd(driver_id, name, cid, season_podiums=2):
     return {
         "driverId": driver_id,
         "name": name,
         "constructorId": cid,
+        # compute writes the display name alongside the id; the hero labels each
+        # driver with it, so the fixture has to carry it too
+        "constructor": TEAM_NAMES.get(cid, ""),
         "seasonPodiums": season_podiums,
         "weight": 5.0,
     }
@@ -36,27 +41,92 @@ def test_driver_view_falls_back_without_meta_or_team():
     assert v["color"].startswith("#")  # neutral fallback
 
 
-def test_num_chip_present_and_absent():
-    with_num = bp.driver_view(pd("norris", "Lando Norris", "mclaren"), META)
-    no_num = bp.driver_view({"driverId": "z", "name": "Zoe Zephyr", "constructorId": ""}, {})
-    assert bp._num_chip(with_num) != ""
-    assert bp._num_chip(no_num) == ""
+def test_ordinal_covers_the_teens_and_the_suffix_cycle():
+    assert [bp._ordinal(n) for n in (1, 2, 3, 4)] == ["1st", "2nd", "3rd", "4th"]
+    assert [bp._ordinal(n) for n in (11, 12, 13)] == ["11th", "12th", "13th"]
+    assert [bp._ordinal(n) for n in (21, 22, 23)] == ["21st", "22nd", "23rd"]
 
 
-def test_render_hero_has_chip_code_surname_and_team_var():
+def test_render_hero_carries_the_team_colour():
+    out = bp.render_hero(_hero_top(), 55.0, META)
+    assert "--team:" in out
+    assert "55%" in out
+
+
+def test_render_hero_head_pairs_the_number_with_its_sentence():
+    """Number and sentence are one row: the figure sits beside a single text
+    block holding the label and the movement line, so they centre against each
+    other instead of the figure hanging off the label's first baseline."""
+    out = bp.render_hero(_hero_top(), 55.0, META)
+    assert 'class="hero-head"' in out
+    assert 'class="hero-head-text"' in out
+    assert 'class="hc-num">55%' in out
+    assert 'class="hc-label"' in out
+
+
+def test_render_hero_names_the_race_when_given():
+    out = bp.render_hero(_hero_top(), 55.0, META, race_name="Italian Grand Prix")
+    assert "Italian Grand Prix" in out
+
+
+def test_render_hero_label_falls_back_without_a_race_name():
+    out = bp.render_hero(_hero_top(), 55.0, META)
+    assert "next race" in out
+    assert "Grand Prix" not in out
+
+
+def test_render_hero_driver_shows_full_name_and_team():
+    out = bp.render_hero(_hero_top(), 55.0, META)
+    assert 'class="hd-name">George Russell' in out
+    assert "Mercedes" in out
+    # the broadcast chips are gone: no number chip, no TLA block
+    assert "hd-id" not in out
+
+
+def test_render_hero_driver_names_the_grid_slot_after_qualifying():
     top = {
         "prob": 3.5,
         "perDriver": [
-            pd("antonelli", "Andrea Kimi Antonelli", "mercedes", 6),
-            pd("norris", "Lando Norris", "mclaren", 2),
-            pd("russell", "George Russell", "mercedes", 3),
+            {**pd("russell", "George Russell", "mercedes", 3), "gridPosition": 2},
+            {**pd("antonelli", "Andrea Kimi Antonelli", "mercedes", 6), "gridPosition": 21},
+            {**pd("norris", "Lando Norris", "mclaren", 2), "gridPosition": 3},
         ],
     }
-    out = bp.render_hero(top, 55.0, META)
-    assert "--team:" in out
-    assert 'class="d-code">ANT' in out
-    assert "Antonelli" in out  # surname only in the hero
-    assert "55%" in out
+    out = bp.render_hero(top, 55.0, META, pre_chance=60.0)
+    assert "starts 2nd" in out
+    assert "starts 3rd" in out
+    assert "starts 21st" in out
+
+
+def test_render_hero_drivers_are_ordered_by_grid_slot():
+    """Post-qualifying the trio reads front-to-back, so the row matches the grid
+    a reader is looking at rather than the model's internal order."""
+    top = {
+        "prob": 3.5,
+        "perDriver": [
+            {**pd("antonelli", "Andrea Kimi Antonelli", "mercedes", 6), "gridPosition": 21},
+            {**pd("russell", "George Russell", "mercedes", 3), "gridPosition": 2},
+            {**pd("norris", "Lando Norris", "mclaren", 2), "gridPosition": 3},
+        ],
+    }
+    out = bp.render_hero(top, 55.0, META, pre_chance=60.0)
+    assert out.index("Russell") < out.index("Norris") < out.index("Antonelli")
+
+
+def test_render_hero_driver_omits_the_grid_slot_before_qualifying():
+    out = bp.render_hero(_hero_top(), 55.0, META)
+    assert "starts" not in out
+
+
+def test_render_hero_pick_label_carries_the_trio_probability():
+    """The trio's own probability belongs on the label that introduces it, not
+    in a second footnote below the drivers."""
+    import re
+
+    out = bp.render_hero(_hero_top(), 55.0, META)
+    label = re.search(r'<p class="hp-label">(.*?)</p>', out)
+    assert label, "hero must introduce the trio with an hp-label paragraph"
+    assert "3.5%" in label.group(1)
 
 
 def test_render_candidates_dots_and_broadcast_tooltip():
@@ -155,11 +225,14 @@ EVAL = {
 }
 
 
-def test_accuracy_badge_shows_top3():
-    out = bp.render_accuracy_badge(EVAL)
-    assert "top-3 30%" in out
-    assert "Backtested" in out
-    assert bp.render_accuracy_badge({}) == ""
+def test_accuracy_note_states_the_hit_rate_in_plain_words():
+    """The backtest result reads as a sentence, not a tracked-out pill — it was
+    the last piece of shouting left in an otherwise quiet block."""
+    out = bp.render_accuracy_note(EVAL)
+    assert "30% of the time" in out
+    assert "top three" in out
+    assert out.isupper() is False
+    assert bp.render_accuracy_note({}) == ""
 
 
 def test_faq_section_has_questions_and_uses_eval():
@@ -320,7 +393,9 @@ def test_render_hero_delta_down_and_flat():
     down = bp.render_hero(_hero_top(), 40.0, META, pre_chance=52.0)
     assert "hc-delta-down" in down
     flat = bp.render_hero(_hero_top(), 52.4, META, pre_chance=52.0)  # both round to 52
-    assert "hc-delta-flat" in flat and "&mdash;" in flat
+    assert "hc-delta-flat" in flat
+    # the movement is a plain sentence now, so no arrow glyph rides in front of it
+    assert "&#8593;" not in flat and "&#8595;" not in flat
 
 
 def test_render_hero_default_has_no_post_quali_markup():

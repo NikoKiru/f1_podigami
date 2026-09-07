@@ -88,8 +88,10 @@ def driver_view(entry: dict, meta: dict) -> dict:
     }
 
 
-def _num_chip(v: dict) -> str:
-    return f'<span class="d-num">{esc(v["number"])}</span>' if v["number"] else ""
+def _ordinal(n: int) -> str:
+    """1 -> "1st", 2 -> "2nd", 21 -> "21st" (11-13 stay "th")."""
+    suffix = "th" if 11 <= n % 100 <= 13 else {1: "st", 2: "nd", 3: "rd"}.get(n % 10, "th")
+    return f"{n}{suffix}"
 
 
 def _to_int(value: object) -> int | None:
@@ -327,54 +329,69 @@ def render_last_race(
 
 
 def render_hero(
-    top: dict, chance: float, meta: dict, acc_badge: str = "", pre_chance: float | None = None
+    top: dict,
+    chance: float,
+    meta: dict,
+    acc_note: str = "",
+    pre_chance: float | None = None,
+    race_name: str = "",
 ) -> str:
+    """One surface, one hairline: the chance and its sentence share a head row,
+    the trio sits below it.
+
+    The head is a figure beside a single text block (label + movement line) so
+    the two centre against each other; hanging the figure off the label's first
+    baseline left it riding high whenever the text ran to two lines.
+    """
+    # Post-qualifying the trio reads front-to-back, matching the grid a reader
+    # is looking at. Pre-qualifying every slot is None, so the model's own order
+    # survives (sorted is stable).
+    entries = sorted(top["perDriver"], key=lambda p: _to_int(p.get("gridPosition")) or 99)
     cards = []
-    for p in top["perDriver"]:
+    for p in entries:
         v = driver_view(p, meta)
-        sp = p["seasonPodiums"]
+        grid = _to_int(p.get("gridPosition"))
+        meta_bits = [b for b in (v["team"], f"starts {_ordinal(grid)}" if grid else "") if b]
         cards.append(
             f'<div class="hero-driver" style="--team:{v["color"]};--team-ink:{v["ink"]}">'
-            f'<div class="hd-id">{_num_chip(v)}<span class="d-code">{esc(v["code"])}</span></div>'
-            f'<div class="hd-name">{esc(v["surname"])}</div>'
-            f'<div class="hd-team">{esc(v["team"])}</div>'
-            f'<div class="hd-stat">{sp} podium{"s" if sp != 1 else ""} this season</div>'
+            f'<span class="hd-name">{esc(v["name"])}</span>'
+            f'<span class="hd-team">{esc(" · ".join(meta_bits))}</span>'
             f"</div>"
         )
-    pd = "".join(cards)
-    updated = ""
-    delta = ""
+    drivers = "".join(cards)
+
+    where = f"at the {esc(race_name)}" if race_name else "at the next race"
+    sub = ""
     if pre_chance is not None:
-        updated = '<span class="hc-updated">&#9889; Updated after qualifying</span>'
         if round(chance) > round(pre_chance):
-            cls, arrow = "up", "&#8593;"
+            cls = "up"
         elif round(chance) < round(pre_chance):
-            cls, arrow = "down", "&#8595;"
+            cls = "down"
         else:
-            cls, arrow = "flat", "&mdash;"
-        delta = (
-            f'<span class="hc-delta hc-delta-{cls}">{arrow} was {pre_chance:.0f}% '
-            f"before the grid was set</span>"
+            cls = "flat"
+        sub = (
+            f'<p class="hc-sub"><span class="hc-updated">Updated after qualifying</span>'
+            f' &middot; <span class="hc-delta hc-delta-{cls}">was {pre_chance:.0f}%'
+            f" before the grid was set</span></p>"
         )
     return (
         f'<section class="hero">'
         f'  <div class="hero-head">'
-        f'    <div class="hero-chance">{updated}<span class="hc-num">{chance:.0f}%</span>'
-        f'      <span class="hc-label">chance the next race<br>delivers a brand-new trio'
-        f'        <span class="info-tip info-tip-sm" tabindex="0" aria-label="More info">'
-        f'          <span class="info-icon">i</span>'
-        f'          <span class="info-bubble">The overall probability that any brand-new podium trio appears at the next race, not just the top-ranked one.</span>'
-        f"        </span>"
-        f"      </span>{delta}</div>"
-        f"  </div>"
-        f'  <div class="hero-pick">'
-        f'    <div class="hp-label">Most likely next <span class="accent">podigami</span></div>'
-        f'    <div class="hero-drivers">{pd}</div>'
-        f'    <div class="hp-prob">'
-        f"      {top['prob']:.1f}% of all possible podiums &mdash; the top never-before trio"
-        f"      {acc_badge}"
+        f'    <span class="hc-num">{chance:.0f}%</span>'
+        f'    <div class="hero-head-text">'
+        f'      <p class="hc-label">chance of a podium trio Formula&nbsp;1 has never seen {where}'
+        f'<span class="info-tip info-tip-sm" tabindex="0" aria-label="More info">'
+        f'<span class="info-icon">i</span>'
+        f'<span class="info-bubble">The overall probability that any brand-new podium trio appears at the next race, not just the top-ranked one.</span>'
+        f"</span>"
+        f"      </p>{sub}"
         f"    </div>"
         f"  </div>"
+        f'  <div class="hero-pick">'
+        f'    <p class="hp-label">Most likely trio &middot; {top["prob"]:.1f}%</p>'
+        f'    <div class="hero-drivers">{drivers}</div>'
+        f"  </div>"
+        f'  <p class="hp-prob">{acc_note}</p>'
         f"</section>"
     )
 
@@ -633,16 +650,19 @@ def render_timeline(data: dict) -> str:
     )
 
 
-def render_accuracy_badge(ev: dict) -> str:
+def render_accuracy_note(ev: dict) -> str:
+    """The backtest result as a sentence for the hero's footing line.
+
+    Replaces the tracked-out "BACKTESTED top-3 x%" pill: it was the only shouting
+    left in the block, and the same fact reads fine in plain words.
+    """
     if not ev:
         return ""
     top3 = round(100 * ev["chosen"]["top3"])
     return (
-        f'<span class="acc-badge" title="Backtested model accuracy">'
-        f'<span class="acc-badge-k">Backtested</span>'
-        f"<b>top-3 {top3}%</b>"
-        f'<span class="acc-badge-sep">&middot;</span>calibrated'
-        f"</span>"
+        f'<span title="Backtested model accuracy">Across every race since '
+        f"{ev['evalWindow']['test'][0]} the model put the real trio in its "
+        f"top three {top3}% of the time.</span>"
     )
 
 
@@ -931,10 +951,17 @@ def main() -> int:
     )
     explore = explore_grid()
 
-    acc_badge = render_accuracy_badge(model_eval)
+    acc_note = render_accuracy_note(model_eval)
+    # The hero predicts the race after asOf — the same one the next-race box names.
+    hero_race = pick_next_race(schedule, data.get("asOf")) if schedule else None
     hero = (
         render_hero(
-            active_cands[0], active_chance, meta, acc_badge, pre_chance=chance if post else None
+            active_cands[0],
+            active_chance,
+            meta,
+            acc_note,
+            pre_chance=chance if post else None,
+            race_name=hero_race["raceName"] if hero_race else "",
         )
         if active_cands
         else ""

@@ -277,74 +277,65 @@ main {
     text-decoration-color: var(--accent-bright);
 }
 
-/* hero */
+/* ── hero ────────────────────────────────────────────────────────────────────
+   One surface split by a single hairline. Deliberately plain: no card inside a
+   card, no uppercase labels, and the accent colour spent once (on the chance)
+   so the number is the only thing competing for attention. */
 .hero {
-    display: grid;
-    grid-template-columns: minmax(180px, 240px) 1fr;
-    gap: 20px;
-    background: linear-gradient(135deg, var(--surface) 0%, var(--bg-2) 100%);
-    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 26px;
-    position: relative;
+    padding: 30px 32px 26px;
 }
 
-/* The accent bar rounds itself rather than the hero clipping it: overflow:hidden
-   here cut off the tooltip that hangs below the 45% card's info icon. */
-.hero::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 4px;
-    border-radius: var(--radius) 0 0 var(--radius);
-    background: linear-gradient(180deg, var(--accent-bright), var(--accent-dim));
-}
-
-.hero-chance {
-    text-align: center;
+/* The figure and its sentence are one row, centred against each other: aligning
+   the number to the label's first baseline left it riding high whenever the
+   sentence ran to two lines. */
+.hero-head {
     display: flex;
-    flex-direction: column;
-    justify-content: center;
-    background: var(--surface-2);
-    border: 1px solid var(--border-strong);
-    border-radius: var(--radius);
-    padding: 24px 20px;
+    align-items: center;
+    gap: 20px;
 }
 
 .hc-num {
-    display: block;
-    font-size: 58px;
-    font-weight: 800;
+    flex: none;
+    font-size: 52px;
+    font-weight: 700;
     line-height: 1;
     color: var(--accent-bright);
     letter-spacing: -2px;
 }
 
+.hero-head-text {
+    min-width: 0;
+}
+
 .hc-label {
-    display: block;
-    font-size: 13px;
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.4;
+    color: var(--text);
+    /* Wide enough that the sentence and its info icon hold one line at desktop
+       width — a tighter measure wrapped the icon onto a line of its own. */
+    max-width: 78ch;
+}
+
+.hc-sub {
+    margin: 5px 0 0;
+    font-size: 13.5px;
     color: var(--muted);
-    margin-top: 8px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
 }
 
 .hero-pick {
-    align-self: center;
+    margin-top: 26px;
+    padding-top: 22px;
+    border-top: 1px solid var(--border);
 }
 
 .hp-label {
-    font-size: 13px;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
+    margin: 0 0 14px;
+    font-size: 13.5px;
     color: var(--muted);
-    margin-bottom: 10px;
-}
-
-.hp-label .accent {
-    color: var(--accent);
 }
 
 /* ── Shared ranked table (Overdue + Unlikeliest + Soulmates) ─────────────────
@@ -568,67 +559,32 @@ main {
     border-color: var(--accent);
 }
 
+/* Three equal columns, no boxes: a hairline in the team's colour is the only
+   thing marking one driver off from the next. */
 .hero-drivers {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 14px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px;
 }
 
 .hero-driver {
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    border-top: 3px solid var(--team, var(--accent));
-    border-radius: var(--radius-sm);
-    padding: 11px 14px 12px;
-    flex: 1 1 138px;
-}
-
-.hd-id {
     display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 5px;
-}
-
-/* team-coloured number chip with computed legible ink (shared with the tower) */
-.d-num {
-    min-width: 24px;
-    padding: 1px 5px;
-    border-radius: 4px;
-    background: var(--team, var(--accent));
-    color: var(--team-ink, #fff);
-    font-size: 13px;
-    font-weight: 700;
-    text-align: center;
-    font-variant-numeric: tabular-nums;
-}
-
-.d-code {
-    font-size: 16px;
-    font-weight: 800;
-    letter-spacing: 0.5px;
-    color: var(--text);
+    flex-direction: column;
+    gap: 3px;
+    padding-left: 12px;
+    border-left: 2px solid var(--team, var(--accent));
 }
 
 .hd-name {
-    font-size: 16px;
-    font-weight: 700;
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.25;
     color: var(--text);
 }
 
 .hd-team {
-    font-size: 12px;
-    font-weight: 600;
+    font-size: 13.5px;
     color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-    margin-top: 2px;
-}
-
-.hd-stat {
-    font-size: 12px;
-    color: var(--muted);
-    margin-top: 4px;
 }
 
 .hp-prob {
@@ -638,7 +594,7 @@ main {
     gap: 4px 0;
     font-size: 13px;
     color: var(--muted);
-    margin-top: 14px;
+    margin: 22px 0 0;
 }
 
 /* panels */
@@ -1434,47 +1390,12 @@ a.tl-where:hover {
     font-weight: 600;
 }
 
-.acc-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 11px;
-    color: var(--muted);
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    padding: 2px 10px;
-    margin-left: 10px;
-    vertical-align: middle;
-    white-space: nowrap;
-}
-
-.acc-badge b {
-    color: var(--text);
-    font-variant-numeric: tabular-nums;
-}
-
-.acc-badge-k {
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    font-size: 9px;
-    color: var(--muted-dim);
-}
-
-.acc-badge-sep {
-    color: var(--muted-dim);
-}
-
 @media (max-width: 720px) {
-    /* The container padding narrows to 14px at 720px (style.css), leaving the
-       hero's right column too narrow for 3 driver cards side by side. Collapse
-       the hero to a single column here so the driver cards get the full width. */
+    /* The container padding narrows to 14px at 720px (style.css). The hero is a
+       single column now, so only its own padding needs to come in — the three
+       driver columns still fit here and stack at 600px instead (#116). */
     .hero {
-        grid-template-columns: 1fr;
-        gap: 14px;
-    }
-
-    .hero-chance {
-        padding: 18px;
+        padding: 24px 20px 20px;
     }
 }
 
@@ -1557,46 +1478,36 @@ a.tl-where:hover {
     }
 
     .hero {
-        grid-template-columns: 1fr;
-        gap: 14px;
-        padding: 18px;
+        padding: 22px 18px 18px;
     }
 
-    .hero-chance {
-        padding: 16px;
-    }
-
-    .hero-drivers {
+    /* The number moves above its sentence — centring the pair would centre them
+       horizontally once they stack, so pin both to the left edge. */
+    .hero-head {
+        flex-direction: column;
+        align-items: flex-start;
         gap: 8px;
     }
 
-    .hero-driver {
-        flex: 1 1 0;
-        min-width: 0;
-        padding: 8px 10px 10px;
-        text-align: center;
+    .hc-num {
+        font-size: 46px;
     }
 
-    .hd-id {
-        justify-content: center;
+    .hc-label {
+        font-size: 16.5px;
     }
 
-    .hd-name {
-        font-size: 14px;
+    /* Three columns leave ~158px each here — narrower than "Andrea Kimi
+       Antonelli" — so the trio stacks and each driver gets the full width. */
+    .hero-drivers {
+        grid-template-columns: 1fr;
+        gap: 16px;
     }
 
     .hd-team {
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
-    }
-
-    .hd-stat {
-        display: none;
-    }
-
-    .hc-num {
-        font-size: 46px;
     }
 
     .panel {
@@ -1833,35 +1744,11 @@ a.tl-where:hover {
 
 /* ---- Post-quali state (hero badge, movement delta, grid chips, quali line) --- */
 
-.hc-updated {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    width: fit-content;
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--accent-bright);
-    border: 1px solid var(--accent);
-    border-radius: 999px;
-    padding: 0.15rem 0.55rem;
-    margin-bottom: 0.4rem;
-}
-
+/* Both halves of the movement line are plain text on one line now: the pill and
+   the arrow glyph were two more things shouting next to a number that already
+   carries the page's only accent colour. */
+.hc-updated,
 .hc-delta {
-    display: block;
-    font-size: 0.8rem;
-    margin-top: 0.35rem;
-    color: var(--muted);
-}
-
-.hc-delta-up {
-    color: var(--accent-bright);
-}
-
-.hc-delta-down,
-.hc-delta-flat {
     color: var(--muted);
 }
 
@@ -1896,17 +1783,9 @@ a.tl-where:hover {
 }
 
 @media (max-width: 600px) {
-    .hc-updated {
-        font-size: 0.64rem;
-    }
-
     .cd-grid {
         font-size: 0.58rem;
         padding: 0.03rem 0.25rem;
-    }
-
-    .hc-delta {
-        font-size: 0.75rem;
     }
 }
 
