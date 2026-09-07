@@ -577,3 +577,116 @@ def test_theme_persists_across_reload(dist):
 
         ctx.close()
         browser.close()
+
+
+# ── Trio board history bubbles (podigami.js) ───────────────────────────────
+# A hover-dismissed popover containing a link is fragile: the pointer has to
+# travel to reach the link, and whatever hides the bubble races the click.
+
+
+def _open_first_board_bubble(page):
+    tip = page.locator(".trio-tip").first
+    tip.scroll_into_view_if_needed()
+    tip.hover()
+    return tip
+
+
+def test_trio_bubble_opens_on_hover(dist):
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        page.goto(_url(dist, "index.html"))
+        page.wait_for_selector(".trio-tip")
+
+        tip = _open_first_board_bubble(page)
+        assert tip.evaluate("el => el.classList.contains('open')")
+        browser.close()
+
+
+def test_trio_bubble_survives_pointer_travel_to_its_link(dist):
+    """Regression: the bubble sat in a gap below the row that belonged to
+    neither element, so moving the mouse toward "See all" fired mouseleave and
+    closed it before the link could be reached."""
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        page.goto(_url(dist, "index.html"))
+        page.wait_for_selector(".trio-tip")
+
+        tip = _open_first_board_bubble(page)
+        link = tip.locator(".trio-bubble a")
+        box = link.bounding_box()
+        # Walk the pointer down to the link the way a hand would, crossing the gap.
+        start = tip.bounding_box()
+        steps = 8
+        for i in range(1, steps + 1):
+            page.mouse.move(
+                start["x"]
+                + start["width"] / 2
+                + (box["x"] + box["width"] / 2 - start["x"] - start["width"] / 2) * i / steps,
+                start["y"]
+                + start["height"] / 2
+                + (box["y"] + box["height"] / 2 - start["y"] - start["height"] / 2) * i / steps,
+            )
+        assert tip.evaluate("el => el.classList.contains('open')"), (
+            "bubble closed while the pointer travelled to its own link"
+        )
+        browser.close()
+
+
+def test_trio_bubble_link_navigates_to_combos(dist):
+    """Regression: the document-level close ran during the same click dispatch
+    and hid the anchor, cancelling its navigation."""
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        page.goto(_url(dist, "index.html"))
+        page.wait_for_selector(".trio-tip")
+
+        tip = _open_first_board_bubble(page)
+        tip.locator(".trio-bubble a").click()
+        page.wait_for_url("**/combos.html*")
+        assert "combos.html" in page.url
+        assert "d=" in page.url
+        browser.close()
+
+
+def test_trio_bubble_opens_on_touch_tap(dist):
+    """Regression: a tap synthesises mouseenter (which opened the bubble) before
+    click (which toggled it shut), so the first tap appeared to do nothing."""
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        page = browser.new_page(viewport={"width": 390, "height": 844}, has_touch=True)
+        page.goto(_url(dist, "index.html"))
+        page.wait_for_selector(".trio-tip")
+
+        tip = page.locator(".trio-tip").first
+        tip.scroll_into_view_if_needed()
+        tip.tap()
+        assert tip.evaluate("el => el.classList.contains('open')"), (
+            "first tap left the bubble closed"
+        )
+        browser.close()
+
+
+def test_trio_bubble_stays_tooltip_sized_on_a_phone(dist):
+    """It read as a band across the list rather than a tooltip: 366px of a
+    390px viewport."""
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        page = browser.new_page(viewport={"width": 390, "height": 844}, has_touch=True)
+        page.goto(_url(dist, "index.html"))
+        page.wait_for_selector(".trio-tip")
+
+        tip = page.locator(".trio-tip").first
+        tip.scroll_into_view_if_needed()
+        tip.tap()
+        width = tip.evaluate("el => el.querySelector('.trio-bubble').getBoundingClientRect().width")
+        assert width <= 320, f"bubble is {width}px wide on a 390px screen"
+        # ...but still fully on screen
+        rect = tip.evaluate(
+            "el => { const r = el.querySelector('.trio-bubble').getBoundingClientRect();"
+            " return {left: r.left, right: r.right}; }"
+        )
+        assert rect["left"] >= 0 and rect["right"] <= 390
+        browser.close()

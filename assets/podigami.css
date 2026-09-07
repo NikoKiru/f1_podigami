@@ -707,10 +707,32 @@ main {
 /* Fade the last rows so a cut-off row reads as "more below". Applied only while
    podigami.js says there is more — a permanent fade would promise rows that
    aren't there once you reach the end, and without JS no fade is the safe
-   default since the list still scrolls natively. */
-.cand-scroll.has-more {
-    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 32px), transparent);
-    mask-image: linear-gradient(to bottom, #000 calc(100% - 32px), transparent);
+   default since the list still scrolls natively.
+
+   This is an overlay, NOT a mask on .cand-scroll. A mask (like a transform or a
+   filter) makes its element a containing block for position:fixed descendants
+   and clips them — which silently truncated the history bubbles to a sliver
+   wherever they fell outside the scroll window. */
+.cand-board {
+    position: relative;
+}
+
+.cand-board::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 34px;
+    background: linear-gradient(to bottom, transparent, var(--surface));
+    border-radius: 0 0 var(--radius) var(--radius);
+    opacity: 0;
+    transition: opacity 0.18s ease;
+    pointer-events: none;
+}
+
+.cand-board.has-more::after {
+    opacity: 1;
 }
 
 .cand-list {
@@ -1497,9 +1519,11 @@ a.tl-where:hover {
         --board-row-h: 75px;
     }
 
+    /* Capped well inside the viewport: allowed to fill the screen it stopped
+       reading as a tooltip and became a band across the list. */
     .trio-tip > .trio-bubble {
         min-width: 0;
-        max-width: calc(100vw - 24px);
+        max-width: min(300px, calc(100vw - 32px));
     }
 
     .sm-facts {

@@ -511,8 +511,10 @@ def render_candidates(
         f'      <span class="info-bubble">{tip}</span>'
         f"    </span>"
         f"  {badge}</h2>"
-        f'  <div class="cand-scroll">'
-        f'    <ol class="cand-list">{"".join(rows)}</ol>'
+        f'  <div class="cand-board">'
+        f'    <div class="cand-scroll">'
+        f'      <ol class="cand-list">{"".join(rows)}</ol>'
+        f"    </div>"
         f"  </div>"
         f"  {form_html}"
         f"</section>"
