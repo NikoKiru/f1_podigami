@@ -1,46 +1,46 @@
 {
   "season": "2026",
-  "round": "12",
+  "round": "13",
   "constructors": [
     {
       "constructorId": "mercedes",
       "name": "Mercedes",
-      "points": 425.0,
+      "points": 468.0,
       "position": 1,
-      "wins": 8
+      "wins": 9
     },
     {
       "constructorId": "ferrari",
       "name": "Ferrari",
-      "points": 338.0,
+      "points": 346.0,
       "position": 2,
       "wins": 2
     },
     {
       "constructorId": "mclaren",
       "name": "McLaren",
-      "points": 263.0,
+      "points": 287.0,
       "position": 3,
       "wins": 2
     },
     {
       "constructorId": "red_bull",
       "name": "Red Bull",
-      "points": 186.0,
+      "points": 204.0,
       "position": 4,
       "wins": 0
     },
     {
       "constructorId": "rb",
       "name": "RB F1 Team",
-      "points": 66.0,
+      "points": 75.0,
       "position": 5,
       "wins": 0
     },
     {
       "constructorId": "alpine",
       "name": "Alpine F1 Team",
-      "points": 63.0,
+      "points": 62.0,
       "position": 6,
       "wins": 0
     },
@@ -81,27 +81,27 @@
     }
   ],
   "driverConstructor": {
-    "norris": "mclaren",
     "antonelli": "mercedes",
     "russell": "mercedes",
-    "hamilton": "ferrari",
-    "leclerc": "ferrari",
+    "max_verstappen": "red_bull",
+    "norris": "mclaren",
     "piastri": "mclaren",
-    "lawson": "red_bull",
-    "hulkenberg": "audi",
-    "alonso": "aston_martin",
+    "hamilton": "ferrari",
     "gasly": "alpine",
-    "tsunoda": "rb",
     "arvid_lindblad": "rb",
-    "bortoleto": "audi",
     "colapinto": "alpine",
-    "perez": "cadillac",
+    "tsunoda": "rb",
+    "bortoleto": "audi",
+    "hulkenberg": "audi",
     "sainz": "williams",
-    "albon": "williams",
-    "bottas": "cadillac",
-    "ocon": "haas",
-    "stroll": "aston_martin",
+    "lawson": "red_bull",
     "bearman": "haas",
-    "max_verstappen": "red_bull"
+    "ocon": "haas",
+    "albon": "williams",
+    "perez": "cadillac",
+    "bottas": "cadillac",
+    "stroll": "aston_martin",
+    "alonso": "aston_martin",
+    "leclerc": "ferrari"
   }
 }

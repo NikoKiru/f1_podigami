@@ -2146,6 +2146,52 @@
   },
   {
     "drivers": [
+      "Andrea Kimi Antonelli",
+      "Max Verstappen",
+      "George Russell"
+    ],
+    "driverIds": [
+      "antonelli",
+      "max_verstappen",
+      "russell"
+    ],
+    "count": 4,
+    "lastRace": {
+      "season": "2026",
+      "round": "13",
+      "raceName": "Italian Grand Prix"
+    },
+    "firstRace": {
+      "season": "2025",
+      "round": "10",
+      "raceName": "Canadian Grand Prix"
+    },
+    "lastRaceKey": 2026013,
+    "races": [
+      {
+        "season": "2025",
+        "round": "10",
+        "raceName": "Canadian Grand Prix"
+      },
+      {
+        "season": "2025",
+        "round": "22",
+        "raceName": "Las Vegas Grand Prix"
+      },
+      {
+        "season": "2026",
+        "round": "8",
+        "raceName": "Austrian Grand Prix"
+      },
+      {
+        "season": "2026",
+        "round": "13",
+        "raceName": "Italian Grand Prix"
+      }
+    ]
+  },
+  {
+    "drivers": [
       "Damon Hill",
       "Michael Schumacher",
       "Alain Prost"
@@ -3189,47 +3235,6 @@
         "season": "1981",
         "round": "1",
         "raceName": "United States Grand Prix West"
-      }
-    ]
-  },
-  {
-    "drivers": [
-      "Andrea Kimi Antonelli",
-      "Max Verstappen",
-      "George Russell"
-    ],
-    "driverIds": [
-      "antonelli",
-      "max_verstappen",
-      "russell"
-    ],
-    "count": 3,
-    "lastRace": {
-      "season": "2026",
-      "round": "8",
-      "raceName": "Austrian Grand Prix"
-    },
-    "firstRace": {
-      "season": "2025",
-      "round": "10",
-      "raceName": "Canadian Grand Prix"
-    },
-    "lastRaceKey": 2026008,
-    "races": [
-      {
-        "season": "2025",
-        "round": "10",
-        "raceName": "Canadian Grand Prix"
-      },
-      {
-        "season": "2025",
-        "round": "22",
-        "raceName": "Las Vegas Grand Prix"
-      },
-      {
-        "season": "2026",
-        "round": "8",
-        "raceName": "Austrian Grand Prix"
       }
     ]
   },
@@ -8636,6 +8641,37 @@
   {
     "drivers": [
       "Andrea Kimi Antonelli",
+      "Isack Hadjar",
+      "Lewis Hamilton"
+    ],
+    "driverIds": [
+      "antonelli",
+      "hadjar",
+      "hamilton"
+    ],
+    "count": 1,
+    "lastRace": {
+      "season": "2026",
+      "round": "6",
+      "raceName": "Monaco Grand Prix"
+    },
+    "firstRace": {
+      "season": "2026",
+      "round": "6",
+      "raceName": "Monaco Grand Prix"
+    },
+    "lastRaceKey": 2026006,
+    "races": [
+      {
+        "season": "2026",
+        "round": "6",
+        "raceName": "Monaco Grand Prix"
+      }
+    ]
+  },
+  {
+    "drivers": [
+      "Andrea Kimi Antonelli",
       "Lando Norris",
       "George Russell"
     ],
@@ -8754,37 +8790,6 @@
         "season": "2026",
         "round": "5",
         "raceName": "Canadian Grand Prix"
-      }
-    ]
-  },
-  {
-    "drivers": [
-      "Andrea Kimi Antonelli",
-      "Pierre Gasly",
-      "Lewis Hamilton"
-    ],
-    "driverIds": [
-      "antonelli",
-      "gasly",
-      "hamilton"
-    ],
-    "count": 1,
-    "lastRace": {
-      "season": "2026",
-      "round": "6",
-      "raceName": "Monaco Grand Prix"
-    },
-    "firstRace": {
-      "season": "2026",
-      "round": "6",
-      "raceName": "Monaco Grand Prix"
-    },
-    "lastRaceKey": 2026006,
-    "races": [
-      {
-        "season": "2026",
-        "round": "6",
-        "raceName": "Monaco Grand Prix"
       }
     ]
   },
