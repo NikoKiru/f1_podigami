@@ -10,10 +10,10 @@
     ]
   },
   "modelParams": {
-    "sigma0_drv": 0.5,
+    "sigma0_drv": 1.0,
     "sigma0_con": 1.6,
     "rookie_mu": -0.8,
-    "newteam_mu": -1.2,
+    "newteam_mu": -2.0,
     "tau_drv": 0.02,
     "tau_con": 0.08,
     "season_var_drv": 0.03,
@@ -77,85 +77,85 @@
     {
       "model": "v2 pace",
       "n": 165,
-      "top1": 0.1576,
-      "top3": 0.3152,
-      "top5": 0.4,
-      "logLoss": 4.059,
-      "brierSet": 0.9477,
-      "brierNew": 0.2363
+      "top1": 0.1636,
+      "top3": 0.3091,
+      "top5": 0.3939,
+      "logLoss": 4.0606,
+      "brierSet": 0.9457,
+      "brierNew": 0.2339
     },
     {
       "model": "v2 +attrition",
       "n": 165,
-      "top1": 0.1576,
-      "top3": 0.3152,
-      "top5": 0.4,
-      "logLoss": 4.059,
-      "brierSet": 0.9477,
-      "brierNew": 0.2363
+      "top1": 0.1636,
+      "top3": 0.3091,
+      "top5": 0.3939,
+      "logLoss": 4.0606,
+      "brierSet": 0.9457,
+      "brierNew": 0.2339
     },
     {
       "model": "v2 +chaos",
       "n": 165,
-      "top1": 0.1576,
-      "top3": 0.3152,
-      "top5": 0.4,
-      "logLoss": 4.0533,
-      "brierSet": 0.9479,
-      "brierNew": 0.2315
+      "top1": 0.1515,
+      "top3": 0.3212,
+      "top5": 0.4061,
+      "logLoss": 4.0567,
+      "brierSet": 0.9459,
+      "brierNew": 0.2299
     },
     {
       "model": "v2 full",
       "n": 165,
-      "top1": 0.1758,
+      "top1": 0.1697,
       "top3": 0.3576,
       "top5": 0.4424,
-      "logLoss": 3.8914,
-      "brierSet": 0.9374,
-      "brierNew": 0.2382
+      "logLoss": 3.8777,
+      "brierSet": 0.9367,
+      "brierNew": 0.2377
     },
     {
       "model": "v2 +adaptive car",
       "n": 165,
-      "top1": 0.1758,
-      "top3": 0.3515,
+      "top1": 0.1576,
+      "top3": 0.3455,
       "top5": 0.4303,
-      "logLoss": 3.895,
-      "brierSet": 0.9402,
-      "brierNew": 0.2434
+      "logLoss": 3.8836,
+      "brierSet": 0.9395,
+      "brierNew": 0.2421
     },
     {
       "model": "v2 post-quali (ratings)",
       "n": 165,
-      "top1": 0.2,
-      "top3": 0.3697,
-      "top5": 0.4788,
-      "logLoss": 3.7289,
-      "brierSet": 0.9269,
-      "brierNew": 0.2352
+      "top1": 0.1939,
+      "top3": 0.3636,
+      "top5": 0.4848,
+      "logLoss": 3.7063,
+      "brierSet": 0.9256,
+      "brierNew": 0.2344
     },
     {
       "model": "v2 post-quali +grid",
       "n": 165,
-      "top1": 0.2545,
-      "top3": 0.4061,
-      "top5": 0.5152,
-      "logLoss": 3.4501,
-      "brierSet": 0.903,
-      "brierNew": 0.2214
+      "top1": 0.2424,
+      "top3": 0.3939,
+      "top5": 0.503,
+      "logLoss": 3.4336,
+      "brierSet": 0.9021,
+      "brierNew": 0.221
     }
   ],
   "chosen": {
     "n": 165,
-    "top1": 0.1758,
+    "top1": 0.1697,
     "top3": 0.3576,
     "top5": 0.4424,
-    "logLoss": 3.8914,
-    "brierSet": 0.9374,
-    "brierNew": 0.2382,
+    "logLoss": 3.8777,
+    "brierSet": 0.9367,
+    "brierNew": 0.2377,
     "baseRateNew": 0.4121,
     "brierNewBaseRate": 0.2423,
-    "ece": 0.0696
+    "ece": 0.0668
   },
   "calibration": [
     {
@@ -176,36 +176,36 @@
       "lo": 0.2,
       "hi": 0.3,
       "n": 11,
-      "meanPred": 0.2796,
+      "meanPred": 0.2787,
       "obsRate": 0.1818
     },
     {
       "lo": 0.3,
       "hi": 0.4,
-      "n": 31,
-      "meanPred": 0.362,
-      "obsRate": 0.4194
+      "n": 32,
+      "meanPred": 0.3591,
+      "obsRate": 0.4062
     },
     {
       "lo": 0.4,
       "hi": 0.5,
-      "n": 63,
-      "meanPred": 0.4456,
-      "obsRate": 0.3651
+      "n": 65,
+      "meanPred": 0.4505,
+      "obsRate": 0.3692
     },
     {
       "lo": 0.5,
       "hi": 0.6,
-      "n": 54,
-      "meanPred": 0.5428,
-      "obsRate": 0.4815
+      "n": 49,
+      "meanPred": 0.5444,
+      "obsRate": 0.4898
     },
     {
       "lo": 0.6,
       "hi": 0.7,
-      "n": 5,
-      "meanPred": 0.6354,
-      "obsRate": 0.6
+      "n": 7,
+      "meanPred": 0.6281,
+      "obsRate": 0.5714
     },
     {
       "lo": 0.7,
@@ -225,7 +225,7 @@
       "lo": 0.9,
       "hi": 1.0,
       "n": 1,
-      "meanPred": 0.9316,
+      "meanPred": 0.9051,
       "obsRate": 1.0
     }
   ],
