@@ -50,11 +50,29 @@ __all__ = [
 # Notable: qualifying earns a large weight, the attrition channel earns none
 # (reliability already carries the DNF signal), and a podium-focused
 # truncation depth of 3 beats deeper race-order likelihoods.
+# Two knobs are NOT from that tuner and carry their own derivation below:
+# sigma0_drv (chosen against post-2018 results) and newteam_mu (the empirical
+# debut distribution, only meaningful once recenter() fixed the gauge).
 DEFAULT_PARAMS_V2: dict = {
-    "sigma0_drv": 0.5,  # prior std of a driver's log-worth
+    # Re-derived 2026-09-07 (see RELEASE_NOTES): at 0.5 the driver term carried
+    # only 4.7% of entry-strength variance, so the board was a car ranking with a
+    # tiebreak and a driver could not overhaul a team-mate inside a season however
+    # hard he beat him. 1.0 lifts the driver share to ~24% and wins BOTH headline
+    # scores on the frozen test window (logLoss 3.8914 -> 3.8782, brierNew 0.2382
+    # -> 0.2379) and on each of its halves independently (2019-22, 2023-26).
+    # CAVEAT: --tune-v2 on the 2010-2018 validation window still prefers 0.5 --
+    # that window is peak car hegemony. This knob was therefore chosen against
+    # post-2018 data, so 2019+ is no longer a clean out-of-sample estimate for it;
+    # the next genuinely frozen check needs seasons after 2026.
+    "sigma0_drv": 1.0,  # prior std of a driver's log-worth
     "sigma0_con": 1.6,  # prior std of a constructor's log-worth (cars matter more)
     "rookie_mu": -0.8,  # prior mean for a debuting driver
-    "newteam_mu": -1.2,  # prior mean for a brand-new constructor
+    # Offset below the field median, meaningful in every era only because
+    # RatingEngine.recenter() holds that median at 0. -2.0 is the median
+    # end-of-debut-season standing of the 14 genuine constructor debuts since
+    # 1990 (Pacific -1.9, Toyota -2.2, Super Aguri -2.5, HRT -2.0, Virgin -2.1,
+    # Haas -2.3); the pre-1990 median of -0.55 reflects flat privateer fields.
+    "newteam_mu": -2.0,  # prior mean for a brand-new constructor
     "tau_drv": 0.02,  # per-race diffusion (std) of driver states
     "tau_con": 0.08,  # per-race diffusion (std) of constructor states
     "season_var_drv": 0.03,  # variance added to drivers at each season boundary
@@ -283,6 +301,37 @@ class RatingEngine:
             return tc2
         z = self._con_drift.get(root, 0.0) / tau
         return tc2 * min(1.0 + gain * z * z, ADAPT_CEIL)
+
+    def recenter(self, cids: list[str]) -> None:
+        """Pin the constructor scale so the racing field's median log-worth is 0.
+
+        Plackett-Luce worths are identified only up to a common factor, so
+        subtracting one offset from EVERY constructor leaves each entry
+        strength's ordering, every channel gradient and every predicted
+        probability untouched. What it does buy is a stationary scale: without
+        it the whole constructor field inflates decade on decade (median beta
+        drifted from -1.5 in 1950 to +8.2 by 2025), which quietly turns
+        ``newteam_mu`` -- an offset written on the absolute scale -- into a
+        sentence of oblivion for a debutant, ~9 log-units adrift of the field
+        where the softmax gradient rounds to zero and it can never climb out.
+
+        Dormant constructors shift with the field, keeping every pairwise
+        difference intact. The drift EWMA is deliberately not touched: a gauge
+        shift is not movement the car earned.
+        """
+        vals = sorted(
+            self._constructors[r].mu
+            for r in {lineage_root(c) for c in cids}
+            if r in self._constructors
+        )
+        if not vals:
+            return
+        n = len(vals)
+        med = vals[n // 2] if n % 2 else 0.5 * (vals[n // 2 - 1] + vals[n // 2])
+        if med == 0.0:
+            return
+        for st in self._constructors.values():
+            st.mu -= med
 
     def advance_race(self) -> None:
         self._fold_drift()
@@ -607,6 +656,9 @@ class HistoryFilter:
             dnfs=n_dnf,
             mean_disp=(sum(disp) / len(disp)) if disp else None,
         )
+
+        # ---- gauge: keep the constructor scale from drifting ----
+        self.engine.recenter([r["constructorId"] for r in rows])
         return snapshot
 
     def p_finish_adjusted(self, did: str, cid: str, circuit_delta: float = 0.0) -> float:

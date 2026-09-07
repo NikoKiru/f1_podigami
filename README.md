@@ -16,7 +16,7 @@ No server. No database. No JavaScript framework. Just Python, one `requests` dep
 [![Live site](https://img.shields.io/badge/live-nikokiru.github.io-e10600?style=flat-square&logo=githubpages&logoColor=white)](https://nikokiru.github.io/f1podigami/)
 
 [![Python](https://img.shields.io/badge/python-3.11%20|%203.12%20|%203.13-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
-[![Tests](https://img.shields.io/badge/tests-735%20passing-brightgreen?style=flat-square&logo=pytest&logoColor=white)](tests/)
+[![Tests](https://img.shields.io/badge/tests-743%20passing-brightgreen?style=flat-square&logo=pytest&logoColor=white)](tests/)
 [![Coverage](https://img.shields.io/badge/coverage-%E2%89%A570%25-brightgreen?style=flat-square&logo=codecov&logoColor=white)](pyproject.toml)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json&style=flat-square)](https://github.com/astral-sh/ruff)
 [![Data: Jolpica F1](https://img.shields.io/badge/data-Jolpica%20F1%20API-15151E?style=flat-square&logo=formula1&logoColor=white)](https://api.jolpi.ca)
@@ -61,9 +61,9 @@ No server. No database. No JavaScript framework. Just Python, one `requests` dep
 
 ![Backtested](https://img.shields.io/badge/backtested-1950–2026-1f6feb?style=flat-square)
 ![Engine](https://img.shields.io/badge/engine-Bayesian_ratings_(dbpl--v2)-e10600?style=flat-square)
-![Top-1](https://img.shields.io/badge/exact_trio_top--1-18%25-brightgreen?style=flat-square)
-![Top-3](https://img.shields.io/badge/trio_top--3-35%25-brightgreen?style=flat-square)
-![Hold-outs](https://img.shields.io/badge/frozen_test_races-161-8957e5?style=flat-square)
+![Top-1](https://img.shields.io/badge/exact_trio_top--1-17%25-brightgreen?style=flat-square)
+![Top-3](https://img.shields.io/badge/trio_top--3-36%25-brightgreen?style=flat-square)
+![Hold-outs](https://img.shields.io/badge/frozen_test_races-165-8957e5?style=flat-square)
 
 A *podigami* = a 3-driver podium **set** that has **never** finished a podium together before.
 
@@ -76,16 +76,26 @@ The predictor is a **dynamic Bayesian rating engine** ([`src/compute/model_v2.py
 - **Grid** — once a race's qualifying is classified, the grid order feeds back through the ratings and a **circuit-modulated track-position term** shifts each driver's finishing odds — amplified at processional circuits where the grid rarely reshuffles, damped where it does — so the headline refreshes after qualifying. Known grid penalties (hand-curated in `data/grid_penalties.json`: place drops and back-of-grid starts) rebuild the actual starting slots for this term, while the qualifying order itself still counts at face value — a penalised driver demonstrated that pace regardless of where they start. Mid-race retirements can be recorded the same way (`data/retirements.json`), taking a crashed or broken-down car out of the running field so the headline can be refreshed while the race is live.
 - **Prediction** — the engine simulates the next race (deterministic seed): skill noise + who survives, with *exact* conditional Plackett–Luce trio probabilities per draw. `P(next race is new)` is the exact complement of every already-seen trio.
 
-> **Why this model?** Walk-forward evaluation — tuned on 2010–2018 only, then scored once on a frozen 2019–2026 test window (161 races) it never saw:
+> **Why this model?** Walk-forward evaluation — tuned on 2010–2018 only, then scored once on a frozen 2019–2026 test window (165 races) it never saw:
 >
 > | model | top-1 | top-3 | top-5 | log-loss |
 > |---|---|---|---|---|
-> | recency Plackett–Luce (previous) | 12.4% | 29.2% | 41.0% | 4.109 |
-> | **rating engine (live, pre-qualifying)** | **18.0%** | **35.4%** | **44.1%** | **3.913** |
-> | + qualifying order (post-qualifying) | 21.1% | 36.6% | 47.8% | 3.749 |
-> | **+ grid position (post-qualifying)** | **25.5%** | **40.4%** | **51.5%** | **3.474** |
+> | recency Plackett–Luce (previous) | 12.1% | 29.1% | 40.6% | 4.101 |
+> | **rating engine (live, pre-qualifying)** | **17.0%** | **35.8%** | **44.2%** | **3.878** |
+> | + qualifying order (post-qualifying) | 19.4% | 36.4% | 48.5% | 3.706 |
+> | **+ grid position (post-qualifying)** | **24.2%** | **39.4%** | **50.3%** | **3.434** |
 >
-> Ablations: pace + reliability alone already beat v1; adding the qualifying order gave the biggest jump; a failure-order (attrition) channel earned zero weight and is off, as does an adaptive car-diffusion channel that lets a constructor's rating loosen when its form keeps shifting the same way — it won the tuning window and lost the hold-out, so it ships dormant. Once a race's qualifying is in, replaying the grid order through the ratings **plus** a circuit-aware grid-position term (gate-accepted on the same hold-out) lifts top-3 to 40.4% and log-loss to 3.474. Full ladder in [`data/model_eval.json`](data/model_eval.json).
+>
+> **One knob is not blind to the hold-out.** The driver-rating prior `sigma0_drv` was widened
+> from 0.5 to 1.0 in Sept 2026 because at 0.5 the driver term carried only ~5% of a car+driver
+> strength, so a driver could not overhaul a team-mate within a season however decisively he beat
+> him. It wins both headline scores on the test window *and* on each of its halves separately, but
+> the 2010–2018 tuner still prefers 0.5 — that window is peak car hegemony. It was therefore chosen
+> with knowledge of post-2018 results, so 2019+ is no longer a clean out-of-sample estimate for that
+> one knob; the next genuinely frozen check needs seasons after 2026. Every other knob is
+> validation-tuned as described.
+>
+> Ablations: pace + reliability alone already beat v1; adding the qualifying order gave the biggest jump; a failure-order (attrition) channel earned zero weight and is off, as does an adaptive car-diffusion channel that lets a constructor's rating loosen when its form keeps shifting the same way — it won the tuning window and lost the hold-out, so it ships dormant. Once a race's qualifying is in, replaying the grid order through the ratings **plus** a circuit-aware grid-position term (gate-accepted on the same hold-out) lifts top-3 to 39.4% and log-loss to 3.434. Full ladder in [`data/model_eval.json`](data/model_eval.json).
 
 ---
 
@@ -156,7 +166,7 @@ src/
 assets/         source CSS + JS (copied into dist/ at build time)
 data/           committed JSON datasets the site builds from
 dist/           generated, deployable site (git-ignored)
-tests/          pytest suite (735 tests, run in CI)
+tests/          pytest suite (743 tests, run in CI)
 ```
 
 </details>
@@ -197,7 +207,7 @@ python src/build_site.py
 ```bash
 pip install -r requirements-dev.txt   # tooling: ruff, pytest-cov, pip-audit
 ruff check . && ruff format --check .  # lint + format
-pytest --cov                          # 694 tests + coverage gate (≥70%)
+pytest --cov                          # 743 tests + coverage gate (≥70%)
 ```
 
 The suite covers **pure helpers**, **cross-dataset integrity** (combos derive from podiums, podigami
