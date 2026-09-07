@@ -158,8 +158,18 @@ def test_trio_board_window_shrinks_on_mobile():
 
 
 def test_trio_board_bubble_fits_phone_width():
-    """A fixed-width popover overflows a narrow screen; the bubble must cap to
-    the viewport so it can't push the page sideways."""
+    """Capped well inside the viewport, not merely to it: allowed to fill the
+    screen the bubble stopped reading as a tooltip and became a band across the
+    list."""
     s = css("podigami.css")
     mobile = s[s.index("@media (max-width: 600px)") :]
-    assert "max-width: calc(100vw" in mobile
+    assert "max-width: min(300px, calc(100vw - 32px))" in mobile
+
+
+def test_trio_board_fade_is_an_overlay_not_a_mask():
+    """A mask on the scroll container makes it a containing block for
+    position:fixed descendants and clips them, which truncated the history
+    bubbles to a sliver. The fade must stay an overlay on the wrapper."""
+    s = css("podigami.css")
+    assert "mask-image" not in s, "a mask on the board would clip the fixed bubbles"
+    assert ".cand-board.has-more::after" in s

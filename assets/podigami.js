@@ -334,45 +334,66 @@
 //
 // The bubble can't be an ordinary absolutely-positioned popover — .cand-scroll
 // has overflow-y:auto, which would clip it — so it's position:fixed and gets its
-// coordinates here. That means visibility is JS-driven for pointer, keyboard and
-// touch alike, which is why hover, focus, tap, outside-click, Escape and
-// close-on-scroll all live in this one place instead of being split with the
-// CSS-driven .info-tip handler above.
+// coordinates here.
+//
+// Two things this has to get right, both learned the hard way:
+//
+//  * The bubble sits flush against its row, not offset below it. An offset
+//    leaves a strip belonging to neither element, and a mouse travelling down
+//    to the "See all" link crosses it — firing pointerleave and closing the
+//    bubble before the link can be reached.
+//  * Hover and tap are handled separately by pointerType. A tap synthesises
+//    pointerenter before click, so a handler that both opens on enter and
+//    toggles on click opens and then immediately shuts on the first tap.
 (function () {
     const tips = Array.from(document.querySelectorAll('.trio-tip'));
     const scroller = document.querySelector('.cand-scroll');
     if (!tips.length) return;
 
     let open = null;
+    let hideTimer = null;
+    let lastPointerType = 'mouse';
+
+    function cancelHide() {
+        clearTimeout(hideTimer);
+        hideTimer = null;
+    }
 
     function close() {
+        cancelHide();
         if (!open) return;
         open.classList.remove('open');
         open.setAttribute('aria-expanded', 'false');
         open = null;
     }
 
+    // A short grace period covers sub-pixel seams and an unsteady hand on the
+    // way to the link; entering the bubble cancels it.
+    function scheduleClose() {
+        cancelHide();
+        hideTimer = setTimeout(close, 160);
+    }
+
     function place(tip) {
         const bubble = tip.querySelector('.trio-bubble');
         if (!bubble) return;
         const anchor = tip.getBoundingClientRect();
-        // Measure while shown but before positioning, so width/height are real.
         const box = bubble.getBoundingClientRect();
         const pad = 8;
         let left = anchor.left + anchor.width / 2 - box.width / 2;
         left = Math.max(pad, Math.min(left, window.innerWidth - box.width - pad));
-        // Prefer below the row; flip above when that would run off the viewport.
-        let top = anchor.bottom + pad;
+        // Flush below the row; flip to flush above when that would overflow.
+        let top = anchor.bottom;
         if (top + box.height > window.innerHeight - pad) {
-            const above = anchor.top - box.height - pad;
-            if (above >= pad) top = above;
-            else top = Math.max(pad, window.innerHeight - box.height - pad);
+            const above = anchor.top - box.height;
+            top = above >= pad ? above : Math.max(pad, window.innerHeight - box.height - pad);
         }
         bubble.style.left = left + 'px';
         bubble.style.top = top + 'px';
     }
 
     function show(tip) {
+        cancelHide();
         if (open === tip) return;
         close();
         tip.classList.add('open');
@@ -382,31 +403,64 @@
     }
 
     tips.forEach(tip => {
-        tip.addEventListener('mouseenter', () => show(tip));
-        tip.addEventListener('mouseleave', () => {
-            if (open === tip) close();
+        // Hover is a mouse affordance only — see the note above about taps.
+        tip.addEventListener('pointerenter', e => {
+            if (e.pointerType === 'mouse') show(tip);
         });
-        tip.addEventListener('focus', () => show(tip));
-        tip.addEventListener('blur', () => {
-            if (open === tip) close();
+        tip.addEventListener('pointerleave', e => {
+            if (e.pointerType === 'mouse' && open === tip) scheduleClose();
         });
-        // Touch has no hover: tapping the row toggles, tapping it again closes.
+        tip.addEventListener('pointerdown', e => {
+            lastPointerType = e.pointerType || 'mouse';
+        });
+        // Keyboard focus only. A tap focuses *and* clicks, so opening on any
+        // focus would let the click that follows toggle it straight back shut.
+        tip.addEventListener('focus', () => {
+            if (tip.matches(':focus-visible')) show(tip);
+        });
+        // focusout, not blur: tabbing to the link inside must not close it.
+        tip.addEventListener('focusout', e => {
+            if (!tip.contains(e.relatedTarget)) close();
+        });
         tip.addEventListener('click', e => {
-            if (e.target.closest('a')) return; // let the combos link through
+            if (e.target.closest('a')) return; // the link navigates; leave it alone
+            // Keyboard activation (detail 0) is already covered by focus, and on
+            // a mouse the pointer handlers own the state.
+            if (lastPointerType === 'mouse' || !e.detail) return;
             e.stopPropagation();
             if (open === tip) close();
             else show(tip);
         });
     });
 
-    document.addEventListener('click', close);
+    // Anything inside a tip — the bubble and its link included — is not outside.
+    document.addEventListener('click', e => {
+        if (!e.target.closest('.trio-tip')) close();
+    });
     document.addEventListener('keydown', e => {
         if (e.key === 'Escape') close();
     });
-    // A fixed bubble doesn't travel with its row, so any scroll invalidates it.
-    if (scroller) scroller.addEventListener('scroll', close, { passive: true });
-    window.addEventListener('scroll', close, { passive: true });
-    window.addEventListener('resize', close);
+    // A fixed bubble doesn't travel with its row, so a scroll has to move it.
+    // Closing instead would be simpler but wrong twice over: the bubble should
+    // follow the row it belongs to, and the browser scrolls the page itself when
+    // you reach for the link — which would shut the bubble as you tried to use
+    // it. It only closes once its row has left the board's window.
+    function reanchor() {
+        if (!open) return;
+        if (scroller) {
+            const row = open.getBoundingClientRect();
+            const win = scroller.getBoundingClientRect();
+            if (row.bottom <= win.top || row.top >= win.bottom) {
+                close();
+                return;
+            }
+        }
+        place(open);
+    }
+
+    if (scroller) scroller.addEventListener('scroll', reanchor, { passive: true });
+    window.addEventListener('scroll', reanchor, { passive: true });
+    window.addEventListener('resize', reanchor);
 })();
 
 // The board's bottom fade promises "more below", so it must only be on while
@@ -415,9 +469,13 @@
     const scroller = document.querySelector('.cand-scroll');
     if (!scroller) return;
 
+    // The class goes on the wrapper, not the scroller: the fade is an overlay
+    // there, and putting it back on .cand-scroll would clip the fixed bubbles.
+    const board = scroller.closest('.cand-board') || scroller;
+
     function sync() {
         const more = scroller.scrollTop + scroller.clientHeight < scroller.scrollHeight - 1;
-        scroller.classList.toggle('has-more', more);
+        board.classList.toggle('has-more', more);
     }
 
     sync();
