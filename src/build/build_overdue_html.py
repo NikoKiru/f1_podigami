@@ -1,9 +1,11 @@
 """Render data/overdue.json into dist/overdue.html.
 
 Two ranked sections — all-time near-misses and current-grid candidates. Each
-renders through the shared ranked table (``_rows``): one bordered container
-with a column-label strip and a row per rank that expands to show its stats.
-Rank #1 is the same row, open by default and accented.
+renders through the shared ranked table (``_rows``): a heading and one-line
+description sitting above one bordered table, with a row per rank that expands
+to show its stats. Rank #1 is the same closed row, marked only by an accent
+rail.
+
 Every entry leads with the expected number of shared podiums (racesTogether ×
 rates) shown as "X.Y×", which makes the overdue-ness concrete: a score of 8
 means statistics expected this to happen roughly eight times already. A
@@ -30,11 +32,15 @@ from _layout import (  # noqa: E402
     nav,
     organization_schema,
 )
-from _rows import render_row, render_stat, render_table  # noqa: E402
+from _rows import render_row, render_section, render_stat, render_table  # noqa: E402
 
 from datalib import OverdueTrio, load_overdue  # noqa: E402
 
 OUT_PATH = ROOT / "dist" / "overdue.html"
+
+# Grid tracks shared by the label strip and every row face: trio, value,
+# chevron.
+COLS = "minmax(0,1fr) 200px 26px"
 
 
 def esc(s: str) -> str:
@@ -80,47 +86,35 @@ def _stats(e: OverdueTrio) -> str:
 
 
 def render_row_entry(e: OverdueTrio, hero: bool = False) -> str:
-    """One leaderboard row. ``hero`` marks the top entry: open and accented."""
+    """One leaderboard row. ``hero`` marks the top entry with an accent rail."""
     return render_row(render_trio(e.names), format_score(e.score), _stats(e), hero=hero)
 
 
 def render_cards(entries: list[OverdueTrio]) -> str:
     if not entries:
-        return '<p class="panel-sub">No candidates.</p>'
+        return '<p class="rank-sub">No candidates.</p>'
     rows = "".join(render_row_entry(e, hero=(i == 1)) for i, e in enumerate(entries, 1))
-    return render_table(rows, value_label="Expected co-podiums", value_width=168)
+    return render_table(rows, value_label="Expected co-podiums", cols=COLS)
 
 
-def panel(title: str, sub: str, entries: list[OverdueTrio]) -> str:
-    """One collapsible ranked section.
-
-    A native ``<details open>`` so the header toggles the whole section with no
-    JS.
-    """
-    return (
-        f'<details class="panel od-panel" open>'
-        f'<summary class="panel-head">'
-        f"<h2>{title}</h2>"
-        f'<span class="panel-chev" aria-hidden="true">&#9662;</span>'
-        f"</summary>"
-        f'<p class="panel-sub">{sub}</p>'
-        f"{render_cards(entries)}"
-        f"</details>"
-    )
+def section(title: str, sub: str, entries: list[OverdueTrio]) -> str:
+    """One ranked section: heading, one-line description, table. No box —
+    the table is the only framed element, matching the combinations page."""
+    return render_section(title, sub, render_cards(entries))
 
 
 def main() -> int:
     data = load_overdue()
     as_of = data.asOf
 
-    all_time = panel(
+    all_time = section(
         "All-time near-misses",
         "Trios from across F1 history that raced together often and each podiumed often "
         "&mdash; yet never all three on the same podium. Expected co-podiums = races together "
         "&times; each driver&rsquo;s career podium rate.",
         data.allTime,
     )
-    grid = panel(
+    grid = section(
         "Current grid &mdash; still possible",
         "The most overdue trios among this season&rsquo;s drivers. These could still happen.",
         data.currentGrid,

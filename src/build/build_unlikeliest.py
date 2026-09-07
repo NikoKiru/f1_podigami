@@ -1,11 +1,11 @@
 """Render data/unlikeliest.json into dist/unlikeliest.html.
 
 The mirror of the Overdue page: podium trios that *did* happen, ranked by how
-statistically unlikely they were. The #1 trio (the single most improbable
-podium in F1 history) is a full hero card; every other rank is a compact
-leaderboard row (shared ``_rows.render_row``) that expands to show each
-driver's career podium rate, how often they raced together, and how many
-times it hit.
+statistically unlikely they were. Every rank is a row in the shared ranked
+table (``_rows.render_row``) that expands to show each driver's career podium
+rate, how often they raced together, and how many times it hit. The #1 trio —
+the single most improbable podium in F1 history — is the same closed row,
+marked only by an accent rail.
 
 The headline "1 in N" is the odds the trio would *ever* share a podium, derived
 from the expected co-podium count s = racesTogether x rates via the Poisson
@@ -33,11 +33,15 @@ from _layout import (  # noqa: E402
     organization_schema,
     race_url,
 )
-from _rows import render_row, render_stat, render_table  # noqa: E402
+from _rows import render_row, render_section, render_stat, render_table  # noqa: E402
 
 from datalib import UnlikeliestTrio, load_race_links, load_unlikeliest  # noqa: E402
 
 OUT_PATH = ROOT / "dist" / "unlikeliest.html"
+
+# Grid tracks shared by the label strip and every row face: trio, odds,
+# race, chevron.
+COLS = "minmax(0,1fr) 110px 240px 26px"
 
 
 def esc(s: str) -> str:
@@ -84,18 +88,24 @@ def _rates_cells(e: UnlikeliestTrio) -> str:
 
 
 def _race_link(e: UnlikeliestTrio, links: dict | None = None) -> str:
+    """The race, split into year + name so it picks up the combinations table's
+    "Last seen" treatment (bold year, dimmed name). The same fragment is reused
+    in the expanded drawer on phones."""
     h = e.happened
     url = race_url(links or {}, h.season, h.round, h.raceName)
     label = f"{esc(h.season)} {esc(h.raceName)}"
     return (
         f'<a class="race-link" href="{html.escape(url, quote=True)}" target="_blank" '
-        f'rel="noopener" title="{label} &mdash; race report">{label}</a>'
+        f'rel="noopener" title="{label} &mdash; race report">'
+        f'<span class="year">{esc(h.season)}</span>'
+        f'<span class="race-name">{esc(h.raceName)}</span>'
+        f"</a>"
     )
 
 
 def _stats(e: UnlikeliestTrio, race: str) -> str:
-    """Stat cells for the expanded panel. The race repeats here because CSS
-    moves it off the row face and into the panel on phones."""
+    """Stat cells for the expanded drawer. The race repeats here because CSS
+    moves it off the row face and into the drawer on phones."""
     return (
         render_stat("Podium rates", _rates_cells(e))
         + render_stat("Raced together", f"{e.racesTogether}&times;")
@@ -105,7 +115,7 @@ def _stats(e: UnlikeliestTrio, race: str) -> str:
 
 
 def render_row_entry(e: UnlikeliestTrio, links: dict | None = None, hero: bool = False) -> str:
-    """One leaderboard row. ``hero`` marks the top entry: open and accented."""
+    """One leaderboard row. ``hero`` marks the top entry with an accent rail."""
     race = _race_link(e, links)
     return render_row(
         render_trio(e.names),
@@ -118,21 +128,29 @@ def render_row_entry(e: UnlikeliestTrio, links: dict | None = None, hero: bool =
 
 def render_cards(entries: list[UnlikeliestTrio], links: dict | None = None) -> str:
     if not entries:
-        return '<p class="panel-sub">No trios.</p>'
+        return '<p class="rank-sub">No trios.</p>'
     rows = "".join(render_row_entry(e, links, hero=(i == 1)) for i, e in enumerate(entries, 1))
+    # "Odds" rather than "Chance it ever happened": the label strip truncates
+    # anything wider than its track, and the combinations table sets the
+    # precedent for short column labels.
     return render_table(
         rows,
-        value_label="Chance it ever happened",
-        value_width=190,
+        value_label="Odds",
+        cols=COLS,
         race_label="Race",
-        race_width=210,
     )
 
 
 def main() -> int:
     data = load_unlikeliest()
     as_of = data.asOf
-    body = render_cards(data.trios, load_race_links())
+    body = render_section(
+        "Against the odds",
+        "Every trio ranked by how improbable their podium was &mdash; the odds they would "
+        "<em>ever</em> share one, from each driver&rsquo;s career podium rate and how often "
+        "the three raced together.",
+        render_cards(data.trios, load_race_links()),
+    )
 
     page = f"""{
         head(

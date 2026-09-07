@@ -109,7 +109,7 @@ def test_render_row_entry_race_on_face_and_in_stats():
     html = bu.render_row_entry(e)
     assert 'class="rankrow"' in html
     assert "1 in 150" in html  # headline odds on the row face
-    # race link appears twice: on the desktop row face and in the stats panel
+    # race link appears twice: on the desktop row face and in the stats drawer
     assert html.count("https://en.wikipedia.org/wiki/2020_Sakhir_Grand_Prix") == 2
     assert 'class="rr-race"' in html
     assert 'class="rr-stat rr-stat-race"' in html
@@ -125,13 +125,13 @@ def test_render_cards_table_with_hero_first_row():
     html = bu.render_cards(entries)
     # one combos-style container with a column-label strip, race column included
     assert 'class="rank-wrap"' in html
-    assert '<span class="rh-num">Chance it ever happened</span>' in html
+    assert '<span class="rh-num">Odds</span>' in html
     assert '<span class="rh-race">Race</span>' in html
     assert 'class="rank-list"' in html
-    # every rank is a row; only #1 is the open hero
+    # every rank is a row; #1 carries the accent rail but is closed like the rest
     assert html.count('class="rankrow') == 3
     assert html.count("rankrow-hero") == 1
-    assert html.count("<details open>") == 1
+    assert "<details open>" not in html
     assert 'class="rr-rank"' not in html  # ordered <ol>; no ordinal column
 
 

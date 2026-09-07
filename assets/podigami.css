@@ -339,16 +339,45 @@ main {
 }
 
 /* ── Shared ranked table (Overdue + Unlikeliest + Soulmates) ─────────────────
-   Deliberately mirrors the Combinations table on index.css: one bordered
-   container, an uppercase column-label strip, hairline row dividers and zebra
-   striping — no floating per-row cards. Every rank is a native <details> row
-   (the <summary> is the row face, the body holds the stat cells), so there is
-   no JS and keyboard support is free. Rank #1 carries .rankrow-hero: open by
-   default, accented and a size up, keeping the entry readers care about most
-   the richest one without breaking the grid.
+   Mirrors the Combinations table (index.css) cell-for-cell so the four data
+   pages read as one system: a single hairline frame with no outer panel, an
+   uppercase column-label strip, flat rows at the page type size, and an
+   expanded drawer on --bg-2 behind a 3px accent rail. Every rank is a native
+   <details> row (the <summary> is the row face, the body holds the stat
+   cells), so there is no JS and keyboard support is free.
+
+   Closed shows the headline stat only; open reveals the detail — #1 included.
+   .rankrow-hero adds nothing but an accent rail: same type size, same
+   closed-by-default behaviour, so position and the rail mark the leader
+   without breaking the grid.
 
    The label strip and the row faces share their column geometry through
-   --rank-num-w / --rank-race-w, set per page as an inline custom property. */
+   --rank-cols (a grid track list), set per page as an inline custom property. */
+
+/* ---------- section heading (the table is the only framed element) ---------- */
+.rank-section {
+    margin-top: 34px;
+}
+
+.rank-section:first-of-type {
+    margin-top: 0;
+}
+
+.rank-section > h2 {
+    margin: 0 0 4px;
+    font-size: 18px;
+    letter-spacing: -0.3px;
+}
+
+.rank-section > .rank-sub {
+    margin: 0 0 14px;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.6;
+    max-width: 95ch;
+}
+
+/* ---------- frame + label strip ---------- */
 .rank-wrap {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -356,10 +385,15 @@ main {
     overflow: hidden;
 }
 
-.rank-head {
-    display: flex;
+.rank-head,
+.rr-face {
+    display: grid;
+    grid-template-columns: var(--rank-cols, minmax(0, 1fr) 200px 26px);
     align-items: center;
-    gap: 12px;
+    column-gap: 18px;
+}
+
+.rank-head {
     padding: 13px 18px;
     background: var(--surface-2);
     border-bottom: 1px solid var(--border);
@@ -372,26 +406,13 @@ main {
     user-select: none;
 }
 
-.rh-drivers {
-    flex: 1;
+/* Guard: a label wider than its track truncates rather than silently
+   overlapping the next column. Keep labels short (combos: "Count", "Last
+   seen") and this never fires. */
+.rank-head > span {
     min-width: 0;
-}
-
-.rh-race {
-    flex: 0 0 auto;
-    width: var(--rank-race-w, 0);
-    text-align: right;
-}
-
-.rh-num {
-    flex: 0 0 auto;
-    width: var(--rank-num-w, 120px);
-    text-align: right;
-}
-
-.rh-chev {
-    flex: 0 0 auto;
-    width: 11px;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .rank-list {
@@ -400,6 +421,7 @@ main {
     padding: 0;
 }
 
+/* ---------- rows ---------- */
 .rankrow > details {
     background: transparent;
     transition: background 0.12s;
@@ -409,30 +431,18 @@ main {
     border-top: 1px solid var(--border);
 }
 
-.rankrow:nth-of-type(2n) > details {
-    background: var(--stripe);
-}
-
 .rankrow > details:hover,
 .rankrow > details[open] {
     background: var(--surface-2);
 }
 
-/* #1: accent rule down the left edge drawn as an inset shadow, so the row's
+/* #1: an accent rule down the left edge drawn as an inset shadow, so the row's
    content stays on the same grid as every other row (a border would shift it). */
 .rankrow-hero > details {
-    background: linear-gradient(135deg, var(--surface) 0%, var(--bg-2) 100%);
     box-shadow: inset 3px 0 0 var(--accent-bright);
 }
 
-.rankrow-hero > details:hover {
-    background: linear-gradient(135deg, var(--surface-2) 0%, var(--bg-2) 100%);
-}
-
 .rr-face {
-    display: flex;
-    align-items: center;
-    gap: 12px;
     padding: 14px 18px;
     cursor: pointer;
     list-style: none;
@@ -443,17 +453,23 @@ main {
 }
 
 .rr-drivers {
-    flex: 1;
     min-width: 0;
-    font-size: 15px;
-    font-weight: 700;
+    font-size: 16px;
+    font-weight: 500;
     color: var(--text);
-    line-height: 1.35;
+    line-height: 1.4;
+    overflow-wrap: break-word;
+}
+
+.rr-drivers .oddriver,
+.rr-drivers .undriver,
+.rr-drivers .smdriver {
+    white-space: nowrap;
 }
 
 .rr-drivers .sep {
     color: var(--muted-dim);
-    margin: 0 6px;
+    margin: 0 8px;
     font-weight: 400;
 }
 
@@ -461,59 +477,60 @@ main {
     display: none;
 }
 
+.rr-num {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--accent-bright);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
 .rr-race {
-    flex: 0 0 auto;
-    width: var(--rank-race-w, auto);
-    font-size: 13px;
-    text-align: right;
+    min-width: 0;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.35;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.rr-num {
-    flex: 0 0 auto;
-    width: var(--rank-num-w, 120px);
-    font-size: 15px;
-    font-weight: 800;
-    color: var(--accent-bright);
-    font-variant-numeric: tabular-nums;
-    text-align: right;
-    white-space: nowrap;
-}
-
 .rr-chev {
-    flex: 0 0 auto;
-    width: 11px;
-    color: var(--muted);
-    font-size: 11px;
-    transition: transform 0.18s ease;
+    text-align: center;
+    color: var(--muted-dim);
 }
 
-.rankrow > details[open] .rr-chev {
+.rr-chev .chev {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
+    text-align: center;
+    border-radius: 50%;
+    font-size: 10px;
+    transition: transform 0.18s ease, color 0.15s, background 0.15s;
+}
+
+.rankrow > details:hover .rr-chev .chev {
+    color: var(--text);
+}
+
+.rankrow > details[open] .rr-chev .chev {
     transform: rotate(180deg);
     color: var(--accent-bright);
+    background: rgba(225, 6, 0, 0.12);
 }
 
-/* #1 sits a size up — enough to read as the headline entry, not enough to
-   break the column rhythm. */
-.rankrow-hero .rr-drivers {
-    font-size: 19px;
-}
-
-.rankrow-hero .rr-num {
-    font-size: 24px;
-    letter-spacing: -0.5px;
-}
-
-/* Expanded panel: the labelled stat cells every page shares. */
+/* ---------- expanded drawer ---------- */
 .rr-stats {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px 28px;
-    margin: 0 18px;
-    padding: 10px 0 14px;
+    gap: 14px 40px;
+    margin: 0;
+    padding: 18px 24px 20px;
+    background: var(--bg-2);
     border-top: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
 }
 
 .rr-stat {
@@ -558,6 +575,18 @@ main {
     color: var(--accent-bright);
     border-color: var(--accent);
 }
+
+.race-link .year {
+    color: var(--text);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    margin-right: 8px;
+}
+
+.race-link .race-name {
+    color: var(--text-dim);
+}
+
 
 /* Three equal columns, no boxes: a hairline in the team's colour is the only
    thing marking one driver off from the next. */
@@ -913,44 +942,6 @@ main {
 .fc-detail b {
     color: var(--text);
     font-weight: 600;
-}
-
-/* ── Overdue: collapsible section headers (native <details>) ──────────────── */
-.od-panel > summary {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    cursor: pointer;
-    list-style: none;
-}
-
-.od-panel > summary::-webkit-details-marker {
-    display: none;
-}
-
-.od-panel > summary h2 {
-    margin: 0;
-}
-
-.od-panel > summary:hover h2 {
-    color: var(--text);
-}
-
-.od-panel > .panel-sub {
-    margin-top: 6px;
-}
-
-.panel-chev {
-    flex: 0 0 auto;
-    color: var(--muted);
-    font-size: 12px;
-    transition: transform 0.18s ease, color 0.15s;
-}
-
-.od-panel[open] > summary .panel-chev {
-    transform: rotate(180deg);
-    color: var(--accent-bright);
 }
 
 /* current form — collapsed <details> inside the candidates panel */
@@ -1426,7 +1417,7 @@ a.tl-where:hover {
     }
 
     /* Leaderboard rows: abbreviate driver names (E. Ocon), tighten type, and
-       move the race name off the row face into the expanded panel. */
+       move the race name off the row face into the expanded drawer. */
     .rr-drivers .dn-full {
         display: none;
     }
@@ -1436,33 +1427,30 @@ a.tl-where:hover {
     }
 
     .rr-face {
+        grid-template-columns: minmax(0, 1fr) auto 26px;
+        column-gap: 10px;
         padding: 12px 14px;
-        gap: 10px;
     }
 
     .rr-drivers {
-        font-size: 13px;
-    }
-
-    .rr-num {
-        width: auto;
         font-size: 14px;
     }
 
-    .rr-stats {
-        margin: 0 14px;
+    .rr-drivers .sep {
+        margin: 0 5px;
     }
 
-    .rankrow-hero .rr-drivers {
-        font-size: 16px;
-    }
-
-    .rankrow-hero .rr-num {
-        font-size: 19px;
+    .rr-num {
+        font-size: 15px;
     }
 
     .rr-race {
         display: none;
+    }
+
+    .rr-stats {
+        padding: 14px 16px 16px;
+        gap: 12px 26px;
     }
 
     .rr-stats .rr-stat-race {
