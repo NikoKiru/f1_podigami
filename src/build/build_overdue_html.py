@@ -79,15 +79,15 @@ def _stats(e: OverdueTrio) -> str:
     )
 
 
-def render_row_entry(rank: int, e: OverdueTrio, hero: bool = False) -> str:
-    """One leaderboard row. ``hero`` marks rank #1: open and accented."""
-    return render_row(rank, render_trio(e.names), format_score(e.score), _stats(e), hero=hero)
+def render_row_entry(e: OverdueTrio, hero: bool = False) -> str:
+    """One leaderboard row. ``hero`` marks the top entry: open and accented."""
+    return render_row(render_trio(e.names), format_score(e.score), _stats(e), hero=hero)
 
 
 def render_cards(entries: list[OverdueTrio]) -> str:
     if not entries:
         return '<p class="panel-sub">No candidates.</p>'
-    rows = "".join(render_row_entry(i, e, hero=(i == 1)) for i, e in enumerate(entries, 1))
+    rows = "".join(render_row_entry(e, hero=(i == 1)) for i, e in enumerate(entries, 1))
     return render_table(rows, value_label="Expected co-podiums", value_width=168)
 
 

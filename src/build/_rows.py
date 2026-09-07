@@ -7,11 +7,13 @@ table: a single bordered container, an uppercase column-label strip, hairline
 row dividers and zebra striping. No floating per-row cards, no bespoke hero
 card per page.
 
-Every rank is one native ``<details>`` row: the ``<summary>`` is the row face
-(rank, drivers, headline number, optional race link) and the body holds the
-stat cells. Rank #1 is the same row rendered ``hero=True`` — open by default,
-accented, and slightly larger — so the entry readers care about most shows its
-stats without a click while still sitting in the table.
+Every entry is one native ``<details>`` row: the ``<summary>`` is the row face
+(drivers, headline number, optional race link) and the body holds the stat
+cells. The list carries no ordinal column — it is an ordered ``<ol>`` and
+position says the same thing — so the top entry is marked by rendering it
+``hero=True``: open by default, accented, and slightly larger, showing the
+stats readers care about most without a click while still sitting in the
+table.
 
 Callers pass pre-escaped HTML fragments (driver spans, stat cells, race link);
 this module only assembles structure.
@@ -21,7 +23,6 @@ from __future__ import annotations
 
 
 def render_row(
-    rank: int,
     drivers_html: str,
     num: str,
     stats_html: str,
@@ -30,14 +31,13 @@ def render_row(
 ) -> str:
     """One expandable row. ``race_html`` (Unlikeliest only) sits on the row face
     on desktop; CSS moves it into the stats panel on phones. ``hero`` marks the
-    #1 rank: rendered open and accented."""
+    top entry: rendered open and accented."""
     race = f'<span class="rr-race">{race_html}</span>' if race_html else ""
     cls = "rankrow rankrow-hero" if hero else "rankrow"
     return (
         f'<li class="{cls}">'
         f"<details{' open' if hero else ''}>"
         '<summary class="rr-face">'
-        f'<span class="rr-rank">{rank}</span>'
         f'<span class="rr-drivers">{drivers_html}</span>'
         f"{race}"
         f'<span class="rr-num">{num}</span>'
@@ -85,7 +85,6 @@ def render_table(
     return (
         f'<div class="rank-wrap" style="{style}">'
         '<div class="rank-head">'
-        '<span class="rh-rank">#</span>'
         f'<span class="rh-drivers">{group_label}</span>'
         f"{race_head}"
         f'<span class="rh-num">{value_label}</span>'
