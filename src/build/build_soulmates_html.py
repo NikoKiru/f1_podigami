@@ -104,18 +104,21 @@ def _compute_facts(soulmates: Soulmates) -> list[dict]:
         }
     )
 
-    # 2. Longest active partnership
+    # 2. Longest active partnership. The span counts both endpoint seasons, the
+    # same way the row's own "Seasons active" stat does (_seasons) — 2007-2023 is
+    # 17 seasons, not 16 — so the card and the row it describes agree.
     if top_pairs:
-        longest = max(top_pairs, key=lambda p: p.lastYear - p.firstYear)
-        span = longest.lastYear - longest.firstYear
+        longest = max(top_pairs, key=_seasons)
+        span = _seasons(longest)
+        unit = "season" if span == 1 else "seasons"
         facts.append(
             {
                 "num": str(span),
-                "unit": "seasons",
+                "unit": unit,
                 "label": "Longest partnership",
                 "detail": f"<b>{esc(longest.a)}</b> &amp; <b>{esc(longest.b)}</b> shared podiums "
-                f"across {span} seasons ({longest.firstYear}&ndash;{longest.lastYear}), "
-                f"the longest-running pairing in the top 30.",
+                f"across {span} {unit} ({longest.firstYear}&ndash;{longest.lastYear}), "
+                f"the longest-running pairing in the top {len(top_pairs)}.",
             }
         )
 

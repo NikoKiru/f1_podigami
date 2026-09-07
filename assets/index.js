@@ -95,8 +95,7 @@ function setRange(from, to) {
     seasonTo = clampSeason(to);
     if (seasonFrom > seasonTo) seasonTo = seasonFrom;
     syncSeasonUI();
-    writeParams();
-    refresh();
+    refresh();  // applyFilter() writes the URL for both controls
 }
 
 // ── Sorting ────────────────────────────────────────────────────────────────
@@ -252,6 +251,7 @@ function applyFilter() {
     visibleEl.textContent = visible;
     emptyEl.style.display = visible === 0 ? '' : 'none';
     clearBtn.disabled = filters.length === 0 && full;
+    writeParams();
 
     if (ofTotalEl && rangeNoteEl) {
         ofTotalEl.style.display = full ? '' : 'none';
@@ -307,11 +307,18 @@ if (rangeEl) {
 
 // ?d=Name&d=Name&d=Name (e.g. from a trio elsewhere on the site) pre-fills the
 // driver filters; ?from=2001&to=2003 pre-sets the season range.
+//
+// The URL mirrors BOTH controls, and is rewritten after every filter pass. It
+// used to carry only the season range, so the driver names a visitor arrived
+// with survived everything they did next: Clear emptied the three inputs and
+// left ?d= standing, and the next reload (or a shared link) silently put the
+// filter back on a table that showed no sign of it.
 function writeParams() {
-    if (!rangeEl) return;
     try {
         const params = new URLSearchParams(location.search);
-        if (fullRange()) {
+        params.delete('d');
+        filterInputs.forEach(i => { if (i.value.trim()) params.append('d', i.value.trim()); });
+        if (!rangeEl || fullRange()) {
             params.delete('from');
             params.delete('to');
         } else {
@@ -319,6 +326,7 @@ function writeParams() {
             params.set('to', seasonTo);
         }
         const query = params.toString();
+        if (query === location.search.replace(/^\?/, '')) return;
         history.replaceState(null, '', query ? '?' + query : location.pathname);
     } catch {
         /* replaceState can be blocked (e.g. file://); the filter still works */
