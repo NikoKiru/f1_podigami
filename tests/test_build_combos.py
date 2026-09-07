@@ -99,9 +99,11 @@ def _sample_combo():
     )
 
 
-def test_render_combo_row_has_rank_drivers_count():
-    out = bc.render_combo(1, _sample_combo())
-    assert '<td class="rank">1</td>' in out
+def test_render_combo_row_has_drivers_and_count():
+    out = bc.render_combo(_sample_combo())
+    # No ordinal column: the table is ordered, and it went stale under filtering
+    # because only sorting renumbered it.
+    assert 'class="rank"' not in out
     assert 'class="dn-full"' in out
     assert 'class="dn-abbr"' in out
     assert '<td class="count">4</td>' in out
@@ -109,7 +111,7 @@ def test_render_combo_row_has_rank_drivers_count():
 
 def test_render_combo_data_attributes():
     c = _sample_combo()
-    out = bc.render_combo(5, c)
+    out = bc.render_combo(c)
     assert 'data-count="4"' in out
     assert f'data-last="{c.lastRaceKey}"' in out
     drivers_data = out.split('data-drivers="')[1].split('"')[0]
@@ -118,9 +120,9 @@ def test_render_combo_data_attributes():
 
 
 def test_render_combo_includes_detail_row_with_races():
-    out = bc.render_combo(1, _sample_combo())
+    out = bc.render_combo(_sample_combo())
     assert 'class="detail"' in out
-    assert 'colspan="5"' in out
+    assert 'colspan="4"' in out  # one fewer column since the ordinal went
     assert "British GP" in out
 
 
@@ -134,7 +136,7 @@ def test_render_combo_escapes_driver_names():
         2020001,
         [race_ref("2020", "1", "Test Grand Prix")],
     )
-    out = bc.render_combo(1, c)
+    out = bc.render_combo(c)
     assert "A &amp; B" in out
 
 
@@ -210,19 +212,19 @@ def _shared_combo():
 def test_render_combo_emits_shared_badge_for_combo_touching_shared_race():
     c = _shared_combo()
     shared = {("1955", "1"): "Froilan Gonzalez"}
-    out = bc.render_combo(1, c, None, shared)
+    out = bc.render_combo(c, None, shared)
     assert "shared-badge" in out
 
 
 def test_render_combo_omits_shared_badge_when_no_race_is_shared():
-    out = bc.render_combo(1, _sample_combo(), None, {})
+    out = bc.render_combo(_sample_combo(), None, {})
     assert "shared-badge" not in out
 
 
 def test_render_combo_shared_badge_has_aria_label():
     c = _shared_combo()
     shared = {("1955", "1"): "Froilan Gonzalez"}
-    out = bc.render_combo(1, c, None, shared)
+    out = bc.render_combo(c, None, shared)
     assert 'role="img"' in out
     assert 'aria-label="One podium step was a car shared by two drivers"' in out
 
@@ -244,14 +246,14 @@ def test_render_combo_carries_every_race_in_data_races():
         2003009,
         races,
     )
-    out = bc.render_combo(1, c)
+    out = bc.render_combo(c)
     assert 'data-races="2001|3|Brazilian Grand Prix;2003|9|British Grand Prix"' in out
 
 
 def test_render_combo_escapes_race_names_in_data_races():
     races = [race_ref("2020", "1", 'A "quoted" Grand Prix')]
     c = combo(["A", "B", "C"], ["a", "b", "c"], 1, races[0], races[0], 2020001, races)
-    out = bc.render_combo(1, c)
+    out = bc.render_combo(c)
     assert "&quot;quoted&quot;" in out
     assert 'data-races="2020|1|A &quot;quoted&quot; Grand Prix"' in out
 

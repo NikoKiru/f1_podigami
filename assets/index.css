@@ -319,10 +319,6 @@ table {
     table-layout: fixed;
 }
 
-col.col-rank {
-    width: 68px;
-}
-
 col.col-drivers {
     width: auto;
 }
@@ -428,13 +424,6 @@ tbody tr.combo:nth-of-type(2n):hover>td {
 
 tbody tr.combo.expanded>td {
     background: var(--surface-2);
-}
-
-td.rank {
-    color: var(--muted);
-    font-variant-numeric: tabular-nums;
-    font-size: 13px;
-    white-space: nowrap;
 }
 
 td.drivers {
@@ -666,10 +655,6 @@ a.race-pill:hover {
         min-width: 500px;
     }
 
-    col.col-rank {
-        width: 40px;
-    }
-
     col.col-drivers {
         width: 160px;
     }
@@ -757,19 +742,6 @@ a.race-pill:hover {
         padding: 0;
         border: none;
         background: transparent;
-    }
-
-    tbody tr.combo td.rank {
-        font-size: 12px;
-        font-weight: 700;
-        color: var(--accent-bright);
-        letter-spacing: 0.3px;
-        margin-bottom: 3px;
-    }
-
-    tbody tr.combo td.rank::before {
-        content: "#";
-        opacity: 0.55;
     }
 
     tbody tr.combo td.drivers {
