@@ -97,10 +97,10 @@ def test_render_cards_table_with_hero_first_row():
     assert 'class="rank-wrap"' in html
     assert '<span class="rh-num">Expected co-podiums</span>' in html
     assert 'class="rank-list"' in html
-    # every rank is a row; only #1 is the open hero
+    # every rank is a row; #1 carries the accent rail but is closed like the rest
     assert html.count('class="rankrow') == 3
     assert html.count("rankrow-hero") == 1
-    assert html.count("<details open>") == 1
+    assert "<details open>" not in html
     assert 'class="rr-rank"' not in html  # ordered <ol>; no ordinal column
 
 
@@ -108,14 +108,16 @@ def test_render_cards_empty():
     assert "No candidates." in bo.render_cards([])
 
 
-# ── panel ─────────────────────────────────────────────────────────────────────
+# ── section ───────────────────────────────────────────────────────────────────
 
 
-def test_panel_wraps_title_and_sub():
-    out = bo.panel("My Title", "the subtitle", [])
+def test_section_wraps_title_and_sub_without_a_box():
+    """Heading and description sit naked above the table — the table is the only
+    framed element, so there is no panel box and no collapsible header."""
+    out = bo.section("My Title", "the subtitle", [])
     assert "<h2>My Title</h2>" in out
     assert "the subtitle" in out
-    # section is now a collapsible <details>, open by default
-    assert '<details class="panel od-panel" open>' in out
-    assert '<summary class="panel-head">' in out
-    assert 'class="panel-chev"' in out
+    assert out.startswith('<section class="rank-section">')
+    assert "od-panel" not in out
+    assert "panel-chev" not in out
+    assert "<details" not in out
