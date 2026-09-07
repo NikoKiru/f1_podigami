@@ -394,10 +394,11 @@ def _trio_chips(per_driver: list[dict], meta: dict) -> str:
     return '<span class="cd-sep">/</span>'.join(chips)
 
 
-def _cand_row(rank: int, names: str, pct: int, prob: float, cls: str = "", extra: str = "") -> str:
+def _cand_row(names: str, pct: int, prob: float, cls: str = "", extra: str = "") -> str:
+    """One board row. No rank column: the list is already ordered, and the bar
+    and percentage carry the ranking without spending width on a number."""
     return (
         f'<li class="cand{cls}">'
-        f'<span class="cand-rank">{rank}</span>'
         f'<div class="cand-body">'
         f'  <div class="cand-names">{names}{extra}</div>'
         f'  <div class="cand-bar-wrap"><div class="cand-bar" style="width:{pct}%"></div></div>'
@@ -448,14 +449,12 @@ def _board_rows(board: list[dict], meta: dict, driver_form: list[dict], combos) 
 
     top = board[0]["prob"] or 1
     rows = []
-    for i, r in enumerate(board, 1):
+    for r in board:
         names = _trio_chips([entry(d) for d in r["driverIds"]], meta)
         pct = round(100 * r["prob"] / top)
         if not r["happened"]:
             rows.append(
-                _cand_row(
-                    i, names, pct, r["prob"], " cand-new", '<span class="cand-pill">NEW</span>'
-                )
+                _cand_row(names, pct, r["prob"], " cand-new", '<span class="cand-pill">NEW</span>')
             )
             continue
         bubble, label = _board_history(r, combos)
@@ -464,7 +463,7 @@ def _board_rows(board: list[dict], meta: dict, driver_form: list[dict], combos) 
                 f'<span class="trio-tip" tabindex="0" role="button" aria-expanded="false"'
                 f' aria-label="{esc(label)}">{names}{bubble}</span>'
             )
-        rows.append(_cand_row(i, names, pct, r["prob"], " cand-done"))
+        rows.append(_cand_row(names, pct, r["prob"], " cand-done"))
     return rows
 
 
@@ -493,8 +492,8 @@ def render_candidates(
     elif cands:
         top = cands[0]["prob"] or 1
         rows = [
-            _cand_row(i, _trio_chips(c["perDriver"], meta), round(100 * c["prob"] / top), c["prob"])
-            for i, c in enumerate(cands, 1)
+            _cand_row(_trio_chips(c["perDriver"], meta), round(100 * c["prob"] / top), c["prob"])
+            for c in cands
         ]
         tip = (
             "Trios that have never shared a podium, ranked by the model's "
