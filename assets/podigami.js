@@ -329,3 +329,98 @@
         }
     });
 })();
+
+// Trio board: an already-happened row reveals how many times and when.
+//
+// The bubble can't be an ordinary absolutely-positioned popover — .cand-scroll
+// has overflow-y:auto, which would clip it — so it's position:fixed and gets its
+// coordinates here. That means visibility is JS-driven for pointer, keyboard and
+// touch alike, which is why hover, focus, tap, outside-click, Escape and
+// close-on-scroll all live in this one place instead of being split with the
+// CSS-driven .info-tip handler above.
+(function () {
+    const tips = Array.from(document.querySelectorAll('.trio-tip'));
+    const scroller = document.querySelector('.cand-scroll');
+    if (!tips.length) return;
+
+    let open = null;
+
+    function close() {
+        if (!open) return;
+        open.classList.remove('open');
+        open.setAttribute('aria-expanded', 'false');
+        open = null;
+    }
+
+    function place(tip) {
+        const bubble = tip.querySelector('.trio-bubble');
+        if (!bubble) return;
+        const anchor = tip.getBoundingClientRect();
+        // Measure while shown but before positioning, so width/height are real.
+        const box = bubble.getBoundingClientRect();
+        const pad = 8;
+        let left = anchor.left + anchor.width / 2 - box.width / 2;
+        left = Math.max(pad, Math.min(left, window.innerWidth - box.width - pad));
+        // Prefer below the row; flip above when that would run off the viewport.
+        let top = anchor.bottom + pad;
+        if (top + box.height > window.innerHeight - pad) {
+            const above = anchor.top - box.height - pad;
+            if (above >= pad) top = above;
+            else top = Math.max(pad, window.innerHeight - box.height - pad);
+        }
+        bubble.style.left = left + 'px';
+        bubble.style.top = top + 'px';
+    }
+
+    function show(tip) {
+        if (open === tip) return;
+        close();
+        tip.classList.add('open');
+        tip.setAttribute('aria-expanded', 'true');
+        open = tip;
+        place(tip);
+    }
+
+    tips.forEach(tip => {
+        tip.addEventListener('mouseenter', () => show(tip));
+        tip.addEventListener('mouseleave', () => {
+            if (open === tip) close();
+        });
+        tip.addEventListener('focus', () => show(tip));
+        tip.addEventListener('blur', () => {
+            if (open === tip) close();
+        });
+        // Touch has no hover: tapping the row toggles, tapping it again closes.
+        tip.addEventListener('click', e => {
+            if (e.target.closest('a')) return; // let the combos link through
+            e.stopPropagation();
+            if (open === tip) close();
+            else show(tip);
+        });
+    });
+
+    document.addEventListener('click', close);
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') close();
+    });
+    // A fixed bubble doesn't travel with its row, so any scroll invalidates it.
+    if (scroller) scroller.addEventListener('scroll', close, { passive: true });
+    window.addEventListener('scroll', close, { passive: true });
+    window.addEventListener('resize', close);
+})();
+
+// The board's bottom fade promises "more below", so it must only be on while
+// there is more — otherwise the last row reads as cut off at the end of the list.
+(function () {
+    const scroller = document.querySelector('.cand-scroll');
+    if (!scroller) return;
+
+    function sync() {
+        const more = scroller.scrollTop + scroller.clientHeight < scroller.scrollHeight - 1;
+        scroller.classList.toggle('has-more', more);
+    }
+
+    sync();
+    scroller.addEventListener('scroll', sync, { passive: true });
+    window.addEventListener('resize', sync);
+})();

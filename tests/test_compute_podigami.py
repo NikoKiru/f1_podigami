@@ -1004,3 +1004,143 @@ def test_post_quali_retirement_deterministic(scenario_post_quali):
         "retirements": _retirements(2025, 6, "eli"),
     }
     assert cp.compute(podiums, combos, grid, **kw) == cp.compute(podiums, combos, grid, **kw)
+
+
+# ── trio board ───────────────────────────────────────────────────────────────
+# The board merges already-happened trios back in beside the new ones, ranked
+# together by probability, so the panel can show what has happened rather than
+# leaving a visitor unable to tell "already done" from "too unlikely to list".
+
+
+def test_build_trio_board_ranks_seen_and_new_together():
+    probs = {
+        ("a", "b", "c"): 0.30,
+        ("a", "b", "d"): 0.25,
+        ("a", "c", "d"): 0.20,
+        ("b", "c", "d"): 0.15,
+    }
+    seen = {("a", "b", "d")}
+    board = cp.build_trio_board(probs, seen, ["a", "b", "c", "d"])
+    assert [r["driverIds"] for r in board] == [
+        ["a", "b", "c"],
+        ["a", "b", "d"],
+        ["a", "c", "d"],
+        ["b", "c", "d"],
+    ]
+    assert [r["happened"] for r in board] == [False, True, False, False]
+    assert [r["prob"] for r in board] == [30.0, 25.0, 20.0, 15.0]
+
+
+def test_build_trio_board_ignores_seen_trios_off_the_grid():
+    """`seen` is global history; only trios all of whose drivers are entered
+    can happen at this race, so a stale trio must not be marked happened."""
+    probs = {("a", "b", "c"): 0.5, ("a", "b", "d"): 0.5}
+    seen = {("a", "b", "z")}  # z isn't entered — irrelevant to this race
+    board = cp.build_trio_board(probs, seen, ["a", "b", "c", "d"])
+    assert all(r["happened"] is False for r in board)
+
+
+def test_build_trio_board_drops_rows_below_one_percent():
+    # 12 fat rows clear the 1% line; the thin ones sit under it and are cut.
+    probs = {(f"d{i}", "x", "y"): 0.05 for i in range(12)}
+    probs |= {(f"t{i}", "x", "y"): 0.001 for i in range(8)}
+    board = cp.build_trio_board(probs, set(), [])
+    assert len(board) == 12
+    assert min(r["prob"] for r in board) >= 100 * cp.BOARD_MIN_PROB
+
+
+def test_build_trio_board_floor_keeps_the_card_full():
+    """A concentrated era can leave fewer than a dozen trios above 1%; the card
+    still shows BOARD_MIN_ROWS so it never looks half-built."""
+    probs = {("a", "b", "c"): 0.9}
+    probs |= {(f"d{i}", "x", "y"): 0.0001 for i in range(30)}
+    board = cp.build_trio_board(probs, set(), [])
+    assert len(board) == cp.BOARD_MIN_ROWS
+
+
+def test_build_trio_board_floor_cannot_invent_rows():
+    probs = {("a", "b", "c"): 0.6, ("a", "b", "d"): 0.4}
+    assert len(cp.build_trio_board(probs, set(), [])) == 2
+
+
+def test_build_trio_board_caps_row_count():
+    probs = {(f"d{i}", "x", "y"): 0.02 for i in range(50)}
+    assert len(cp.build_trio_board(probs, set(), [])) == cp.BOARD_MAX_ROWS
+
+
+def test_build_trio_board_breaks_ties_deterministically():
+    probs = {("b", "c", "d"): 0.25, ("a", "b", "c"): 0.25, ("a", "b", "d"): 0.5}
+    board = cp.build_trio_board(probs, set(), [])
+    assert [r["driverIds"] for r in board] == [["a", "b", "d"], ["a", "b", "c"], ["b", "c", "d"]]
+
+
+def test_trio_board_present_and_ordered(scenario):
+    podiums, combos, grid = scenario
+    res = cp.compute(podiums, combos, grid)
+    board = res["trioBoard"]
+    assert board
+    probs = [r["prob"] for r in board]
+    assert probs == sorted(probs, reverse=True)
+
+
+def test_trio_board_marks_seen_trio_that_candidates_omit(scenario):
+    """The whole point: alf+bob+cas happened (2025 R4), so `candidates` leaves
+    it out — the board must carry it, flagged."""
+    podiums, combos, grid = scenario
+    res = cp.compute(podiums, combos, grid)
+    rows = {tuple(r["driverIds"]): r for r in res["trioBoard"]}
+    assert rows[("alf", "bob", "cas")]["happened"] is True
+    assert rows[("alf", "bob", "eli")]["happened"] is False
+
+
+def test_trio_board_happened_flags_agree_with_history(scenario):
+    podiums, combos, grid = scenario
+    res = cp.compute(podiums, combos, grid)
+    seen = {tuple(sorted(c["driverIds"])) for c in combos}
+    for row in res["trioBoard"]:
+        assert row["happened"] is (tuple(row["driverIds"]) in seen)
+
+
+def test_trio_board_new_rows_match_candidate_probabilities(scenario):
+    """The board is a view of the same simulation, not a second opinion."""
+    podiums, combos, grid = scenario
+    res = cp.compute(podiums, combos, grid)
+    cand = {tuple(c["driverIds"]): c["prob"] for c in res["candidates"]}
+    for row in res["trioBoard"]:
+        if not row["happened"] and tuple(row["driverIds"]) in cand:
+            assert row["prob"] == pytest.approx(cand[tuple(row["driverIds"])], abs=1e-3)
+
+
+def test_trio_board_built_by_v2_engine(scenario_v2):
+    podiums, combos, grid, con, rres = scenario_v2
+    res = cp.compute(podiums, combos, grid, constructor_data=con, race_results=rres)
+    assert res["trioBoard"]
+    assert any(r["happened"] for r in res["trioBoard"])
+
+
+def test_post_quali_board_is_grid_aware(scenario_post_quali):
+    podiums, combos, grid, con, rres, quali = scenario_post_quali
+    res = cp.compute(
+        podiums,
+        combos,
+        grid,
+        constructor_data=con,
+        race_results=rres,
+        qualifying=quali,
+        schedule=SCHED_R6,
+    )
+    board = res["postQuali"]["trioBoard"]
+    assert board
+    probs = [r["prob"] for r in board]
+    assert probs == sorted(probs, reverse=True)
+    # only cars that qualified can appear
+    entered = {d["driverId"] for d in res["postQuali"]["driverForm"]}
+    assert all(set(r["driverIds"]) <= entered for r in board)
+    # and it is a different view from the pre-quali board
+    assert board != res["trioBoard"]
+
+
+def test_grid_smaller_than_three_yields_no_board(scenario):
+    podiums, combos, _ = scenario
+    res = cp.compute(podiums, combos, [{"driverId": "alf", "name": "Alf"}])
+    assert res["trioBoard"] == []

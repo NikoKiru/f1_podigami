@@ -299,8 +299,38 @@ def test_landing_page_form_is_collapsed_in_candidates_panel(dist):
     assert "Show current form" in html
     details = html[html.index('<details class="form-details">') :]
     assert details.index('class="form-tower"') < details.index("</details>")
-    panel_start = html.index("Most likely new trios")
+    panel_start = html.index("Most likely trios")
     assert panel_start < html.index('<details class="form-details">')
+
+
+def test_landing_trio_board_marks_happened_and_new(dist):
+    """The board's whole point: a visitor can tell an already-happened trio from
+    one the model simply rates too low to list."""
+    html = (dist / "index.html").read_text(encoding="utf-8")
+    assert "Most likely trios" in html
+    assert 'class="cand cand-done"' in html
+    assert 'class="cand cand-new"' in html
+    assert "cand-pill" in html
+    # done rows carry their history behind a hover/tap bubble
+    assert 'class="trio-tip"' in html
+    assert "trio-bubble" in html
+    assert "Happened" in html
+    # the list scrolls inside a fixed window rather than running the page long
+    assert 'class="cand-scroll"' in html
+
+
+def test_landing_trio_board_bubbles_link_to_combos(dist):
+    html = (dist / "index.html").read_text(encoding="utf-8")
+    board = html[html.index('class="cand-scroll"') : html.index("form-details")]
+    assert "combos.html?d=" in board
+
+
+def test_landing_trio_board_new_rows_have_no_bubble(dist):
+    html = (dist / "index.html").read_text(encoding="utf-8")
+    board = html[html.index('class="cand-scroll"') : html.index("form-details")]
+    for row in board.split('<li class="cand')[1:]:
+        if "cand-new" in row[:20]:
+            assert "trio-tip" not in row, "a never-happened row has nothing to reveal"
 
 
 def test_landing_page_explore_grid_is_last_section(dist):
