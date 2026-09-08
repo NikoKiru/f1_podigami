@@ -224,14 +224,24 @@
 
     const dateEl = box.querySelector('.nr-date');
     const cdEl = box.querySelector('.nr-countdown');
+    const labelEl = box.querySelector('.nr-cd-label');
 
+    const localWhen = d => d.toLocaleString(undefined, {
+        weekday: 'short', day: 'numeric', month: 'short',
+        hour: '2-digit', minute: '2-digit',
+    });
+
+    // Both sessions in the visitor's timezone. The server renders them in UTC,
+    // so a no-JS reader still gets two consistent clocks rather than one of each.
     if (dateEl) {
         try {
-            const local = when.toLocaleString(undefined, {
-                weekday: 'short', day: 'numeric', month: 'short',
-                hour: '2-digit', minute: '2-digit',
-            });
-            dateEl.textContent = `${local} (your time)`;
+            const parts = [`Race ${localWhen(when)}`];
+            const qualiAttr = box.getAttribute('data-quali-datetime');
+            if (qualiAttr) {
+                const quali = new Date(qualiAttr);
+                if (!isNaN(quali.getTime())) parts.push(`Quali ${localWhen(quali)}`);
+            }
+            dateEl.textContent = `${parts.join(' · ')} (your time)`;
         } catch (e) { /* keep the server-rendered UTC fallback */ }
     }
 
@@ -246,7 +256,11 @@
             if (cdEl) {
                 cdEl.textContent =
                     sinceStart < RACE_WINDOW ? 'Lights out — race underway' : 'Awaiting results';
+                // The slot now holds a sentence, so it drops to text size — and
+                // "Lights out in" above a race already underway would be a lie.
+                cdEl.classList.add('nr-cd-msg');
             }
+            if (labelEl) labelEl.hidden = true;
             return false;
         }
         const d = Math.floor(diff / 86400); diff -= d * 86400;
@@ -390,6 +404,16 @@
         }
         bubble.style.left = left + 'px';
         bubble.style.top = top + 'px';
+        // A transformed, filtered or masked ancestor becomes the containing block
+        // for position:fixed, so those coordinates land relative to it instead of
+        // the viewport — the scroll-reveal transition does exactly that for 0.5s
+        // as a panel animates in. Measure where the bubble actually landed and
+        // correct by the delta, which works whatever the offending ancestor is.
+        const landed = bubble.getBoundingClientRect();
+        if (Math.abs(landed.left - left) > 0.5 || Math.abs(landed.top - top) > 0.5) {
+            bubble.style.left = 2 * left - landed.left + 'px';
+            bubble.style.top = 2 * top - landed.top + 'px';
+        }
     }
 
     function show(tip) {

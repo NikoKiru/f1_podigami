@@ -111,6 +111,28 @@ def test_podigami_hero_trio_stacks_on_mobile():
     ), ".hero-drivers must collapse to one column inside the 600px breakpoint"
 
 
+def test_next_race_plate_becomes_a_band_on_mobile():
+    """The circuit plate must lay out as a row on phones.
+
+    Stacked, the outline renders as a small off-centre doodle costing ~90px of
+    scroll before the prediction hero. As a row it is a 54px outline beside its
+    caption — one band, roughly half the height, and it reads as a caption.
+    """
+    import re
+
+    s = css("podigami.css")
+    mobile = re.search(r"@media \(max-width: 600px\)[\s\S]*", s)
+    assert mobile, "podigami.css must keep the 600px breakpoint"
+    assert re.search(
+        r"\.nr-art\s*\{[^}]*flex-direction:\s*row",
+        mobile.group(0),
+    ), ".nr-art must lay out as a row inside the 600px breakpoint"
+    assert re.search(
+        r"\.nr-track\s*\{[^}]*width:\s*\d+px",
+        mobile.group(0),
+    ), ".nr-track must take a fixed width on phones so the band stays short"
+
+
 def test_shared_nav_collapses_to_drawer_on_mobile():
     """At <=720px the inline nav links hide behind a burger that opens a left
     slide-out drawer (CSS checkbox core, so it works without JS)."""
