@@ -251,6 +251,7 @@ function applyFilter() {
     visibleEl.textContent = visible;
     emptyEl.style.display = visible === 0 ? '' : 'none';
     clearBtn.disabled = filters.length === 0 && full;
+    syncFilterSummary(filters.length + (full ? 0 : 1), visible);
     writeParams();
 
     if (ofTotalEl && rangeNoteEl) {
@@ -301,6 +302,78 @@ if (rangeEl) {
         });
     }
     window.addEventListener('resize', positionFill);
+}
+
+// ── Mobile filter panel ────────────────────────────────────────────────────
+// Below 720px the whole .filters block lives in a slide-out panel behind the
+// "Filters" trigger, so the table (not the controls) owns the top of a phone
+// screen. The checkbox hack in index.css does the opening and closing on its
+// own; this layer only adds aria state, Escape-to-close, a scroll lock, and
+// the badge that reports how many filters are on while the panel is shut.
+
+const panelToggle = document.getElementById('filter-toggle');
+const panelEl = document.getElementById('filter-panel');
+const toggleLabel = document.querySelector('.filter-toggle');
+const countEl = document.getElementById('filter-count');
+const doneEl = document.getElementById('filter-done');
+const navToggle = document.getElementById('nav-drawer-toggle');
+
+function syncPanel(moveFocus) {
+    const open = panelToggle.checked;
+    if (toggleLabel) toggleLabel.setAttribute('aria-expanded', String(open));
+    document.documentElement.classList.toggle(
+        'drawer-open',
+        open || !!(navToggle && navToggle.checked)
+    );
+    if (!moveFocus) return;
+    // Focus the panel itself rather than the first input: landing on a text
+    // field would raise the on-screen keyboard over the filters.
+    if (open) panelEl.focus();
+    else if (toggleLabel) toggleLabel.focus();
+}
+
+// Reported on the trigger while the panel is shut: each filled driver box
+// counts as one, a narrowed season range as one more.
+function syncFilterSummary(active, visible) {
+    if (toggleLabel) {
+        toggleLabel.classList.toggle('has-active', active > 0);
+        toggleLabel.setAttribute('aria-label', active ? 'Filters (' + active + ' active)' : 'Filters');
+    }
+    if (countEl) countEl.textContent = active;
+    if (doneEl) {
+        doneEl.textContent = visible === 0
+            ? 'No matches'
+            : 'Show ' + visible + ' trio' + (visible === 1 ? '' : 's');
+    }
+}
+
+if (panelToggle) {
+    panelToggle.addEventListener('change', () => syncPanel(true));
+    [toggleLabel, doneEl, document.querySelector('.fp-close')].forEach(el => {
+        if (!el) return;
+        el.addEventListener('keydown', e => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                panelToggle.checked = !panelToggle.checked;
+                syncPanel(true);
+            }
+        });
+    });
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && panelToggle.checked) {
+            panelToggle.checked = false;
+            syncPanel(true);
+        }
+    });
+    // Past the breakpoint the filters are inline again; a panel left "open"
+    // would otherwise keep the page scroll-locked behind an invisible scrim.
+    window.addEventListener('resize', () => {
+        if (panelToggle.checked && window.innerWidth > 720) {
+            panelToggle.checked = false;
+            syncPanel(false);
+        }
+    });
+    syncPanel(false);
 }
 
 // ── Deep links ─────────────────────────────────────────────────────────────

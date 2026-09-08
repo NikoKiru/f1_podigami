@@ -58,6 +58,21 @@ def dataset_schema(
 
 OUT_PATH = ROOT / "dist" / "combos.html"
 
+# Sliders glyph for the mobile "Filters" trigger, and the X that closes the
+# panel. Inline (not CSS masks) so they inherit `currentColor` from the label.
+_SLIDERS_ICON = (
+    '<svg class="ft-icon" viewBox="0 0 24 24" width="15" height="15" fill="none"'
+    ' stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">'
+    '<path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h10M18 18h2"/>'
+    '<circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="16" cy="18" r="2"/>'
+    "</svg>"
+)
+_CLOSE_ICON = (
+    '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"'
+    ' stroke-width="2" stroke-linecap="round" aria-hidden="true">'
+    '<path d="M6 6l12 12M18 6L6 18"/></svg>'
+)
+
 
 def render_race_pills(
     races: list[RaceRef],
@@ -250,37 +265,55 @@ def main() -> int:
 <main>
     <div class="container">
         <div class="controls">
-            <div class="filters">
-                <div class="search-wrap">
-                    <input data-filter type="search" placeholder="Driver 1..." aria-label="Driver 1 filter">
+            <input type="checkbox" id="filter-toggle" class="fp-toggle">
+            <label for="filter-toggle" class="fp-scrim" aria-hidden="true"></label>
+            <div class="filter-panel" id="filter-panel" tabindex="-1" aria-label="Filters and sort">
+                <div class="fp-head">
+                    <span class="fp-title">Filters &amp; sort</span>
+                    <label for="filter-toggle" class="fp-close" role="button" tabindex="0" aria-label="Close filters">{
+        _CLOSE_ICON
+    }</label>
                 </div>
-                <div class="search-wrap">
-                    <input data-filter type="search" placeholder="Driver 2..." aria-label="Driver 2 filter">
+                <div class="filters">
+                    <div class="search-wrap">
+                        <input data-filter type="search" placeholder="Driver 1..." aria-label="Driver 1 filter">
+                    </div>
+                    <div class="search-wrap">
+                        <input data-filter type="search" placeholder="Driver 2..." aria-label="Driver 2 filter">
+                    </div>
+                    <div class="search-wrap">
+                        <input data-filter type="search" placeholder="Driver 3..." aria-label="Driver 3 filter">
+                    </div>
+                    {render_season_control(season_min, season_max)}
+                    <button id="clear-filters" type="button" class="clear-btn" disabled>Clear</button>
+                    <div class="filter-group mobile-sort">
+                        <label for="mobile-sort">Sort</label>
+                        <select id="mobile-sort">
+                            <option value="count-desc">Count (high &rarr; low)</option>
+                            <option value="count-asc">Count (low &rarr; high)</option>
+                            <option value="last-desc">Last seen (newest)</option>
+                            <option value="last-asc">Last seen (oldest)</option>
+                            <option value="drivers-asc">Trios (A &rarr; Z)</option>
+                            <option value="drivers-desc">Trios (Z &rarr; A)</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="search-wrap">
-                    <input data-filter type="search" placeholder="Driver 3..." aria-label="Driver 3 filter">
-                </div>
-                {render_season_control(season_min, season_max)}
-                <button id="clear-filters" type="button" class="clear-btn" disabled>Clear</button>
-                <div class="filter-group mobile-sort">
-                    <label for="mobile-sort">Sort</label>
-                    <select id="mobile-sort">
-                        <option value="count-desc">Count (high &rarr; low)</option>
-                        <option value="count-asc">Count (low &rarr; high)</option>
-                        <option value="last-desc">Last seen (newest)</option>
-                        <option value="last-asc">Last seen (oldest)</option>
-                        <option value="drivers-asc">Trios (A &rarr; Z)</option>
-                        <option value="drivers-desc">Trios (Z &rarr; A)</option>
-                    </select>
+                <div class="fp-foot">
+                    <label for="filter-toggle" class="fp-done" role="button" tabindex="0" id="filter-done">Show results</label>
                 </div>
             </div>
-            <div class="hint">
-                Showing <strong id="visible-count">{
+            <div class="controls-bar">
+                <div class="hint">
+                    Showing <strong id="visible-count">{
         unique_combos
     }</strong><span id="of-total"> of <span id="total-count">{
         unique_combos
     }</span></span> unique podium trios<span id="range-note"></span>
-                &middot; click a row to expand
+                    &middot; click a row to expand
+                </div>
+                <label for="filter-toggle" class="filter-toggle" role="button" tabindex="0" aria-expanded="false" aria-controls="filter-panel">{
+        _SLIDERS_ICON
+    }<span class="ft-label">Filters</span><span class="ft-count" id="filter-count" aria-hidden="true">0</span></label>
             </div>
         </div>
         <div class="table-wrap">
