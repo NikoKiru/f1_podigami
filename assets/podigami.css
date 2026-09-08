@@ -667,7 +667,11 @@ main {
        list reads as continuing rather than ending on a full row. */
     max-height: calc(var(--board-rows) * var(--board-row-h) + 18px);
     overflow-y: auto;
-    overscroll-behavior: contain;
+    /* Deliberately NOT `contain`: on a phone the board is a panel in the middle
+       of the page, not a modal, so swallowing the scroll at the end of the list
+       strands the reader inside it. Chaining hands the gesture back to the page
+       at both ends, the way the top of the list already does. */
+    overscroll-behavior: auto;
     scrollbar-width: thin;
 }
 
