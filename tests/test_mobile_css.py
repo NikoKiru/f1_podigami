@@ -135,6 +135,33 @@ def test_season_slider_swaps_for_selects_on_mobile():
     assert re.search(r"\.filter-group\.mobile-seasons \{\s*display: flex;", mobile)
 
 
+def test_filters_become_a_slide_out_panel_on_mobile():
+    """The filter block is the tallest thing on the combinations page; below
+    720px it must leave the flow for a drawer behind the "Filters" trigger so
+    the table, not the controls, owns the top of a phone screen.
+    """
+    import re
+
+    s = css("index.css")
+    # Inert on widescreen: the trigger and the panel chrome are hidden.
+    assert re.search(r"\.filter-toggle \{\s*display: none;", s)
+    assert re.search(r"\.fp-head,\n\.fp-foot \{\s*display: none;", s)
+
+    block = re.search(r"@media \(max-width: 720px\) \{.*?\n\}\n", s, re.S)
+    assert block, "expected a 720px breakpoint block"
+    mobile = block.group(0)
+    assert re.search(r"\.filter-toggle \{\s*display: inline-flex;", mobile)
+    assert re.search(r"\.filter-panel \{[^}]*position: fixed", mobile), (
+        "the panel must be a fixed drawer inside the 720px breakpoint"
+    )
+    assert re.search(r"\.filter-panel \{[^}]*transform: translateX\(105%\)", mobile), (
+        "the panel must start off-canvas"
+    )
+    assert re.search(r"\.fp-toggle:checked ~ \.filter-panel \{[^}]*translateX\(0\)", mobile), (
+        "the checkbox core must slide the panel in with no JS"
+    )
+
+
 def test_season_slider_thumbs_stay_grabbable():
     """The two range inputs overlap, so the input surfaces must be
     click-through with pointer events restored on the thumbs alone.

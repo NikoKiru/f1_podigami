@@ -39,7 +39,7 @@ No server. No database. No JavaScript framework. Just Python, one `requests` dep
 - 🎲 **Unlikeliest podiums** — the mirror of Overdue: trios that *did* happen despite the odds, ranked by how big a fluke they were.
 - 🤝 **Soulmates** — the shared-podium matrix showing which drivers have stood on the box together most.
 - 🔗 **Cited sources** — every race links to its official Formula 1 result page, with a Wikipedia fallback.
-- 📊 **Combinations table** — every unique 3-driver podium combination since 1950, sortable and filterable by driver or by season range.
+- 📊 **Combinations table** — every unique 3-driver podium combination since 1950, sortable and filterable by driver or by season range (behind a slide-out filter panel on phones).
 - 📱 **Mobile-first** — fully responsive, dark theme, locked in by CSS regression tests.
 - ⚙️ **Zero-ops deploy** — rebuilds from committed JSON in CI; a guarded 15-minute poll auto-opens and merges a data-refresh PR after each race, which ships straight to GitHub Pages.
 
@@ -50,7 +50,7 @@ No server. No database. No JavaScript framework. Just Python, one `requests` dep
 | | Page | What it shows |
 |---|---|---|
 | 🔮 | **`index.html`** | The **Podigami predictor** — next/last race (with the upcoming qualifying time), most likely brand-new trio and a **trio board** ranking every trio in play for the next race — already-happened ones muted with their history on hover/tap, never-happened ones highlighted — all of which **refresh after qualifying using the starting grid** (with a collapsible current-form tower), season debut timeline (with quick-pick season chips), FAQ, plus live-stat discovery hooks and a "Keep exploring" grid routing to every other page |
-| 🧩 | `combos.html` | Every unique three-driver combination that has shared a podium since 1950 — sortable, filterable by driver and season range, expandable, with shared-drive podiums marked |
+| 🧩 | `combos.html` | Every unique three-driver combination that has shared a podium since 1950 — sortable, filterable by driver and season range (on mobile the filters fold into a slide-out panel), expandable, with shared-drive podiums marked |
 | ⏳ | `overdue.html` | Trios "overdue" to appear — driver pairs whose current form suggests a shared podium is imminent |
 | 🎲 | `unlikeliest.html` | The mirror of Overdue — podium trios that *did* happen ranked by how statistically improbable they were, led by the single biggest fluke in F1 history |
 | 🤝 | `soulmates.html` | Shared-podium matrix — which drivers have stood on the box together most often |

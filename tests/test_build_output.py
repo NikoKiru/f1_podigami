@@ -124,6 +124,23 @@ def test_combos_season_filter_controls(dist):
     assert 'id="range-note"' in html
 
 
+def test_combos_filters_live_in_a_toggleable_panel(dist):
+    """On mobile the filters sit in a slide-out panel; the markup that makes
+    that possible (checkbox core, scrim, trigger, panel wrapping .filters)
+    must ship on every build."""
+    html = (dist / "combos.html").read_text(encoding="utf-8")
+    assert '<input type="checkbox" id="filter-toggle" class="fp-toggle">' in html
+    assert 'class="fp-scrim"' in html
+    assert 'class="filter-toggle"' in html and 'aria-controls="filter-panel"' in html
+    assert 'id="filter-count"' in html and 'id="filter-done"' in html
+
+    panel = html.index('<div class="filter-panel"')
+    controls_bar = html.index('<div class="controls-bar">')
+    assert panel < html.index('<div class="filters">') < controls_bar, (
+        "the filters must be inside the panel, which precedes the trigger bar"
+    )
+
+
 def test_combos_rows_carry_race_seasons(dist):
     """Every combo row exposes its races to the season filter, and those
     seasons match the season rows rendered in its expanded detail."""
