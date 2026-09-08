@@ -910,13 +910,6 @@ a.race-pill:hover {
 
 /* <=600px: each combo row becomes a self-contained card (no sideways scroll) */
 @media (max-width: 600px) {
-    .table-wrap {
-        background: transparent;
-        border: none;
-        border-radius: 0;
-        overflow: visible;
-    }
-
     table,
     tbody {
         display: block;
@@ -939,11 +932,15 @@ a.race-pill:hover {
         grid-template-columns: minmax(0, 1fr) 24px 24px;
         align-items: center;
         column-gap: 10px;
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        margin-bottom: 6px;
-        padding: 10px 14px;
+        /* rows sit flush inside the table frame, divided by one hairline each
+           (mirroring the desktop table) rather than floating as separate
+           cards — 754 of them read as a list, not a stack of panels */
+        border-top: 1px solid var(--border);
+        padding: 12px 14px;
+    }
+
+    tbody tr.combo:first-child {
+        border-top: none;
     }
 
     /* neutralize desktop cell borders / zebra / hover backgrounds in card mode */
@@ -1047,23 +1044,15 @@ a.race-pill:hover {
     }
 
     /* card + its expanded detail join into one connected block */
-    tbody tr.combo.expanded {
-        border-bottom-left-radius: 0;
-        border-bottom-right-radius: 0;
-        margin-bottom: 0;
-    }
-
     tr.detail {
         display: none;
     }
 
     tr.detail.open {
         display: block;
-        margin: 0 0 6px;
+        margin: 0;
         background: var(--bg-2);
-        border: 1px solid var(--border);
-        border-top: none;
-        border-radius: 0 0 var(--radius) var(--radius);
+        border-top: 1px solid var(--border);
     }
 
     tr.detail.open>td {

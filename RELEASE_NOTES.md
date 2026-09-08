@@ -3,8 +3,13 @@
 ## 2026-09-08
 
 ### Improvements
+- **The mobile combinations list is one table again, not a stack of cards.** Collapsing each trio to a single line left every row still carrying its own border, rounded corners and a 6px gap, so the list read as 754 separate panels. Rows now sit flush inside the table frame divided by one hairline each — the same shape the widescreen table has — and the expanded drawer flows on inside that frame instead of breaking out of a card. About fifteen trios now fit on a phone screen (#311)
 - **On mobile a combination is now one line.** Each row on the combinations page had stacked the trio, a labelled `Podiums` line and a labelled `Last` line into a three-part card, so a phone screen held about three of 754 trios and scrolling the list meant scrolling past the same two labels 750 times. The collapsed row is now just the trio, its podium count and the expand chevron; the last race moves into the expanded state, above the race pills it already showed. The count and chevron sit in fixed grid tracks so they line up down the whole list, the count keeps the sort order legible without a label, and trios too long for one line wrap without displacing the chevron. Roughly eleven trios now fit where three did (#309)
 - **On mobile the combinations page opens on the table, not the filters.** The three driver boxes, the season selects, Clear and Sort stacked to roughly a full phone screen, so the first trio sat below the fold on a page whose whole point is the list. They now live in a slide-out panel behind a `Filters` trigger sitting beside the result count, which carries a badge counting the filters in force (each filled driver box, plus a narrowed season range) so a filtered table never looks like an unfiltered one. The panel closes on its `Show N trios` button, the X, the scrim or Escape, and the count on that button updates live as the filters change. The core is the same pure-CSS checkbox as the nav drawer, so it works with JS off; widescreen is untouched — above 720px the filters stay inline above the table and the trigger is hidden
+
+### Fixes
+- The landing page's prediction hero called its pick the **Most likely trio** when the whole hero is about brand-new trios; it now reads **Most likely new trio** (#311)
+- The trio board no longer traps the page's scroll on mobile. It set `overscroll-behavior: contain`, which suits a modal but not a panel in the middle of a page: reaching the end of the list stranded the reader inside the board with no way to keep scrolling by dragging over it. The gesture now chains back to the page at the end of the list, as it already did at the top, while a drag mid-list still scrolls the board (#311)
 
 ## 2026-09-07
 
