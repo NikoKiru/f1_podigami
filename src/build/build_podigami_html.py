@@ -388,7 +388,7 @@ def render_hero(
         f"    </div>"
         f"  </div>"
         f'  <div class="hero-pick">'
-        f'    <p class="hp-label">Most likely trio &middot; {top["prob"]:.1f}%</p>'
+        f'    <p class="hp-label">Most likely new trio &middot; {top["prob"]:.1f}%</p>'
         f'    <div class="hero-drivers">{drivers}</div>'
         f"  </div>"
         f'  <p class="hp-prob">{acc_note}</p>'

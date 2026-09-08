@@ -40,6 +40,21 @@ def test_index_combo_row_collapses_to_one_line():
     assert 'content: "Last"' in block  # CSS-generated label on the revealed cell
 
 
+def test_index_combo_rows_stay_one_table_on_mobile():
+    """Rows divide with a hairline inside the table frame instead of floating as
+    separate rounded cards — 754 of them must read as a list, not a stack."""
+    import re
+
+    s = css("index.css")
+    block = s[s.index("@media (max-width: 600px)") :]
+    row = re.search(r"tbody tr\.combo \{([^}]*)\}", block)
+    assert row, "no mobile rule for tbody tr.combo"
+    body = row.group(1)
+    assert "border-top:" in body, "mobile combo rows need a hairline divider"
+    assert "border-radius" not in body, "mobile combo rows must not be rounded cards"
+    assert "margin-bottom" not in body, "mobile combo rows must not be gapped apart"
+
+
 def test_index_inputs_prevent_ios_zoom():
     # >=16px font-size on inputs stops iOS auto-zoom on focus
     assert "font-size: 16px" in css("index.css")
@@ -201,6 +216,19 @@ def test_trio_board_window_shrinks_on_mobile():
     assert block, ".cand-scroll has no mobile override"
     rows = re.search(r"--board-rows:\s*(\d+)", block.group(1))
     assert rows and int(rows.group(1)) < 12
+
+
+def test_trio_board_chains_scroll_to_the_page():
+    """The board is a panel mid-page, not a modal: reaching the end of the list
+    must hand the gesture back to the page instead of trapping the reader."""
+    import re
+
+    s = css("podigami.css")
+    block = re.search(r"\.cand-scroll \{([^}]*)\}", s)
+    assert block, ".cand-scroll rule missing"
+    assert not re.search(r"overscroll-behavior:\s*contain", block.group(1)), (
+        ".cand-scroll must not contain overscroll — it strands the reader in the board"
+    )
 
 
 def test_trio_board_bubble_fits_phone_width():
