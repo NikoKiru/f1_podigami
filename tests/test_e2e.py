@@ -228,6 +228,80 @@ def test_combos_deep_link_prefills_filters(dist):
         browser.close()
 
 
+# ── Combos filter panel (index.js) ─────────────────────────────────────────
+
+
+def test_combos_filter_panel_opens_and_closes_on_mobile(dist):
+    """On a phone the filters are off-canvas until the trigger is tapped, and
+    the "Show N trios" button puts them away again."""
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        page = browser.new_page(viewport={"width": 400, "height": 800})
+        page.goto(_url(dist, "combos.html"))
+        page.wait_for_selector("tr.combo")
+
+        panel = page.locator("#filter-panel")
+        toggle = page.locator(".filter-toggle")
+        assert toggle.is_visible()
+        assert panel.bounding_box()["x"] >= 400, "panel should start off-canvas"
+
+        toggle.click()
+        page.wait_for_function(
+            "document.querySelector('#filter-panel').getBoundingClientRect().right <= 400"
+        )
+        assert toggle.get_attribute("aria-expanded") == "true"
+        assert page.evaluate("document.documentElement.classList.contains('drawer-open')")
+
+        page.locator(".fp-done").click()
+        page.wait_for_function(
+            "document.querySelector('#filter-panel').getBoundingClientRect().x >= 400"
+        )
+        assert toggle.get_attribute("aria-expanded") == "false"
+        assert not page.evaluate("document.documentElement.classList.contains('drawer-open')")
+        browser.close()
+
+
+def test_combos_filter_panel_reports_active_filters(dist):
+    """The trigger badge counts the filters in force, and the panel's button
+    counts the rows they leave — both while the panel is shut."""
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        page = browser.new_page(viewport={"width": 400, "height": 800})
+        page.goto(_url(dist, "combos.html"))
+        page.wait_for_selector("tr.combo")
+
+        toggle = page.locator(".filter-toggle")
+        assert not toggle.evaluate("el => el.classList.contains('has-active')")
+
+        page.locator(".filter-toggle").click()
+        page.locator(".filters input[data-filter]").first.fill("hamilton")
+        page.locator("#season-from-sel").select_option("2015")
+
+        # one driver box + a narrowed season range
+        assert page.text_content("#filter-count") == "2"
+        assert toggle.evaluate("el => el.classList.contains('has-active')")
+        visible = page.text_content("#visible-count")
+        assert page.text_content(".fp-done") == f"Show {visible} trios"
+        browser.close()
+
+
+def test_combos_filter_panel_is_inline_on_desktop(dist):
+    """Widescreen keeps the filters in the flow above the table — no trigger,
+    no drawer."""
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        page = browser.new_page(viewport={"width": 1200, "height": 900})
+        page.goto(_url(dist, "combos.html"))
+        page.wait_for_selector("tr.combo")
+
+        assert not page.locator(".filter-toggle").is_visible()
+        assert page.locator(".filters").is_visible()
+        assert page.eval_on_selector("#filter-panel", "el => getComputedStyle(el).position") == (
+            "static"
+        )
+        browser.close()
+
+
 # ── Combos season range (index.js) ─────────────────────────────────────────
 
 

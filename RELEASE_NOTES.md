@@ -1,5 +1,10 @@
 # Release Notes
 
+## 2026-09-08
+
+### Improvements
+- **On mobile the combinations page opens on the table, not the filters.** The three driver boxes, the season selects, Clear and Sort stacked to roughly a full phone screen, so the first trio sat below the fold on a page whose whole point is the list. They now live in a slide-out panel behind a `Filters` trigger sitting beside the result count, which carries a badge counting the filters in force (each filled driver box, plus a narrowed season range) so a filtered table never looks like an unfiltered one. The panel closes on its `Show N trios` button, the X, the scrim or Escape, and the count on that button updates live as the filters change. The core is the same pure-CSS checkbox as the nav drawer, so it works with JS off; widescreen is untouched — above 720px the filters stay inline above the table and the trigger is hidden
+
 ## 2026-09-07
 
 ### Features
