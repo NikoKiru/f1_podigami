@@ -57,16 +57,21 @@ main {
 /* next-race box */
 .next-race {
     display: grid;
-    grid-template-columns: 1fr minmax(120px, 200px);
-    gap: 18px;
-    align-items: center;
+    grid-template-columns: 1fr 210px;
+    gap: 26px;
+    align-items: stretch;
     background: linear-gradient(135deg, var(--surface) 0%, var(--bg-2) 100%);
     border: 1px solid var(--border-strong);
     border-left: 4px solid var(--accent);
     border-radius: var(--radius);
-    padding: 18px 22px;
+    padding: 20px 22px;
     margin-bottom: 22px;
     overflow: hidden;
+}
+
+/* No track outline for this circuit -> no plate to sit beside. */
+.next-race.nr-noplate {
+    grid-template-columns: 1fr;
 }
 
 .nr-head {
@@ -104,8 +109,8 @@ main {
 }
 
 .nr-name {
-    margin: 0 0 4px;
-    font-size: 24px;
+    margin: 0 0 2px;
+    font-size: 26px;
     letter-spacing: -0.4px;
 }
 
@@ -123,45 +128,88 @@ main {
     color: var(--muted);
 }
 
+/* The countdown is the only thing on this card that moves, so it leads — but in
+   text colour. The accent is spent on its label instead, leaving the hero's
+   chance figure just below as the one big red number on the page. */
 .nr-when {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px 16px;
-    align-items: baseline;
-    margin-top: 10px;
+    display: block;
+    margin-top: 14px;
 }
 
-.nr-date {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text);
+.nr-cd-label[hidden] {
+    display: none;
+}
+
+.nr-cd-label {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--accent-bright);
+    text-transform: uppercase;
+    letter-spacing: 1.4px;
+    margin-bottom: 3px;
 }
 
 .nr-countdown {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--accent-bright);
+    display: block;
+    font-size: 23px;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.4px;
+    color: var(--text);
     font-variant-numeric: tabular-nums;
 }
 
+/* Once the race starts the slot carries a sentence, not a figure. */
+.nr-countdown.nr-cd-msg {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0;
+    color: var(--accent-bright);
+}
+
+.nr-date {
+    display: block;
+    margin-top: 4px;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--muted);
+}
+
+/* The track outline framed as a circuit plate, captioned with the circuit's
+   own name and length. */
 .nr-art {
     display: flex;
+    flex-direction: column;
     justify-content: center;
-    align-items: center;
+    gap: 8px;
     align-self: stretch;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 12px 9px;
 }
 
 .nr-track {
     width: 100%;
-    height: 100%;
+    height: auto;
+    max-height: 106px;
 }
 
 .nr-track path {
-    stroke: var(--accent);
-    stroke-width: 2;
+    stroke: var(--accent-bright);
+    stroke-width: 2.4;
     fill: none;
     stroke-linejoin: round;
     stroke-linecap: round;
+}
+
+.nr-plate-cap {
+    font-size: 10px;
+    letter-spacing: 1.1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: center;
 }
 
 .next-race:has(+ .last-race) {
@@ -255,14 +303,20 @@ main {
     background: color-mix(in srgb, var(--accent) 15%, transparent);
     padding: 2px 8px;
     border-radius: 4px;
-    margin-left: auto;
+    margin-left: 4px;
 }
 
+/* The status describes the trio it follows, so it stays beside it; the spacer
+   below takes the leftover width that used to push it to the far edge. */
 .lr-status {
     font-size: 12px;
     color: var(--muted);
-    margin-left: auto;
+    margin-left: 6px;
     white-space: nowrap;
+}
+
+.lr-sp {
+    flex: 1 1 auto;
 }
 
 .lr-link {
@@ -1508,12 +1562,33 @@ a.tl-where:hover {
 
     .next-race {
         grid-template-columns: 1fr;
-        gap: 10px;
+        gap: 12px;
         padding: 16px;
     }
 
+    /* The plate flips to a band: a small outline and its caption on one row,
+       instead of an off-centre doodle costing ~90px of scroll. */
+    .nr-art {
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 11px;
+        padding: 7px 12px;
+    }
+
     .nr-track {
-        max-height: 70px;
+        width: 54px;
+        height: 38px;
+        max-height: none;
+        flex: 0 0 auto;
+    }
+
+    .nr-plate-cap {
+        text-align: left;
+    }
+
+    .nr-countdown {
+        font-size: 20px;
     }
 
     .last-race {
@@ -1560,6 +1635,12 @@ a.tl-where:hover {
         font-size: 11px;
         white-space: normal;
         margin-left: 0;
+    }
+
+    /* Nothing to absorb once the strip wraps — an auto-growing spacer would
+       just push the status onto a line of its own. */
+    .lr-sp {
+        display: none;
     }
 
     /* timing tower: drop the surname and team name on narrow screens —
@@ -1766,12 +1847,6 @@ a.tl-where:hover {
     border-radius: var(--radius-sm);
     padding: 0.05rem 0.3rem;
     margin-left: 0.2rem;
-}
-
-.nr-quali {
-    font-size: 0.85rem;
-    color: var(--muted);
-    margin-top: 0.25rem;
 }
 
 @media (max-width: 600px) {

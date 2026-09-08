@@ -133,11 +133,27 @@ def _iso_datetime(race: dict) -> str:
     return f"{race['date']}T{race.get('time') or '00:00:00Z'}"
 
 
-def _fallback_when(race: dict) -> str:
-    d = dt.datetime.strptime(race["date"], "%Y-%m-%d")
+def _session_when(date: str, time: str | None) -> str:
+    """One session as "Sun 28 Jun &middot; 13:00 UTC"; empty if the date is unusable."""
+    try:
+        d = dt.datetime.strptime(date, "%Y-%m-%d")
+    except (TypeError, ValueError):
+        return ""
     base = f"{d:%a} {d.day} {d:%b}"
-    t = race.get("time", "")
-    return f"{base} &middot; {t[:5]} UTC" if t else base
+    return f"{base} &middot; {time[:5]} UTC" if time else base
+
+
+def _when_line(race: dict) -> str:
+    """Race and qualifying on one line, server-rendered in UTC.
+
+    ``podigami.js`` rewrites both halves into the visitor's timezone; this UTC
+    form is what a reader without JS gets, and what the page ships in its HTML.
+    """
+    parts = [f"Race {_session_when(race['date'], race.get('time'))}".strip()]
+    quali = _session_when(race.get("qualifyingDate", ""), race.get("qualifyingTime"))
+    if quali:
+        parts.append(f"Quali {quali}")
+    return " &middot; ".join(parts)
 
 
 def render_next_race(schedule: dict, asof: dict | None = None, links: dict | None = None) -> str:
@@ -153,29 +169,33 @@ def render_next_race(schedule: dict, asof: dict | None = None, links: dict | Non
     name = esc(nxt["raceName"])
     url = race_url(links or {}, schedule.get("season", ""), nxt["round"], nxt["raceName"])
     name_html = f'<a href="{esc(url)}" target="_blank" rel="noopener">{name}</a>'
-    parts = [esc(nxt["circuitName"]), esc(f"{nxt['locality']}, {nxt['country']}")]
+    # With a track outline the circuit's identity captions the plate; without one
+    # there is no plate to caption, so it stays on the locality line rather than
+    # disappearing with it.
+    place = esc(f"{nxt['locality']}, {nxt['country']}")
+    circuit_bits = [esc(nxt["circuitName"])]
     if nxt.get("lengthKm"):
-        parts.append(f"{nxt['lengthKm']} km")
-    circuit_line = " &middot; ".join(parts)
-    track = ""
+        circuit_bits.append(f"{nxt['lengthKm']} km")
+    plate = ""
     if nxt.get("trackPath"):
-        track = (
+        plate = (
+            f'<div class="nr-art">'
             f'<svg class="nr-track" viewBox="{esc(nxt["trackViewBox"])}" '
             f'fill="none" aria-hidden="true"><path d="{esc(nxt["trackPath"])}"/></svg>'
+            f'<div class="nr-plate-cap">{" &middot; ".join(circuit_bits)}</div>'
+            f"</div>"
         )
-    quali_line = ""
+        circuit_line = place
+    else:
+        circuit_line = " &middot; ".join([circuit_bits[0], place, *circuit_bits[1:]])
     qd = nxt.get("qualifyingDate")
-    if qd:
-        try:
-            q = dt.datetime.strptime(qd, "%Y-%m-%d")
-        except ValueError:
-            q = None
-        if q is not None:
-            qt = esc((nxt.get("qualifyingTime") or "")[:5])
-            when = f"{q:%a} {q.day} {q:%b}" + (f" &middot; {qt} UTC" if qt else "")
-            quali_line = f'<div class="nr-quali">Qualifying: {when}</div>'
+    quali_attr = ""
+    if qd and _session_when(qd, nxt.get("qualifyingTime")):
+        qt = nxt.get("qualifyingTime") or "00:00:00Z"
+        quali_attr = f' data-quali-datetime="{esc(f"{qd}T{qt}")}"'
     return (
-        f'<section class="next-race" data-datetime="{esc(_iso_datetime(nxt))}">'
+        f'<section class="next-race{"" if plate else " nr-noplate"}"'
+        f' data-datetime="{esc(_iso_datetime(nxt))}"{quali_attr}>'
         f'  <div class="nr-main">'
         f'    <span class="nr-tag">Next race</span>'
         f'    <div class="nr-head">'
@@ -185,12 +205,12 @@ def render_next_race(schedule: dict, asof: dict | None = None, links: dict | Non
         f'    <h2 class="nr-name">{name_html}</h2>'
         f'    <div class="nr-circuit">{circuit_line}</div>'
         f'    <div class="nr-when">'
-        f'      <span class="nr-date">{_fallback_when(nxt)}</span>'
+        f'      <span class="nr-cd-label">Lights out in</span>'
         f'      <span class="nr-countdown" data-countdown></span>'
+        f'      <span class="nr-date">{_when_line(nxt)}</span>'
         f"    </div>"
-        f"    {quali_line}"
         f"  </div>"
-        f'  <div class="nr-art">{track}</div>'
+        f"  {plate}"
         f"</section>"
     )
 
@@ -307,8 +327,8 @@ def render_last_race(
             links, second_last["season"], second_last["round"], second_last["raceName"]
         )
         status_html = (
-            f'<span class="lr-status">Happened {cnt} time{"s" if cnt != 1 else ""}'
-            f' &middot; last time <a class="lr-link" href="{esc(repeat_url)}"'
+            f'<span class="lr-status">{_ordinal(cnt)} time'
+            f' &middot; last <a class="lr-link" href="{esc(repeat_url)}"'
             f' target="_blank" rel="noopener">'
             f"{esc(second_last['season'])} R{esc(second_last['round'])} &middot;"
             f" {esc(second_last['raceName'])}</a></span>"
@@ -324,6 +344,9 @@ def render_last_race(
         f"R{esc(rnd)} &middot; {name}</a>"
         f"{trio_block}"
         f"{status_html}"
+        # The status describes the trio, so it follows it; this spacer takes the
+        # slack that used to be handed to a margin-left:auto push to the far edge.
+        f'<span class="lr-sp"></span>'
         f"</section>"
     )
 
