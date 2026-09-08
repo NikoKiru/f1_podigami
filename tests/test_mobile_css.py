@@ -19,8 +19,25 @@ def test_index_table_becomes_cards():
     s = css("index.css")
     assert "@media (max-width: 600px)" in s
     assert "display: block" in s  # table -> block/card layout
-    assert 'content: "Podiums"' in s  # CSS-generated row labels
-    assert 'content: "Last"' in s
+
+
+def test_index_combo_row_collapses_to_one_line():
+    """On phones a combination is one line — trio, podium count, chevron — with
+    the last-race cell revealed only on expand, so 754 rows stay scannable.
+    """
+    import re
+
+    s = css("index.css")
+    block = s[s.index("@media (max-width: 600px)") :]
+    assert re.search(
+        r"tbody tr\.combo td\.last\s*\{[^}]*display:\s*none",
+        block,
+    ), "collapsed combo rows must hide the last-race cell on phones"
+    assert re.search(
+        r"tbody tr\.combo\.expanded td\.last\s*\{[^}]*display:\s*block",
+        block,
+    ), "expanding a combo row must reveal the last-race cell"
+    assert 'content: "Last"' in block  # CSS-generated label on the revealed cell
 
 
 def test_index_inputs_prevent_ios_zoom():
