@@ -106,6 +106,8 @@ SCHED = {
             "locality": "Spielberg",
             "url": "http://x",
             "time": "13:00:00Z",
+            "qualifyingDate": "2026-06-27",
+            "qualifyingTime": "14:00:00Z",
             "trackPath": "M0 0 L1 1 Z",
             "trackViewBox": "0 0 120 72",
             "lengthKm": 4.318,
@@ -173,6 +175,55 @@ def test_render_next_race_box_contents():
 def test_render_next_race_season_complete_fallback():
     html = bp.render_next_race(SCHED, asof={"season": "2026", "round": "3"})
     assert "Season complete" in html
+
+
+def test_render_next_race_circuit_identity_lives_in_the_plate_caption():
+    # The track outline is framed as a circuit plate, so the circuit's name and
+    # length caption it there rather than padding the locality line.
+    html = bp.render_next_race(SCHED, asof={"season": "2026", "round": "1"})
+    caption = html.split('class="nr-plate-cap"', 1)[1].split("</div>", 1)[0]
+    assert "Red Bull Ring" in caption and "4.318 km" in caption
+    circuit_line = html.split('class="nr-circuit"', 1)[1].split("</div>", 1)[0]
+    assert "Spielberg" in circuit_line and "Austria" in circuit_line
+    assert "Red Bull Ring" not in circuit_line
+
+
+def test_render_next_race_without_a_track_drops_the_plate_entirely():
+    # Round 3 has no trackPath: an empty framed plate would be worse than none,
+    # so the card goes single-column and the circuit identity stays on the line
+    # it would otherwise have vacated.
+    html = bp.render_next_race(SCHED, asof={"season": "2026", "round": "2"})
+    assert "nr-art" not in html and "nr-plate-cap" not in html
+    assert "nr-noplate" in html
+    circuit_line = html.split('class="nr-circuit"', 1)[1].split("</div>", 1)[0]
+    assert "Z" in circuit_line and "M" in circuit_line
+
+
+def test_render_next_race_labels_the_countdown():
+    # The bare countdown never said what it was counting to; the label carries
+    # the accent so the figure itself can stay in text colour.
+    html = bp.render_next_race(SCHED, asof={"season": "2026", "round": "1"})
+    assert 'class="nr-cd-label"' in html
+    assert "Lights out in" in html
+
+
+def test_render_next_race_merges_race_and_qualifying_into_one_line():
+    # Both sessions on one muted line, and both datetimes exposed so the client
+    # can put them in the visitor's timezone (the old quali line was UTC-only).
+    html = bp.render_next_race(SCHED, asof={"season": "2026", "round": "1"})
+    assert 'data-quali-datetime="2026-06-27T14:00:00Z"' in html
+    assert "nr-quali" not in html
+    when = html.split('class="nr-date"', 1)[1].split("</span>", 1)[0]
+    assert "Race" in when and "Quali" in when
+    assert "13:00" in when and "14:00" in when
+
+
+def test_render_next_race_without_qualifying_shows_the_race_alone():
+    # Round 1 has no qualifying entry: no dangling separator, no empty attribute.
+    html = bp.render_next_race(SCHED, asof=None)
+    assert "data-quali-datetime" not in html
+    when = html.split('class="nr-date"', 1)[1].split("</span>", 1)[0]
+    assert "Race" in when and "Quali" not in when
 
 
 # --- render_last_race fallback -----------------------------------------------
@@ -355,6 +406,19 @@ def test_render_last_race_trio_not_linked_when_combo_missing():
     html = bp.render_last_race(SCHED, [_PODIUM_TRIO], [], {}, [])
     assert 'class="combo-link"' not in html
     assert "combos.html?d=" not in html
+
+
+def test_render_last_race_status_sits_next_to_the_trio():
+    # The status describes the trio, so it follows it immediately; a trailing
+    # spacer takes up the slack instead of shoving the status to the far edge.
+    html = bp.render_last_race(SCHED, [_PODIUM_TRIO], [_combo_for_trio(3)], {}, [])
+    assert html.index('class="lr-trio"') < html.index('class="lr-status"')
+    assert html.index('class="lr-status"') < html.index('class="lr-sp"')
+
+
+def test_render_last_race_podigami_badge_also_sits_next_to_the_trio():
+    html = bp.render_last_race(SCHED, [_PODIUM_TRIO], [_combo_for_trio(1)], {}, [])
+    assert html.index('class="lr-podigami"') < html.index('class="lr-sp"')
 
 
 def test_render_last_race_repeat_link_names_the_year():

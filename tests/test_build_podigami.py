@@ -349,10 +349,13 @@ SCHED_ONE = {
 
 
 def test_next_race_shows_quali_session():
+    # Qualifying shares the race's line, and its datetime is exposed so the
+    # client can localise it instead of leaving it stranded in UTC.
     out = bp.render_next_race(SCHED_ONE, {"season": "2026", "round": "9"})
-    assert 'class="nr-quali"' in out
-    assert "Qualifying:" in out
-    assert "Sat 18 Jul" in out and "14:00 UTC" in out
+    when = out.split('class="nr-date"', 1)[1].split("</span>", 1)[0]
+    assert "Quali" in when
+    assert "Sat 18 Jul" in when and "14:00 UTC" in when
+    assert 'data-quali-datetime="2026-07-18T14:00:00Z"' in out
 
 
 def test_next_race_without_quali_fields_has_no_line():
@@ -368,7 +371,9 @@ def test_next_race_without_quali_fields_has_no_line():
         ],
     }
     out = bp.render_next_race(sched, {"season": "2026", "round": "9"})
-    assert "nr-quali" not in out
+    assert "data-quali-datetime" not in out
+    when = out.split('class="nr-date"', 1)[1].split("</span>", 1)[0]
+    assert "Quali" not in when
 
 
 def _hero_top():

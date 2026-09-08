@@ -132,6 +132,27 @@ def test_next_race_shows_local_time(dist):
         browser.close()
 
 
+def test_next_race_localises_qualifying_too(dist):
+    """Qualifying joins the race on one line and is converted out of UTC.
+
+    The race time was always localised; qualifying used to ship as a separate
+    UTC-only line, leaving two different clocks in one card.
+    """
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        page = browser.new_page(viewport={"width": 1000, "height": 800})
+        page.goto(_url(dist, "index.html"))
+
+        if not page.locator(".next-race[data-quali-datetime]").count():
+            pytest.skip("next race has no qualifying entry in this build")
+
+        when = page.locator(".nr-date").text_content() or ""
+        assert "Quali" in when
+        assert "your time" in when
+        assert "UTC" not in when
+        browser.close()
+
+
 def test_next_race_countdown_ticks(dist):
     """The countdown value changes after ~1 s when the race is upcoming."""
     with sync_playwright() as p:
@@ -749,6 +770,43 @@ def test_trio_bubble_survives_pointer_travel_to_its_link(dist):
         assert tip.evaluate("el => el.classList.contains('open')"), (
             "bubble closed while the pointer travelled to its own link"
         )
+        browser.close()
+
+
+def test_trio_bubble_stays_flush_under_a_transformed_ancestor(dist):
+    """The bubble is position:fixed, so any transformed ancestor becomes its
+    containing block and its viewport coordinates land relative to that instead.
+
+    The scroll-reveal transition (`.reveal.reveal-in` animates transform for
+    0.5s) puts a transform on the enclosing panel, so hovering a row while its
+    panel is still animating in used to drop the bubble hundreds of pixels below
+    its row. Same trap as a mask-image or filter on any ancestor.
+    """
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        page.goto(_url(dist, "index.html"))
+        page.wait_for_selector(".trio-tip")
+
+        # Hold the panel in the state the reveal transition passes through.
+        page.evaluate(
+            "() => { const t = document.querySelector('.trio-tip');"
+            " t.closest('.panel').style.transform = 'translateY(12px)'; }"
+        )
+        tip = page.locator(".trio-tip").first
+        tip.scroll_into_view_if_needed()
+        tip.hover()
+
+        gap = page.evaluate(
+            """() => {
+                const t = document.querySelector('.trio-tip.open');
+                const b = t.querySelector('.trio-bubble').getBoundingClientRect();
+                const a = t.getBoundingClientRect();
+                // Flush below the row, or flush above it when flipped.
+                return Math.min(Math.abs(b.top - a.bottom), Math.abs(b.bottom - a.top));
+            }"""
+        )
+        assert gap < 2, f"bubble sits {gap:.0f}px from its row instead of flush against it"
         browser.close()
 
 
